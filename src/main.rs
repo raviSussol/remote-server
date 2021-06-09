@@ -4,19 +4,16 @@ mod database;
 mod server;
 mod utils;
 
-use std::net::TcpListener;
-use std::{env, io};
-
-use utils::get_configuration;
+use env_logger::Env;
+use std::{io, net};
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    env::set_var("RUST_LOG", "info");
-    env_logger::init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
-    let configuration = get_configuration().expect("Failed to parse configuration settings");
+    let configuration = utils::get_configuration().expect("Failed to parse configuration settings");
 
-    let listener = TcpListener::bind(configuration.server.address())
+    let listener = net::TcpListener::bind(configuration.server.address())
         .expect("Failed to bind server to address");
 
     let pool = sqlx::PgPool::connect(&configuration.database.connection_string())
