@@ -6,6 +6,10 @@ use crate::database::schema::{
 };
 
 pub async fn insert_store(pool: &sqlx::PgPool, store: &StoreRow) -> Result<(), sqlx::Error> {
+    log::info!(
+        "Inserting store record with id '{}' into database",
+        store.id
+    );
     sqlx::query!(
         r#"
         INSERT INTO store (id, name_id)
@@ -15,7 +19,11 @@ pub async fn insert_store(pool: &sqlx::PgPool, store: &StoreRow) -> Result<(), s
         store.name_id
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -23,6 +31,10 @@ pub async fn insert_store(pool: &sqlx::PgPool, store: &StoreRow) -> Result<(), s
 pub async fn insert_stores(pool: &sqlx::PgPool, stores: Vec<StoreRow>) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for store in &stores {
+        log::info!(
+            "Inserting store record with id '{}' into database",
+            store.id
+        );
         sqlx::query!(
             r#"
                 INSERT INTO store (id, name_id)
@@ -32,13 +44,18 @@ pub async fn insert_stores(pool: &sqlx::PgPool, stores: Vec<StoreRow>) -> Result
             store.name_id
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
 }
 
 pub async fn insert_name(pool: &sqlx::PgPool, name: &NameRow) -> Result<(), sqlx::Error> {
+    log::info!("Inserting name record with id '{}' into database", name.id);
     sqlx::query!(
         r#"
         INSERT INTO name (id, name)
@@ -48,7 +65,11 @@ pub async fn insert_name(pool: &sqlx::PgPool, name: &NameRow) -> Result<(), sqlx
         name.name
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -56,6 +77,7 @@ pub async fn insert_name(pool: &sqlx::PgPool, name: &NameRow) -> Result<(), sqlx
 pub async fn insert_names(pool: &sqlx::PgPool, names: Vec<NameRow>) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for name in &names {
+        log::info!("Inserting name record with id '{}' into database", name.id);
         sqlx::query!(
             r#"
                 INSERT INTO name (id, name)
@@ -65,13 +87,18 @@ pub async fn insert_names(pool: &sqlx::PgPool, names: Vec<NameRow>) -> Result<()
             name.name
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
 }
 
 pub async fn insert_item(pool: &sqlx::PgPool, item: &ItemRow) -> Result<(), sqlx::Error> {
+    log::info!("Inserting item record with id '{}' into database", item.id);
     sqlx::query!(
         r#"
         INSERT INTO item (id, item_name)
@@ -81,7 +108,11 @@ pub async fn insert_item(pool: &sqlx::PgPool, item: &ItemRow) -> Result<(), sqlx
         item.item_name
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -89,6 +120,7 @@ pub async fn insert_item(pool: &sqlx::PgPool, item: &ItemRow) -> Result<(), sqlx
 pub async fn insert_items(pool: &sqlx::PgPool, items: Vec<ItemRow>) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for item in &items {
+        log::info!("Inserting item record with id '{}' into database", item.id);
         sqlx::query!(
             r#"
             INSERT INTO item (id, item_name)
@@ -98,7 +130,11 @@ pub async fn insert_items(pool: &sqlx::PgPool, items: Vec<ItemRow>) -> Result<()
             item.item_name
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
@@ -108,6 +144,10 @@ pub async fn insert_item_line(
     pool: &sqlx::PgPool,
     item_line: &ItemLineRow,
 ) -> Result<(), sqlx::Error> {
+    log::info!(
+        "Inserting item_line record with id '{}' into database",
+        item_line.id
+    );
     sqlx::query!(
         r#"
         INSERT INTO item_line (id, item_id, store_id, batch, quantity)
@@ -120,7 +160,11 @@ pub async fn insert_item_line(
         item_line.quantity
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -131,6 +175,10 @@ pub async fn insert_item_lines(
 ) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for item_line in &item_lines {
+        log::info!(
+            "Inserting item_line record with id '{}' into database",
+            item_line.id
+        );
         sqlx::query!(
             r#"
             INSERT INTO item_line (id, item_id, store_id, batch, quantity)
@@ -143,7 +191,11 @@ pub async fn insert_item_lines(
             item_line.quantity,
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
@@ -153,6 +205,10 @@ pub async fn insert_requisition(
     pool: &sqlx::PgPool,
     requisition: &RequisitionRow,
 ) -> Result<(), sqlx::Error> {
+    log::info!(
+        "Inserting requisition record with id '{}' into database",
+        requisition.id
+    );
     sqlx::query!(
         r#"
         INSERT INTO requisition (id, name_id, store_id)
@@ -163,7 +219,11 @@ pub async fn insert_requisition(
         requisition.store_id
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -174,6 +234,10 @@ pub async fn insert_requisitions(
 ) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for requisition in &requisitions {
+        log::info!(
+            "Inserting requisition record with id '{}' into database",
+            requisition.id
+        );
         sqlx::query!(
             r#"
             INSERT INTO requisition (id, name_id, store_id)
@@ -184,7 +248,11 @@ pub async fn insert_requisitions(
             requisition.store_id
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
@@ -194,6 +262,10 @@ pub async fn insert_requisition_line(
     pool: &sqlx::PgPool,
     requisition_line: &RequisitionLineRow,
 ) -> Result<(), sqlx::Error> {
+    log::info!(
+        "Inserting requisition_line record with id '{}' into database",
+        requisition_line.id
+    );
     sqlx::query!(
         r#"
         INSERT INTO requisition_line (id, requisition_id, item_id, actual_quantity, suggested_quantity)
@@ -206,7 +278,11 @@ pub async fn insert_requisition_line(
         requisition_line.suggested_quantity
     )
     .execute(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(())
 }
@@ -217,6 +293,10 @@ pub async fn insert_requisition_lines(
 ) -> Result<(), sqlx::Error> {
     // TODO: aggregate into single query.
     for requisition_line in &requisition_lines {
+        log::info!(
+            "Inserting requisition_line record with id '{}' into database",
+            requisition_line.id
+        );
         sqlx::query!(
             r#"
             INSERT INTO requisition_line (id, requisition_id, item_id, actual_quantity, suggested_quantity)
@@ -229,13 +309,18 @@ pub async fn insert_requisition_lines(
             requisition_line.suggested_quantity
         )
         .execute(pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Failed to execute query: {:?}", e);
+            e
+        })?;
     }
 
     Ok(())
 }
 
 pub async fn select_store(pool: &sqlx::PgPool, id: String) -> Result<StoreRow, sqlx::Error> {
+    log::info!("Fetching store record with id '{}' from database", id);
     let store = sqlx::query_as!(
         StoreRow,
         r#"
@@ -246,12 +331,17 @@ pub async fn select_store(pool: &sqlx::PgPool, id: String) -> Result<StoreRow, s
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(store)
 }
 
 pub async fn select_name(pool: &sqlx::PgPool, id: String) -> Result<NameRow, sqlx::Error> {
+    log::info!("Fetching name record with id '{}' from database", id);
     let name = sqlx::query_as!(
         NameRow,
         r#"
@@ -262,12 +352,17 @@ pub async fn select_name(pool: &sqlx::PgPool, id: String) -> Result<NameRow, sql
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(name)
 }
 
 pub async fn select_item(pool: &sqlx::PgPool, id: String) -> Result<ItemRow, sqlx::Error> {
+    log::info!("Fetching item record with id '{}' from database", id);
     let item = sqlx::query_as!(
         ItemRow,
         r#"
@@ -278,12 +373,17 @@ pub async fn select_item(pool: &sqlx::PgPool, id: String) -> Result<ItemRow, sql
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(item)
 }
 
 pub async fn select_item_line(pool: &sqlx::PgPool, id: String) -> Result<ItemLineRow, sqlx::Error> {
+    log::info!("Fetching item_line record with id '{}' from database", id);
     let item_line = sqlx::query_as!(
         ItemLineRow,
         r#"
@@ -294,7 +394,11 @@ pub async fn select_item_line(pool: &sqlx::PgPool, id: String) -> Result<ItemLin
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(item_line)
 }
@@ -303,6 +407,7 @@ pub async fn select_requisition(
     pool: &sqlx::PgPool,
     id: String,
 ) -> Result<RequisitionRow, sqlx::Error> {
+    log::info!("Fetching requisition record with id '{}' from database", id);
     let requisition = sqlx::query_as!(
         RequisitionRow,
         r#"
@@ -313,7 +418,11 @@ pub async fn select_requisition(
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(requisition)
 }
@@ -322,6 +431,10 @@ pub async fn select_requisition_line(
     pool: &sqlx::PgPool,
     id: String,
 ) -> Result<RequisitionLineRow, sqlx::Error> {
+    log::info!(
+        "Fetching requisition_line record with id '{}' from database",
+        id
+    );
     let requisition_line = sqlx::query_as!(
         RequisitionLineRow,
         r#"
@@ -332,7 +445,11 @@ pub async fn select_requisition_line(
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(requisition_line)
 }
@@ -341,6 +458,10 @@ pub async fn select_requisition_lines(
     pool: &sqlx::PgPool,
     requisition_id: String,
 ) -> Result<Vec<RequisitionLineRow>, sqlx::Error> {
+    log::info!(
+        "Fetching requisition_line records for requisition with id '{}' from database",
+        requisition_id
+    );
     let requisition_lines = sqlx::query_as!(
         RequisitionLineRow,
         r#"
@@ -351,12 +472,17 @@ pub async fn select_requisition_lines(
         requisition_id
     )
     .fetch_all(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(requisition_lines)
 }
 
 pub async fn select_transact(pool: &sqlx::PgPool, id: String) -> Result<TransactRow, sqlx::Error> {
+    log::info!("Fetching transact record with id '{}' from database", id);
     let transact: TransactRow = sqlx::query_as!(
         TransactRow,
         r#"
@@ -367,7 +493,11 @@ pub async fn select_transact(pool: &sqlx::PgPool, id: String) -> Result<Transact
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(transact)
 }
@@ -376,6 +506,10 @@ pub async fn select_transacts(
     pool: &sqlx::PgPool,
     name_id: String,
 ) -> Result<Vec<TransactRow>, sqlx::Error> {
+    log::info!(
+        "Fetching transact records for name with id '{}' from database",
+        name_id
+    );
     let transacts: Vec<TransactRow> = sqlx::query_as!(
         TransactRow,
         r#"
@@ -386,7 +520,11 @@ pub async fn select_transacts(
         name_id
     )
     .fetch_all(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(transacts)
 }
@@ -395,6 +533,7 @@ pub async fn select_trans_line(
     pool: &sqlx::PgPool,
     id: String,
 ) -> Result<TransLineRow, sqlx::Error> {
+    log::info!("Fetching trans_line record with id '{}' from database", id);
     let trans_line: TransLineRow = sqlx::query_as!(
         TransLineRow,
         r#"
@@ -405,7 +544,11 @@ pub async fn select_trans_line(
         id
     )
     .fetch_one(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(trans_line)
 }
@@ -414,6 +557,10 @@ pub async fn select_trans_lines(
     pool: &sqlx::PgPool,
     transact_id: String,
 ) -> Result<Vec<TransLineRow>, sqlx::Error> {
+    log::info!(
+        "Fetching trans_line records for transact with id '{}' from database",
+        transact_id
+    );
     let trans_lines: Vec<TransLineRow> = sqlx::query_as!(
         TransLineRow,
         r#"
@@ -424,7 +571,11 @@ pub async fn select_trans_lines(
         transact_id
     )
     .fetch_all(pool)
-    .await?;
+    .await
+    .map_err(|e| {
+        log::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
 
     Ok(trans_lines)
 }
