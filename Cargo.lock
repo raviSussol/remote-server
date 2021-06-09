@@ -1532,6 +1532,7 @@ dependencies = [
  "env_logger",
  "juniper",
  "juniper_actix",
+ "log",
  "serde 1.0.126",
  "sqlx",
 ]
