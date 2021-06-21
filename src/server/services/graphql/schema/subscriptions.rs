@@ -1,3 +1,3 @@
-use crate::database::DatabaseConnection;
+use crate::database::DataLoader;
 
-pub type Subscriptions = juniper::EmptySubscription<DatabaseConnection>;
+pub type Subscriptions = juniper::EmptySubscription<DataLoader>;

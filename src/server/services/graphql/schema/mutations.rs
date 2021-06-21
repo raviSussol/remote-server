@@ -1,14 +1,14 @@
-use crate::database::{DatabaseConnection, ItemRow, RequisitionLineRow, RequisitionRow};
+use crate::database::{DataLoader, ItemRow, RequisitionLineRow, RequisitionRow};
 use crate::server::graphql::{InputRequisitionLine, Item, Requisition, RequisitionType};
 
 pub struct Mutations;
-#[juniper::graphql_object(context = DatabaseConnection)]
+#[juniper::graphql_object(context = DataLoader)]
 impl Mutations {
     #[graphql(arguments(
         id(description = "id of the item"),
         item_name(description = "name of the item"),
     ))]
-    async fn insert_item(database: &DatabaseConnection, id: String, item_name: String) -> Item {
+    async fn insert_item(database: &DataLoader, id: String, item_name: String) -> Item {
         let item_row = ItemRow { id, item_name };
 
         database
@@ -27,7 +27,7 @@ impl Mutations {
         requisition_lines(description = "requisition lines attached to the requisition")
     ))]
     async fn insert_requisition(
-        database: &DatabaseConnection,
+        database: &DataLoader,
         id: String,
         name_id: String,
         store_id: String,

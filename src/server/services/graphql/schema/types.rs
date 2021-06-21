@@ -2,7 +2,7 @@ use crate::database::schema::{
     ItemLineRow, ItemRow, NameRow, RequisitionLineRow, RequisitionRow, RequisitionRowType,
     StoreRow, TransactLineRow, TransactRow, TransactRowType,
 };
-use crate::database::DatabaseConnection;
+use crate::database::DataLoader;
 
 use juniper::{graphql_object, GraphQLEnum, GraphQLInputObject};
 
@@ -11,7 +11,7 @@ pub struct Name {
     pub name_row: NameRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl Name {
     pub fn id(&self) -> &str {
         &self.name_row.id
@@ -27,13 +27,13 @@ pub struct Store {
     pub store_row: StoreRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl Store {
     pub fn id(&self) -> &str {
         &self.store_row.id
     }
 
-    pub async fn name(&self, database: &DatabaseConnection) -> Name {
+    pub async fn name(&self, database: &DataLoader) -> Name {
         let name_row = database
             .get_name(&self.store_row.name_id)
             .await
@@ -48,7 +48,7 @@ pub struct Item {
     pub item_row: ItemRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl Item {
     pub fn id(&self) -> &str {
         &self.item_row.id
@@ -64,13 +64,13 @@ pub struct ItemLine {
     pub item_line_row: ItemLineRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl ItemLine {
     pub fn id(&self) -> &str {
         &self.item_line_row.id
     }
 
-    pub async fn item(&self, database: &DatabaseConnection) -> Item {
+    pub async fn item(&self, database: &DataLoader) -> Item {
         let item_row = database
             .get_item(&self.item_line_row.item_id)
             .await
@@ -81,7 +81,7 @@ impl ItemLine {
         Item { item_row }
     }
 
-    pub async fn store(&self, database: &DatabaseConnection) -> Store {
+    pub async fn store(&self, database: &DataLoader) -> Store {
         let store_row = database
             .get_store(&self.item_line_row.store_id)
             .await
@@ -151,13 +151,13 @@ pub struct Requisition {
     pub requisition_row: RequisitionRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl Requisition {
     pub fn id(&self) -> &str {
         &self.requisition_row.id
     }
 
-    pub async fn name(&self, database: &DatabaseConnection) -> Name {
+    pub async fn name(&self, database: &DataLoader) -> Name {
         let name_row = database
             .get_name(&self.requisition_row.name_id)
             .await
@@ -171,7 +171,7 @@ impl Requisition {
         Name { name_row }
     }
 
-    pub async fn store(&self, database: &DatabaseConnection) -> Store {
+    pub async fn store(&self, database: &DataLoader) -> Store {
         let store_row = database
             .get_store(&self.requisition_row.store_id)
             .await
@@ -189,7 +189,7 @@ impl Requisition {
         self.requisition_row.type_of.clone().into()
     }
 
-    pub async fn requisition_lines(&self, database: &DatabaseConnection) -> Vec<RequisitionLine> {
+    pub async fn requisition_lines(&self, database: &DataLoader) -> Vec<RequisitionLine> {
         let requisition_line_rows = database
             .get_requisition_lines(&self.requisition_row.id)
             .await
@@ -214,13 +214,13 @@ pub struct RequisitionLine {
     pub requisition_line_row: RequisitionLineRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl RequisitionLine {
     pub fn id(&self) -> &str {
         &self.requisition_line_row.id
     }
 
-    pub async fn item(&self, database: &DatabaseConnection) -> Item {
+    pub async fn item(&self, database: &DataLoader) -> Item {
         let item_row = database
             .get_item(&self.requisition_line_row.item_id)
             .await
@@ -298,13 +298,13 @@ pub struct Transact {
     pub transact_row: TransactRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl Transact {
     pub fn id(&self) -> String {
         self.transact_row.id.to_string()
     }
 
-    pub async fn name(&self, database: &DatabaseConnection) -> Name {
+    pub async fn name(&self, database: &DataLoader) -> Name {
         let name_row = database
             .get_name(&self.transact_row.name_id)
             .await
@@ -321,7 +321,7 @@ impl Transact {
         self.transact_row.type_of.clone().into()
     }
 
-    pub async fn transact_lines(&self, database: &DatabaseConnection) -> Vec<TransactLine> {
+    pub async fn transact_lines(&self, database: &DataLoader) -> Vec<TransactLine> {
         let transact_line_rows: Vec<TransactLineRow> = database
             .get_transact_lines(&self.transact_row.id)
             .await
@@ -344,13 +344,13 @@ pub struct TransactLine {
     pub transact_line_row: TransactLineRow,
 }
 
-#[graphql_object(Context = DatabaseConnection)]
+#[graphql_object(Context = DataLoader)]
 impl TransactLine {
     pub fn id(&self) -> &str {
         &self.transact_line_row.id
     }
 
-    pub async fn transact(&self, database: &DatabaseConnection) -> Transact {
+    pub async fn transact(&self, database: &DataLoader) -> Transact {
         let transact_row: TransactRow = database
             .get_transact(&self.transact_line_row.transact_id)
             .await
@@ -364,7 +364,7 @@ impl TransactLine {
         Transact { transact_row }
     }
 
-    pub async fn item(&self, database: &DatabaseConnection) -> Item {
+    pub async fn item(&self, database: &DataLoader) -> Item {
         let item_row = database
             .get_item(&self.transact_line_row.item_id)
             .await
@@ -378,7 +378,7 @@ impl TransactLine {
         Item { item_row }
     }
 
-    pub async fn item_line(&self, database: &DatabaseConnection) -> ItemLine {
+    pub async fn item_line(&self, database: &DataLoader) -> ItemLine {
         // Handle optional item_line_id correctly.
         let item_line_row = database
             .get_item_line(self.transact_line_row.item_line_id.as_ref().unwrap())
