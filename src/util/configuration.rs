@@ -18,59 +18,30 @@ static DEFAULT_APP_ENVIRONMENT: &str = LOCAL_ENVIRONMENT;
 static CONFIGURATION_ENVIRONMENT_PREFIX: &str = "app";
 static CONFIGURATION_ENVIRONMENT_SEPARATOR: &str = "__";
 
-pub struct DisplayDebug {
-    display: String,
-    debug: String,
-    // Also tried this but failed with borrowing issue when boxing one
-    // display: Box<&dyn Debug>,
-    // debug: Box<&dyn Display>,
-}
+trait DebugPlusDisplay: Debug + Display {}
+pub struct DisplayDebug(Box<&'static dyn DebugPlusDisplay>);
 
 impl<T> From<T> for DisplayDebug
 where
-    T: Display + Debug,
+    T: DebugPlusDisplay + 'static,
 {
     fn from(err: T) -> Self {
-        DisplayDebug {
-            display: format!("{}", err),
-            debug: format!("{:?}", err),
-        }
+        DisplayDebug(Box::new(&err))
     }
 }
 
-// If I add below, getting: "conflicting implementations of trait `std::convert::From<util::configuration::Yow>` for type `util::configuration::Yow`", no idea, even if just having one bound trait
-
-// impl Debug for Yow {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{}", self.debug)
-//     }
-// }
-
-// impl Display for Yow {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{}", self.display)
-//     }
-// }
-
-pub struct DisplayDebugWrapper(DisplayDebug);
-
-impl From<DisplayDebug> for DisplayDebugWrapper {
-    fn from(yow: DisplayDebug) -> Self {
-        DisplayDebugWrapper(yow)
-    }
-}
-
-impl Debug for DisplayDebugWrapper {
+impl Debug for DisplayDebug {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0.debug)
+        write!(f, "{}", self.0)
     }
 }
 
-impl Display for DisplayDebugWrapper {
+impl Display for DisplayDebug {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0.display)
+        write!(f, "{}", self.0)
     }
 }
+
 pub fn get_configuration() -> Result<Settings, DisplayDebug> {
     let mut configuration = Config::default();
 
