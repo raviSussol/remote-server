@@ -1,9 +1,10 @@
 use crate::util::environment::{
     Environment, LOCAL as LOCAL_ENVIRONMENT, PRODUCTION as PRODUCTION_ENVIRONMENT,
 };
-use crate::util::settings::{Settings, SettingsError};
+use crate::util::settings::Settings;
 
 use config::{Config, File};
+use std::fmt::{Debug, Display};
 use std::{borrow::Cow, env};
 
 static CONFIGURATION_DIRECTORY_PATH: &str = "configuration";
@@ -17,11 +18,63 @@ static DEFAULT_APP_ENVIRONMENT: &str = LOCAL_ENVIRONMENT;
 static CONFIGURATION_ENVIRONMENT_PREFIX: &str = "app";
 static CONFIGURATION_ENVIRONMENT_SEPARATOR: &str = "__";
 
-pub fn get_configuration() -> Result<Settings, SettingsError> {
+pub struct DisplayDebug {
+    display: String,
+    debug: String,
+    // Also tried this but failed with borrowing issue when boxing one
+    // display: Box<&dyn Debug>,
+    // debug: Box<&dyn Display>,
+}
+
+impl<T> From<T> for DisplayDebug
+where
+    T: Display + Debug,
+{
+    fn from(err: T) -> Self {
+        DisplayDebug {
+            display: format!("{}", err),
+            debug: format!("{:?}", err),
+        }
+    }
+}
+
+// If I add below, getting: "conflicting implementations of trait `std::convert::From<util::configuration::Yow>` for type `util::configuration::Yow`", no idea, even if just having one bound trait
+
+// impl Debug for Yow {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(f, "{}", self.debug)
+//     }
+// }
+
+// impl Display for Yow {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(f, "{}", self.display)
+//     }
+// }
+
+pub struct DisplayDebugWrapper(DisplayDebug);
+
+impl From<DisplayDebug> for DisplayDebugWrapper {
+    fn from(yow: DisplayDebug) -> Self {
+        DisplayDebugWrapper(yow)
+    }
+}
+
+impl Debug for DisplayDebugWrapper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.debug)
+    }
+}
+
+impl Display for DisplayDebugWrapper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.display)
+    }
+}
+pub fn get_configuration() -> Result<Settings, DisplayDebug> {
     let mut configuration = Config::default();
 
-    let current_directory_path =
-        env::current_dir().map_err(|err| SettingsError::Path(err.to_string()))?;
+    let current_directory_path = env::current_dir()?;
 
     let configuration_directory = current_directory_path.join(CONFIGURATION_DIRECTORY_PATH);
 
@@ -47,8 +100,8 @@ pub fn get_configuration() -> Result<Settings, SettingsError> {
         config::Environment::with_prefix(CONFIGURATION_ENVIRONMENT_PREFIX)
             .separator(CONFIGURATION_ENVIRONMENT_SEPARATOR),
     )?;
-
+    // Still need .map_err, why ?? ConfigError implements debug and display just like other errors above that work with ?
     configuration
         .try_into()
-        .map_err(|err| SettingsError::Config(err))
+        .map_err(|err| DisplayDebug::from(err))
 }

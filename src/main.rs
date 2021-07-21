@@ -20,11 +20,14 @@ fn main() -> Result<(), &'static str> {
 #[cfg(not(feature = "mock"))]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    use remote_server::util::configuration::DisplayDebugWrapper;
+
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
-    let configuration =
-        util::configuration::get_configuration().expect("Failed to parse configuration settings");
+    let configuration = util::configuration::get_configuration()
+        .map_err(|err| DisplayDebugWrapper::from(err))
+        .expect("Failed to parse configuration settings");
 
     let pool: sqlx::PgPool = sqlx::PgPool::connect(&configuration.database.connection_string())
         .await
