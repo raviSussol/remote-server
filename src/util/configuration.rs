@@ -40,13 +40,13 @@ where
 
 // If I add below, getting: "conflicting implementations of trait `std::convert::From<util::configuration::Yow>` for type `util::configuration::Yow`", no idea, even if just having one bound trait
 
-// impl Debug for Yow {
+// impl Debug for DisplayDebug {
 //     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 //         write!(f, "{}", self.debug)
 //     }
 // }
 
-// impl Display for Yow {
+// impl Display for DisplayDebug {
 //     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 //         write!(f, "{}", self.display)
 //     }
@@ -55,8 +55,8 @@ where
 pub struct DisplayDebugWrapper(DisplayDebug);
 
 impl From<DisplayDebug> for DisplayDebugWrapper {
-    fn from(yow: DisplayDebug) -> Self {
-        DisplayDebugWrapper(yow)
+    fn from(display_debug: DisplayDebug) -> Self {
+        DisplayDebugWrapper(display_debug)
     }
 }
 
