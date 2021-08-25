@@ -1,5 +1,6 @@
 use crate::database::repository::RepositoryError;
 use crate::database::schema::{DatabaseRow, ItemRow};
+use crate::server::service::graphql::schema::types::{ItemFilter, StringFilter};
 
 use log::info;
 use std::collections::HashMap;
@@ -24,10 +25,55 @@ impl ItemRepository {
         Ok(())
     }
 
-    pub async fn find_all(&self) -> Result<Vec<ItemRow>, RepositoryError> {
+    pub async fn find_many(&self, filter: ItemFilter) -> Result<Vec<ItemRow>, RepositoryError> {
+        let build_begins_with_filterer = |filter: Option<String>| -> Box<dyn Fn(String) -> bool> {
+            Box::new(move |string: String| -> bool {
+                if let Some(begins_with) = filter.clone() {
+                    if !string.starts_with(&begins_with) {
+                        return false;
+                    }
+                }
+                return true;
+            })
+        };
+
+        let build_ends_with_filterer = |filter: Option<String>| -> Box<dyn Fn(String) -> bool> {
+            Box::new(move |string: String| -> bool {
+                if let Some(ends_with) = filter.clone() {
+                    if !string.ends_with(&ends_with) {
+                        return false;
+                    }
+                }
+                return true;
+            })
+        };
+
+        let build_string_filterer = |filter: Option<StringFilter>| -> Box<dyn Fn(String) -> bool> {
+            if let Some(filter) = filter.clone() {
+                let begins_with_filter = build_begins_with_filterer(filter.begins_with);
+                let ends_with_filter = build_ends_with_filterer(filter.ends_with);
+                return Box::new(move |string: String| -> bool {
+                    begins_with_filter(string.clone()) && ends_with_filter(string.clone())
+                });
+            } else {
+                return Box::new(move |_string: String| -> bool { true });
+            }
+        };
+
+        let build_item_filterer = |filter: ItemFilter| -> Box<dyn Fn(&ItemRow) -> bool> {
+            let item_name_filterer = build_string_filterer(filter.item_name);
+            Box::new(move |row: &ItemRow| -> bool { item_name_filterer(row.item_name.clone()) })
+        };
+
+        let item_filterer = build_item_filterer(filter);
+
         let filter_item = |row: &DatabaseRow| -> Option<ItemRow> {
             if let DatabaseRow::Item(item) = row {
-                Some(item.clone())
+                if item_filterer(item) {
+                    Some(item.clone())
+                } else {
+                    None
+                }
             } else {
                 None
             }

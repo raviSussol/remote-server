@@ -6,11 +6,12 @@ use crate::database::schema::{
     ItemLineRow, ItemRow, NameRow, RequisitionRow, StoreRow, TransactLineRow, TransactRow,
 };
 use crate::server::service::graphql::schema::types::{
-    Item, ItemLine, Name, Requisition, Store, Transact, TransactLine,
+    Item, ItemFilter, ItemLine, Name, Requisition, Store, Transact, TransactLine,
 };
 use crate::server::service::graphql::ContextExt;
 
 use async_graphql::{Context, Object};
+use log::info;
 
 pub struct Queries;
 
@@ -111,11 +112,17 @@ impl Queries {
         Item { item_row }
     }
 
-    pub async fn items(&self, ctx: &Context<'_>) -> Vec<Item> {
+    pub async fn items(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "filter for items")] filter: ItemFilter,
+    ) -> Vec<Item> {
+        info!("{:#?}", filter);
+
         let item_repository = ctx.get_repository::<ItemRepository>();
 
         let item_rows: Vec<ItemRow> = item_repository
-            .find_all()
+            .find_many(filter)
             .await
             .unwrap_or_else(|_| panic!("Failed to get items"));
 

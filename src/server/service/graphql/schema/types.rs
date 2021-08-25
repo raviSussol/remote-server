@@ -13,6 +13,7 @@ use crate::{
 };
 
 use async_graphql::{dataloader::DataLoader, Context, Enum, InputObject, Object};
+use std::fmt::Debug;
 
 #[derive(Clone)]
 pub struct Name {
@@ -602,4 +603,15 @@ pub struct InputRequisitionLine {
     pub item_id: String,
     pub actual_quantity: f64,
     pub suggested_quantity: f64,
+}
+
+#[derive(Clone, InputObject, Debug)]
+pub struct StringFilter {
+    pub begins_with: Option<String>,
+    pub ends_with: Option<String>,
+}
+
+#[derive(Clone, InputObject, Debug)]
+pub struct ItemFilter {
+    pub item_name: Option<StringFilter>,
 }
