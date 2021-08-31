@@ -19,21 +19,25 @@ use diesel::{
 
 use byteorder::NativeEndian;
 
-trait MyConnection: Connection
+trait MyConnection: Connection<Backend = <Self as MyConnection>::Backend>
 where
-    Self::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>,
-    Self::Backend: UsesAnsiSavepointSyntax,
-    Self::Backend: SupportsDefaultKeyword,
+    <Self as MyConnection>::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
+        + UsesAnsiSavepointSyntax
+        + SupportsDefaultKeyword,
 {
+    type Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
+        + UsesAnsiSavepointSyntax
+        + SupportsDefaultKeyword;
 }
 
 impl<T> MyConnection for T
 where
     T: Connection,
-    T::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>,
-    T::Backend: UsesAnsiSavepointSyntax,
-    T::Backend: SupportsDefaultKeyword,
+    T::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
+        + UsesAnsiSavepointSyntax
+        + SupportsDefaultKeyword,
 {
+    type Backend = <T as Connection>::Backend;
 }
 
 #[derive(Clone)]
