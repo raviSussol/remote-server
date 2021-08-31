@@ -21,21 +21,15 @@ use byteorder::NativeEndian;
 
 trait MyConnection: Connection<Backend = <Self as MyConnection>::Backend>
 where
-    <Self as MyConnection>::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
-        + UsesAnsiSavepointSyntax
-        + SupportsDefaultKeyword,
+    <Self as MyConnection>::Backend: Backend + UsesAnsiSavepointSyntax + SupportsDefaultKeyword,
 {
-    type Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
-        + UsesAnsiSavepointSyntax
-        + SupportsDefaultKeyword;
+    type Backend: Backend + UsesAnsiSavepointSyntax + SupportsDefaultKeyword;
 }
 
 impl<T> MyConnection for T
 where
     T: Connection,
-    T::Backend: Backend<RawValue = [u8], ByteOrder = NativeEndian>
-        + UsesAnsiSavepointSyntax
-        + SupportsDefaultKeyword,
+    T::Backend: Backend + UsesAnsiSavepointSyntax + SupportsDefaultKeyword,
 {
     type Backend = <T as Connection>::Backend;
 }
