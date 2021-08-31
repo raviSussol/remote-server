@@ -2837,6 +2837,7 @@ dependencies = [
  "async-graphql",
  "async-graphql-actix-web",
  "async-trait",
+ "byteorder",
  "config",
  "diesel",
  "diesel-derive-enum",

@@ -19,6 +19,7 @@ anymap = "0.12"
 async-graphql = "2.9.8"
 async-graphql-actix-web = "2.9.8"
 async-trait = "0.1.16"
+byteorder = "1.4.3"
 diesel = { version = "1.4.7", default-features = false, features = ["sqlite", "postgres", "r2d2", "numeric"] }
 diesel-derive-enum = { version = "1.1.1", features = ["sqlite", "postgres"] }
 r2d2 = "0.8.9"
