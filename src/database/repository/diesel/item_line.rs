@@ -40,9 +40,15 @@ where
     type Backend = <T as Connection>::Backend;
 }
 
-#[derive(Clone)]
 pub struct ItemLineRepository<T: 'static + MyConnection> {
     pool: Pool<ConnectionManager<T>>,
+}
+
+// Manual because #[derive(Clone)] adds an unwanted T: Clone constraint.
+impl<T: MyConnection> Clone for ItemLineRepository<T> {
+    fn clone(&self) -> Self {
+        Self { pool: pool.clone() }
+    }
 }
 
 impl<T: MyConnection> ItemLineRepository<T> {
