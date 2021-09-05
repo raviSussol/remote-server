@@ -64,9 +64,6 @@ async fn main() -> std::io::Result<()> {
     tokio::select! {
         result = http_server => result,
         () = async {
-          sync_sender.schedule_send(Duration::from_secs(settings.sync.interval)).await;
-        } => unreachable!("Sync receiver unexpectedly died!?"),
-        () = async {
           sync_receiver.listen().await;
         } => unreachable!("Sync scheduler unexpectedly died!?"),
     }

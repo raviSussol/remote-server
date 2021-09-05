@@ -1,18 +1,120 @@
+use std::collections::BTreeMap;
+
+use std::time::Duration;
+
 use crate::database::repository::{
-    ItemLineRepository, ItemRepository, NameRepository, RequisitionRepository, StoreRepository,
+    ItemLineRepository, ItemRepository, RequisitionRepository, StoreRepository,
     TransactLineRepository, TransactRepository,
 };
 use crate::database::schema::{
     ItemLineRow, ItemRow, NameRow, RequisitionRow, StoreRow, TransactLineRow, TransactRow,
 };
 use crate::server::service::graphql::schema::types::{
-    Item, ItemLine, Name, Requisition, Store, Transact, TransactLine,
+    Item, ItemLine, Requisition, Store, Transact, TransactLine,
 };
 use crate::server::service::graphql::ContextExt;
 
-use async_graphql::{Context, Object};
+use actix_rt::time::delay_for;
+use async_graphql::{
+    Context, Enum, Error, ErrorExtensions, InputObject, Name as AGname, Object, Value,
+};
+
+use super::types::Name;
 
 pub struct Queries;
+
+struct ErrorDetailsExample {
+    id: String,
+    value: u16,
+}
+
+struct ErrorDetailsExample2 {
+    value: String,
+    id: u16,
+}
+
+enum ErrorExample {
+    Panic,
+    BasicString(String),
+    StructuredError,
+}
+
+impl From<ErrorDetailsExample> for Value {
+    fn from(detail_example: ErrorDetailsExample) -> Self {
+        let mut map: BTreeMap<AGname, Value> = BTreeMap::new();
+
+        map.insert(
+            AGname::new("id"),
+            Value::String(detail_example.id.to_owned()),
+        );
+        map.insert(
+            AGname::new("value"),
+            Value::Number(detail_example.value.into()),
+        );
+        Value::Object(map)
+    }
+}
+
+impl From<ErrorDetailsExample2> for Value {
+    fn from(detail_example: ErrorDetailsExample2) -> Self {
+        let mut map: BTreeMap<AGname, Value> = BTreeMap::new();
+
+        map.insert(
+            AGname::new("value"),
+            Value::String(detail_example.value.to_owned()),
+        );
+        map.insert(AGname::new("id"), Value::Number(detail_example.id.into()));
+        Value::Object(map)
+    }
+}
+
+impl ErrorExtensions for ErrorExample {
+    fn extend(&self) -> Error {
+        match self {
+            ErrorExample::Panic => Error::new(format!("Panice, this will never show"))
+                .extend_with(|_, _| panic!("something went wrong")), // this wouldn't be in error, it would vai panic in logic that we've missed
+            ErrorExample::BasicString(value) => Error::new(format!("String Error"))
+                .extend_with(|_, e| e.set("stringError", value.to_owned())),
+            ErrorExample::StructuredError => {
+                Error::new(format!("Structured Error")).extend_with(|_, e| {
+                    e.set(
+                        "arrayOfErrors",
+                        vec![
+                            ErrorDetailsExample {
+                                id: "first id".to_owned(),
+                                value: 1,
+                            },
+                            ErrorDetailsExample {
+                                id: "second id".to_owned(),
+                                value: 2,
+                            },
+                        ],
+                    );
+                    e.set(
+                        "errorObject",
+                        ErrorDetailsExample2 {
+                            value: "value".to_owned(),
+                            id: 1,
+                        },
+                    );
+                })
+            }
+        }
+    }
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+pub enum ExampleInputVariants {
+    ONE,
+    TWO,
+    THREE,
+}
+
+#[derive(InputObject)]
+pub struct ExampleInput {
+    r#type: ExampleInputVariants,
+    direction: Option<bool>,
+}
 
 #[Object]
 impl Queries {
@@ -23,17 +125,34 @@ impl Queries {
 
     pub async fn name(
         &self,
-        ctx: &Context<'_>,
+        _ctx: &Context<'_>,
         #[graphql(desc = "id of the name")] id: String,
-    ) -> Name {
-        let name_repository = ctx.get_repository::<NameRepository>();
+        delay_seconds: Option<u64>,
+        _structured_input: Option<Vec<ExampleInput>>,
+    ) -> Result<Name, Error> {
+        if let Some(delay_seconds) = delay_seconds {
+            delay_for(Duration::new(delay_seconds, 0)).await;
+        }
 
-        let name_row: NameRow = name_repository
-            .find_one_by_id(&id)
-            .await
-            .unwrap_or_else(|_| panic!("Failed to get name {}", id));
+        match &id[..] {
+            "this_causes_uhandled_panic" => return Err(ErrorExample::Panic.extend()),
+            "this_causes_string_error" => {
+                return Err(
+                    ErrorExample::BasicString(format!("Some error string, from id {}", id))
+                        .extend(),
+                )
+            }
+            "this_causes_structured_error" => return Err(ErrorExample::StructuredError.extend()),
 
-        Name { name_row }
+            _ => {}
+        };
+
+        Ok(Name {
+            name_row: NameRow {
+                id: "TEST".to_owned(),
+                name: "TEST".to_owned(),
+            },
+        })
     }
 
     pub async fn store(
