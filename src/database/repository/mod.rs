@@ -33,7 +33,7 @@ pub enum RepositoryError {
 pub mod repository;
 
 pub use repository::{
-    CustomerInvoiceRepository, ItemLineRepository, ItemRepository, NameRepository,
-    RequisitionLineRepository, RequisitionRepository, StoreRepository, TransactLineRepository,
-    TransactRepository, UserAccountRepository,
+    new_tx_name_repository, CustomerInvoiceRepository, DBTransaction, ItemLineRepository,
+    ItemRepository, NameRepository, RequisitionLineRepository, RequisitionRepository,
+    StoreRepository, TransactLineRepository, TransactRepository, TxManager, UserAccountRepository,
 };

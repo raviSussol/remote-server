@@ -10,16 +10,18 @@ mod requisition_line;
 mod store;
 mod transact;
 mod transact_line;
+mod transaction_manager;
 mod user_account;
 
 pub use item::ItemRepository;
 pub use item_line::ItemLineRepository;
-pub use name::NameRepository;
+pub use name::{new_tx_name_repository, NameRepository};
 pub use requisition::RequisitionRepository;
 pub use requisition_line::RequisitionLineRepository;
 pub use store::StoreRepository;
 pub use transact::{CustomerInvoiceRepository, TransactRepository};
 pub use transact_line::TransactLineRepository;
+pub use transaction_manager::TxManager;
 pub use user_account::UserAccountRepository;
 
 use diesel::{
@@ -28,11 +30,16 @@ use diesel::{
     result::{DatabaseErrorKind as DieselDatabaseErrorKind, Error as DieselError},
 };
 
+use self::name::new_name_repository;
+
 #[cfg(feature = "dieselsqlite")]
 type DBBackendConnection = SqliteConnection;
 
 #[cfg(feature = "dieselpg")]
 type DBBackendConnection = PgConnection;
+
+// Note, for sqlx this would be actual tx object
+pub type DBTransaction = PooledConnection<ConnectionManager<DBBackendConnection>>;
 
 impl From<DieselError> for RepositoryError {
     fn from(err: DieselError) -> Self {
@@ -84,13 +91,14 @@ pub async fn get_repositories(settings: &Settings) -> RepositoryMap {
     repositories.insert(CustomerInvoiceRepository::new(pool.clone()));
     repositories.insert(ItemRepository::new(pool.clone()));
     repositories.insert(ItemLineRepository::new(pool.clone()));
-    repositories.insert(NameRepository::new(pool.clone()));
+    repositories.insert(new_name_repository(pool.clone()));
     repositories.insert(RequisitionLineRepository::new(pool.clone()));
     repositories.insert(RequisitionRepository::new(pool.clone()));
     repositories.insert(StoreRepository::new(pool.clone()));
     repositories.insert(TransactRepository::new(pool.clone()));
     repositories.insert(TransactLineRepository::new(pool.clone()));
     repositories.insert(UserAccountRepository::new(pool.clone()));
+    repositories.insert(TxManager::new(pool.clone()));
 
     repositories
 }

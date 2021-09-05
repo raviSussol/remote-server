@@ -1,4 +1,4 @@
-use remote_server::util::settings::DatabaseSettings;
+use crate::util::settings::DatabaseSettings;
 
 #[cfg(not(feature = "dieselsqlite"))]
 pub async fn setup(db_settings: &DatabaseSettings) {

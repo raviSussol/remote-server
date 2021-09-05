@@ -17,7 +17,7 @@ mod repository_basic_test {
         util::settings::{DatabaseSettings, ServerSettings, Settings, SyncSettings},
     };
 
-    use crate::repository::test_db;
+    use remote_server::util::test_db;
 
     async fn requisition_test(repo: &RequisitionRepository) {
         let item1 = RequisitionRow {
