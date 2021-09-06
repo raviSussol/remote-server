@@ -28,7 +28,7 @@ impl ItemLineRepository {
         info!("Querying item_line record (item_line.id={})", id);
         match self.mock_data.lock().unwrap().get(&id.to_string()) {
             Some(DatabaseRow::ItemLine(item_line)) => Ok(item_line.clone()),
-            _ => Err(RepositoryError {
+            _ => Err(RepositoryError::DBError {
                 msg: String::from(format!(
                     "Failed to find item_line record (item_line.id={})",
                     id

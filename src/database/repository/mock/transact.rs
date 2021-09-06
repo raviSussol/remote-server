@@ -28,7 +28,7 @@ impl TransactRepository {
         info!("Querying transact record (transact.id={})", id);
         match self.mock_data.lock().unwrap().get(&id.to_string()) {
             Some(DatabaseRow::Transact(transact)) => Ok(transact.clone()),
-            _ => Err(RepositoryError {
+            _ => Err(RepositoryError::DBError {
                 msg: String::from(format!(
                     "Failed to find transact record (transact.id={})",
                     id

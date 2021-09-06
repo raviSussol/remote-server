@@ -34,7 +34,7 @@ impl RequisitionLineRepository {
         info!("Querying requisition_line record (id={})", id);
         match self.mock_data.lock().unwrap().get(&id.to_string()) {
             Some(DatabaseRow::RequisitionLine(requisition_line)) => Ok(requisition_line.clone()),
-            _ => Err(RepositoryError {
+            _ => Err(RepositoryError::DBError {
                 msg: String::from(format!(
                     "Failed to find requisition_line record (requisition_line.id={})",
                     id

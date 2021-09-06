@@ -28,7 +28,7 @@ impl NameRepository {
         info!("Querying name record (name.id={})", id);
         match self.mock_data.lock().unwrap().get(&id.to_string()) {
             Some(DatabaseRow::Name(name)) => Ok(name.clone()),
-            _ => Err(RepositoryError {
+            _ => Err(RepositoryError::DBError {
                 msg: String::from(format!("Failed to find name record (name.id={})", id)),
             }),
         }

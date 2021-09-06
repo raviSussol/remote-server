@@ -31,7 +31,7 @@ impl UserAccountRepository {
         info!("Querying user_account {}", id);
         match self.mock_data.lock().unwrap().get(&id.to_string()) {
             Some(DatabaseRow::UserAccount(user_account)) => Ok(user_account.clone()),
-            _ => Err(RepositoryError {
+            _ => Err(RepositoryError::DBError {
                 msg: String::from(format!(
                     "Failed to find user_account record (user_account.id={})",
                     id
