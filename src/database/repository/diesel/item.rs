@@ -1,8 +1,8 @@
-use super::DBBackendConnection;
+use super::{DBBackendConnection, StoreRepository};
 
 use crate::database::{
     repository::{repository::get_connection, RepositoryError},
-    schema::{ItemRow, ItemRowType},
+    schema::{ItemRow, ItemRowType, StoreRow},
 };
 
 use diesel::{
@@ -11,33 +11,70 @@ use diesel::{
 };
 use r2d2::PooledConnection;
 
-pub fn example(pool: &Pool<ConnectionManager<DBBackendConnection>>) -> Result<(), RepositoryError> {
-    let connection = &get_connection(pool)?;
-    connection
-        .transaction::<(), RepositoryError, _>(|| {
-            let row = ItemRow {
+pub fn example(sync_repo: &SyncIntegrationRepository) -> Result<(), RepositoryError> {
+    // Collect translated record
+
+    let records = vec![
+        IntegrationRecord {
+            r#type: SyncType::Upsert,
+            record: Record::Item(ItemRow {
                 id: "abc".to_owned(),
                 item_name: "amox".to_owned(),
                 type_of: ItemRowType::General,
-            };
+            }),
+        },
+        IntegrationRecord {
+            r#type: SyncType::Upsert,
+            record: Record::Store(StoreRow {
+                id: "ABC".to_owned(),
+                name_id: "CBA".to_owned(),
+            }),
+        },
+    ];
 
-            ItemRepository::insert_one_sync(&row, connection)?;
+    // then execute transction
+    sync_repo.integrate_records(records)
+}
 
-            let row = ItemRow {
-                id: "abc".to_owned(),
-                item_name: "amox".to_owned(),
-                type_of: ItemRowType::General,
-            };
+enum SyncType {
+    Delete,
+    Upsert,
+}
 
-            ItemRepository::insert_one_sync(&row, connection)?;
+enum Record {
+    Item(ItemRow),
+    Store(StoreRow),
+}
 
-            // etc ofcourse above would be similar to import_sync_records, but no need for async etc..
+struct IntegrationRecord {
+    r#type: SyncType,
+    record: Record,
+}
 
+pub struct SyncIntegrationRepository {
+    pool: Pool<ConnectionManager<DBBackendConnection>>,
+}
+
+impl SyncIntegrationRepository {
+    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> SyncIntegrationRepository {
+        SyncIntegrationRepository { pool }
+    }
+
+    pub fn integrate_records(
+        &self,
+        integration_records: Vec<IntegrationRecord>,
+    ) -> Result<(), RepositoryError> {
+        let connection = &get_connection(&self.pool)?;
+        connection.transaction::<(), RepositoryError, _>(|| {
+            for record in &integration_records {
+                match &record.record {
+                    Record::Item(record) => ItemRepository::insert_one_sync(record, connection)?,
+                    Record::Store(record) => StoreRepository::insert_one_sync(record, connection)?,
+                }
+            }
             Ok(())
         })
-        .unwrap();
-
-    Ok(())
+    }
 }
 
 #[derive(Clone)]
@@ -47,7 +84,7 @@ pub struct ItemRepository {
 
 impl ItemRepository {
     pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> ItemRepository {
-        ItemRepository { pool: pool }
+        ItemRepository { pool }
     }
 
     pub async fn insert_one(&self, item_row: &ItemRow) -> Result<(), RepositoryError> {
