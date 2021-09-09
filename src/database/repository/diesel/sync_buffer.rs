@@ -31,7 +31,7 @@ impl SyncBufferRepository {
 
     pub async fn insert_many(
         &self,
-        sync_buffer_rows: Vec<SyncBufferRow>,
+        sync_buffer_rows: &Vec<SyncBufferRow>,
     ) -> Result<(), RepositoryError> {
         use crate::database::schema::diesel_schema::sync_buffer::dsl::*;
         let connection = get_connection(&self.pool)?;

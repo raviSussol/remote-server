@@ -24,7 +24,6 @@ pub enum DatabaseRow {
     TransactLine(TransactLineRow),
     UserAccount(UserAccountRow),
     SyncOut(SyncOutRow),
-    SyncBuffer(SyncBufferRow),
 }
 
 pub use item::{ItemRow, ItemRowType};

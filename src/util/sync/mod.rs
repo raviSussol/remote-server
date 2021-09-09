@@ -104,7 +104,7 @@ impl SyncReceiverActor {
                     .collect();
 
                 sync_buffer_repository
-                    .insert_many(buffer_records.clone())
+                    .insert_many(&buffer_records)
                     .await
                     .expect("Failed to insert sync buffer records");
 
