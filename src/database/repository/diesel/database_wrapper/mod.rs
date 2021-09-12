@@ -75,7 +75,7 @@ impl DbConnectionPool {
     }
 
     #[cfg(not(feature = "postgres"))]
-    pub fn new_pg(connection_string: &str) -> DbConnectionPool {
+    pub fn new_pg(_: &str) -> DbConnectionPool {
         panic!("postgres flag is not enabled")
     }
 
@@ -88,7 +88,7 @@ impl DbConnectionPool {
     }
 
     #[cfg(not(feature = "sqlite"))]
-    pub fn new_sqlite(connection_string: &str) -> DbConnectionPool {
+    pub fn new_sqlite(_: &str) -> DbConnectionPool {
         panic!("sqlite flag is not enabled")
     }
 

@@ -35,6 +35,7 @@ macro_rules! sqlite_operation {
 macro_rules! database_operation_pool {
     ($pool:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
         match $pool {
+            #[allow(unused_variables)]
             crate::database::repository::DbConnectionPool::Sqlite(_) => {
                 crate::database::repository::macros::sqlite_operation!(
                     &*$pool.get_sqlite_connection()?,
@@ -42,6 +43,7 @@ macro_rules! database_operation_pool {
                     $operation
                 )
             }
+            #[allow(unused_variables)]
             crate::database::repository::DbConnectionPool::Pg(_) => {
                 crate::database::repository::macros::postgres_operation!(
                     &*$pool.get_pg_connection()?,
@@ -56,6 +58,7 @@ macro_rules! database_operation_pool {
 macro_rules! database_operation_connection {
     ($connection:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
         match $connection {
+            #[allow(unused_variables)]
             crate::database::repository::DbConnection::Sqlite(connection) => {
                 crate::database::repository::macros::sqlite_operation!(
                     &*connection,
@@ -63,6 +66,7 @@ macro_rules! database_operation_connection {
                     $operation
                 )
             }
+            #[allow(unused_variables)]
             crate::database::repository::DbConnection::Pg(connection) => {
                 crate::database::repository::macros::postgres_operation!(
                     &*connection,
@@ -202,11 +206,13 @@ macro_rules! sqlite_transaction {
 macro_rules! transaction {
     ($connection:expr, $transaction_content:expr) => {
         match $connection {
+            #[allow(unused_variables)]
             crate::database::repository::DbConnection::Sqlite(connection) => {
                 crate::database::repository::macros::sqlite_transaction!(
                     connection.transaction($transaction_content)
                 )
             }
+            #[allow(unused_variables)]
             crate::database::repository::DbConnection::Pg(connection) => {
                 crate::database::repository::macros::postgres_transaction!(
                     connection.transaction($transaction_content)

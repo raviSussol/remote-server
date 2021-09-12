@@ -12,7 +12,7 @@ pub async fn setup(db_settings: &DatabaseSettings) {
 }
 
 #[cfg(not(feature = "postgres"))]
-async fn setup_pg(db_settings: &DatabaseSettings) {
+async fn setup_pg(_: &DatabaseSettings) {
     panic!("postgres flag is not enabled")
 }
 
@@ -61,7 +61,7 @@ async fn setup_pg(db_settings: &DatabaseSettings) {
     }
 }
 #[cfg(not(feature = "sqlite"))]
-async fn setup_sqlite(db_settings: &DatabaseSettings) {
+async fn setup_sqlite(_: &DatabaseSettings) {
     panic!("sqlite flag is not enabled")
 }
 #[cfg(feature = "sqlite")]
