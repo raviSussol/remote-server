@@ -11,6 +11,12 @@ pub async fn setup(db_settings: &DatabaseSettings) {
     }
 }
 
+#[cfg(not(feature = "postgres"))]
+async fn setup_pg(db_settings: &DatabaseSettings) {
+    panic!("postgres flag is not enabled")
+}
+
+#[cfg(feature = "postgres")]
 async fn setup_pg(db_settings: &DatabaseSettings) {
     use diesel::{
         r2d2::{ConnectionManager, Pool},
@@ -54,7 +60,11 @@ async fn setup_pg(db_settings: &DatabaseSettings) {
         migration.run(&connection).unwrap();
     }
 }
-
+#[cfg(not(feature = "sqlite"))]
+async fn setup_sqlite(db_settings: &DatabaseSettings) {
+    panic!("sqlite flag is not enabled")
+}
+#[cfg(feature = "sqlite")]
 async fn setup_sqlite(db_settings: &DatabaseSettings) {
     use diesel::{Connection, SqliteConnection};
     use std::fs;

@@ -20,17 +20,17 @@ impl ItemRepository {
         connection: &DbConnection,
         item_row: &ItemRow,
     ) -> Result<(), RepositoryError> {
-        match connection {
-            DbConnection::Pg(pg_connection) => diesel::insert_into(item)
+        execute_connection!(
+            connection,
+            // Postgres
+            diesel::insert_into(item)
                 .values(item_row)
                 .on_conflict(id)
                 .do_update()
-                .set(item_row)
-                .execute(&**pg_connection),
-            DbConnection::Sqlite(sqlite_connection) => diesel::replace_into(item)
-                .values(item_row)
-                .execute(&**sqlite_connection),
-        }?;
+                .set(item_row),
+            // Sqlite
+            diesel::replace_into(item).values(item_row)
+        )?;
 
         Ok(())
     }

@@ -27,17 +27,17 @@ impl NameRepository {
         connection: &DbConnection,
         name_row: &NameRow,
     ) -> Result<(), RepositoryError> {
-        match connection {
-            DbConnection::Pg(pg_connection) => diesel::insert_into(name_table)
+        execute_connection!(
+            connection,
+            // Postgres
+            diesel::insert_into(name_table)
                 .values(name_row)
                 .on_conflict(id)
                 .do_update()
-                .set(name_row)
-                .execute(&**pg_connection),
-            DbConnection::Sqlite(sqlite_connection) => diesel::replace_into(name_table)
-                .values(name_row)
-                .execute(&**sqlite_connection),
-        }?;
+                .set(name_row),
+            // Sqlite
+            diesel::replace_into(name_table).values(name_row)
+        )?;
 
         Ok(())
     }

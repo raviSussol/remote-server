@@ -52,7 +52,6 @@ table! {
 table! {
     sync_out (id) {
         id -> Text,
-        created_at -> Date,
         table_name -> crate::database::schema::sync_out::SyncOutRowTableNameTypeMapping,
         record_id -> Text,
         store_id -> Text,

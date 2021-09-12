@@ -1,11 +1,40 @@
 pub mod macros;
-use diesel::{
-    r2d2::{ConnectionManager, Pool, PooledConnection},
-    PgConnection, SqliteConnection,
-};
+
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use serde::Deserialize;
 
 use crate::{database::repository::RepositoryError, util::settings::Settings};
+
+// Use sqlite instead of postgres and postgres instead of sqlite
+#[cfg(feature = "postgres")]
+pub type PgConnection = diesel::PgConnection;
+#[cfg(not(feature = "postgres"))]
+pub type PgConnection = std::marker::PhantomData<bool>;
+
+#[cfg(feature = "sqlite")]
+pub type SqliteConnection = diesel::SqliteConnection;
+#[cfg(not(feature = "sqlite"))]
+pub type SqliteConnection = std::marker::PhantomData<bool>;
+
+#[cfg(feature = "postgres")]
+type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
+#[cfg(not(feature = "postgres"))]
+type PgPooledConnection = std::marker::PhantomData<bool>;
+
+#[cfg(feature = "sqlite")]
+type SqlitePooledConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
+#[cfg(not(feature = "sqlite"))]
+type SqlitePooledConnection = std::marker::PhantomData<bool>;
+
+#[cfg(feature = "postgres")]
+type PgPool = Pool<ConnectionManager<PgConnection>>;
+#[cfg(not(feature = "postgres"))]
+type PgPool = std::marker::PhantomData<bool>;
+
+#[cfg(feature = "sqlite")]
+type SqlitePool = Pool<ConnectionManager<SqliteConnection>>;
+#[cfg(not(feature = "sqlite"))]
+type SqlitePool = std::marker::PhantomData<bool>;
 
 #[derive(Debug, Clone, Deserialize)]
 pub enum ConnectionType {
@@ -14,13 +43,13 @@ pub enum ConnectionType {
 }
 
 pub enum DbConnectionPool {
-    Pg(Pool<ConnectionManager<PgConnection>>),
-    Sqlite(Pool<ConnectionManager<SqliteConnection>>),
+    Pg(PgPool),
+    Sqlite(SqlitePool),
 }
 
 pub enum DbConnection {
-    Pg(PooledConnection<ConnectionManager<PgConnection>>),
-    Sqlite(PooledConnection<ConnectionManager<SqliteConnection>>),
+    Pg(PgPooledConnection),
+    Sqlite(SqlitePooledConnection),
 }
 
 impl From<r2d2::Error> for RepositoryError {
@@ -39,11 +68,18 @@ impl DbConnectionPool {
         }
     }
 
+    #[cfg(feature = "postgres")]
     pub fn new_pg(connection_string: &str) -> DbConnectionPool {
         let connection_manager = ConnectionManager::<PgConnection>::new(connection_string);
         DbConnectionPool::Pg(Pool::new(connection_manager).expect("Failed to connect to database"))
     }
 
+    #[cfg(not(feature = "postgres"))]
+    pub fn new_pg(connection_string: &str) -> DbConnectionPool {
+        panic!("postgres flag is not enabled")
+    }
+
+    #[cfg(feature = "sqlite")]
     pub fn new_sqlite(connection_string: &str) -> DbConnectionPool {
         let connection_manager = ConnectionManager::<SqliteConnection>::new(connection_string);
         DbConnectionPool::Sqlite(
@@ -51,19 +87,26 @@ impl DbConnectionPool {
         )
     }
 
-    pub fn get_pg_connection(
-        &self,
-    ) -> Result<PooledConnection<ConnectionManager<diesel::PgConnection>>, RepositoryError> {
+    #[cfg(not(feature = "sqlite"))]
+    pub fn new_sqlite(connection_string: &str) -> DbConnectionPool {
+        panic!("sqlite flag is not enabled")
+    }
+
+    #[cfg(feature = "postgres")]
+    pub fn get_pg_connection(&self) -> Result<PgPooledConnection, RepositoryError> {
         match self {
             DbConnectionPool::Pg(pool) => Ok(pool.get()?),
             _ => Err(RepositoryError::ConnectionDoesntExist(ConnectionType::Pg)),
         }
     }
 
-    pub fn get_sqlite_connection(
-        &self,
-    ) -> Result<PooledConnection<ConnectionManager<diesel::SqliteConnection>>, RepositoryError>
-    {
+    #[cfg(not(feature = "postgres"))]
+    pub fn get_pg_connection(&self) -> Result<PgPooledConnection, RepositoryError> {
+        panic!("postgres flag is not enabled")
+    }
+
+    #[cfg(feature = "sqlite")]
+    pub fn get_sqlite_connection(&self) -> Result<SqlitePooledConnection, RepositoryError> {
         match self {
             DbConnectionPool::Sqlite(pool) => Ok(pool.get()?),
             _ => Err(RepositoryError::ConnectionDoesntExist(
@@ -72,10 +115,15 @@ impl DbConnectionPool {
         }
     }
 
+    #[cfg(not(feature = "sqlite"))]
+    pub fn get_sqlite_connection(&self) -> Result<SqlitePooledConnection, RepositoryError> {
+        panic!("sqlite flag is not enabled")
+    }
+
     pub fn get_connection(&self) -> Result<DbConnection, RepositoryError> {
         match self {
-            DbConnectionPool::Pg(pool) => Ok(DbConnection::Pg(pool.get()?)),
-            DbConnectionPool::Sqlite(pool) => Ok(DbConnection::Sqlite(pool.get()?)),
+            DbConnectionPool::Pg(_) => Ok(DbConnection::Pg(self.get_pg_connection()?)),
+            DbConnectionPool::Sqlite(_) => Ok(DbConnection::Sqlite(self.get_sqlite_connection()?)),
         }
     }
 

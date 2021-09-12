@@ -19,10 +19,10 @@ anymap = "0.12"
 async-graphql = { version = "2.9.8", features = ["dataloader"] }
 async-graphql-actix-web = "2.9.8"
 async-trait = "0.1.16"
-diesel = { version = "1.4.7", default-features = false, features = ["sqlite", "postgres", "r2d2", "numeric"] }
-diesel-derive-enum = { version = "1.1.1", features = ["sqlite", "postgres"] }
+diesel = { version = "1.4.7", default-features = false, features = ["r2d2", "numeric"] }
+diesel-derive-enum = { version = "1.1.1", default-features = false, optional = true }
 diesel_migrations = "1.4.0"
-libsqlite3-sys = { version = "0.22.2", features = ["bundled"] }
+libsqlite3-sys = { version = "0.22.2", features = ["bundled"], optional = true }
 r2d2 = "0.8.9"
 config = "0.11.0"
 env_logger = "0.8.3"
@@ -40,6 +40,7 @@ uuid = { version = "0.8", features = ["v4"] }
 httpmock = "0.6"
 
 [features]
+default = ["postgres", "sqlite"]
+postgres = ["diesel/postgres" , "diesel-derive-enum/postgres"]
+sqlite = ["diesel/sqlite", "libsqlite3-sys", "diesel-derive-enum/sqlite"]
 mock = []
-postgres = []
-sqlite = []

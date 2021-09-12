@@ -25,7 +25,6 @@ pub enum SyncOutRowActionType {
 #[table_name = "sync_out"]
 pub struct SyncOutRow {
     pub id: String,
-    pub created_at: String,
     pub table_name: SyncOutRowTableNameType,
     pub record_id: String,
     pub store_id: String,
