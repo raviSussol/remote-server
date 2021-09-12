@@ -1,6 +1,9 @@
-use crate::{
-    database::repository::RepositoryError, server::data::RepositoryMap, util::settings::Settings,
-};
+use super::RepositoryError;
+use crate::{server::data::RepositoryMap, util::settings::Settings};
+use diesel::result::{DatabaseErrorKind as DieselDatabaseErrorKind, Error as DieselError};
+
+pub mod database_wrapper;
+pub use self::database_wrapper::*;
 
 mod item;
 mod item_line;
@@ -23,20 +26,6 @@ pub use sync::{IntegrationRecord, IntegrationUpsertRecord, SyncRepository};
 pub use transact::{CustomerInvoiceRepository, TransactRepository};
 pub use transact_line::TransactLineRepository;
 pub use user_account::UserAccountRepository;
-
-use diesel::{
-    prelude::*,
-    r2d2::{ConnectionManager, Pool, PooledConnection},
-    result::{DatabaseErrorKind as DieselDatabaseErrorKind, Error as DieselError},
-};
-
-#[cfg(feature = "sqlite")]
-type DBBackendConnection = SqliteConnection;
-
-#[cfg(not(feature = "sqlite"))]
-type DBBackendConnection = PgConnection;
-
-pub type DBConnection = PooledConnection<ConnectionManager<DBBackendConnection>>;
 
 impl From<DieselError> for RepositoryError {
     fn from(err: DieselError) -> Self {
@@ -69,19 +58,9 @@ impl From<DieselError> for RepositoryError {
     }
 }
 
-fn get_connection(
-    pool: &Pool<ConnectionManager<DBBackendConnection>>,
-) -> Result<PooledConnection<ConnectionManager<DBBackendConnection>>, RepositoryError> {
-    pool.get().map_err(|_| RepositoryError::DBError {
-        msg: "Failed to open Connection".to_string(),
-    })
-}
-
 pub async fn get_repositories(settings: &Settings) -> RepositoryMap {
     // TODO fix connection string for sqlite
-    let connection_manager =
-        ConnectionManager::<DBBackendConnection>::new(&settings.database.connection_string());
-    let pool = Pool::new(connection_manager).expect("Failed to connect to database");
+    let pool = DbConnectionPool::new(settings);
 
     let mut repositories: RepositoryMap = RepositoryMap::new();
 

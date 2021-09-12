@@ -1,10 +1,17 @@
+use crate::database::repository::ConnectionType;
+
 use super::settings::{DatabaseSettings, ServerSettings, Settings, SyncSettings};
 
 use diesel_migrations::{find_migrations_directory, mark_migrations_in_directory};
 
-
-#[cfg(feature = "postgres")]
 pub async fn setup(db_settings: &DatabaseSettings) {
+    match db_settings.database_type {
+        ConnectionType::Pg => setup_pg(db_settings).await,
+        ConnectionType::Sqlite => setup_sqlite(db_settings).await,
+    }
+}
+
+async fn setup_pg(db_settings: &DatabaseSettings) {
     use diesel::{
         r2d2::{ConnectionManager, Pool},
         PgConnection, RunQueryDsl,
@@ -48,8 +55,7 @@ pub async fn setup(db_settings: &DatabaseSettings) {
     }
 }
 
-#[cfg(feature = "sqlite")]
-pub async fn setup(db_settings: &DatabaseSettings) {
+async fn setup_sqlite(db_settings: &DatabaseSettings) {
     use diesel::{Connection, SqliteConnection};
     use std::fs;
 
@@ -75,7 +81,7 @@ pub async fn setup(db_settings: &DatabaseSettings) {
 
 // The following settings work for PG and Sqlite (username, password, host and port are
 // ignored for the later)
-pub fn get_test_settings(db_name: &str) -> Settings {
+pub fn get_test_settings(db_name: &str, database_type: ConnectionType) -> Settings {
     Settings {
         server: ServerSettings {
             host: "localhost".to_string(),
@@ -87,6 +93,7 @@ pub fn get_test_settings(db_name: &str) -> Settings {
             port: 5432,
             host: "localhost".to_string(),
             database_name: db_name.to_owned(),
+            database_type,
         },
         sync: SyncSettings {
             username: "postgres".to_string(),

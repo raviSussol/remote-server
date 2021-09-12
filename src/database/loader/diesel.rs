@@ -1,34 +1,13 @@
 use crate::{
-    database::{
-        loader::{
-            ItemLineLoader, ItemLoader, NameLoader, RequisitionLineLoader, RequisitionLoader,
-            StoreLoader, TransactLineLoader, TransactLoader, UserAccountLoader,
-        },
-        repository::{
-            ItemLineRepository, ItemRepository, NameRepository, RequisitionLineRepository,
-            RequisitionRepository, StoreRepository, TransactLineRepository, TransactRepository,
-            UserAccountRepository,
-        },
-    },
+    database::{loader::*, repository::*},
     server::data::LoaderMap,
     util::settings::Settings,
 };
 
 use async_graphql::dataloader::DataLoader;
 
-use diesel::r2d2::{ConnectionManager, Pool};
-
-#[cfg(feature = "postgres")]
-use diesel::PgConnection as DBBackendConnection;
-
-#[cfg(feature = "sqlite")]
-use diesel::SqliteConnection as DBBackendConnection;
-
 pub async fn get_loaders(settings: &Settings) -> LoaderMap {
-    let connection_manager =
-        ConnectionManager::<DBBackendConnection>::new(&settings.database.connection_string());
-    let pool = Pool::new(connection_manager).expect("Failed to connect to database");
-
+    let pool = DbConnectionPool::new(settings);
     let mut loaders: LoaderMap = LoaderMap::new();
 
     let item_repository = ItemRepository::new(pool.clone());

@@ -1,22 +1,20 @@
-use super::DBBackendConnection;
-
 use crate::database::{
-    repository::{repository::get_connection, RepositoryError},
-    schema::UserAccountRow,
+    repository::{
+        macros::{execute_pool, first_pool, load_pool},
+        RepositoryError,
+    },
+    schema::{diesel_schema::user_account::dsl::*, UserAccountRow},
 };
+use diesel::prelude::*;
 
-use diesel::{
-    prelude::*,
-    r2d2::{ConnectionManager, Pool},
-};
+use super::DbConnectionPool;
 
-#[derive(Clone)]
 pub struct UserAccountRepository {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pool: DbConnectionPool,
 }
 
 impl UserAccountRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> UserAccountRepository {
+    pub fn new(pool: DbConnectionPool) -> UserAccountRepository {
         UserAccountRepository { pool }
     }
 
@@ -24,11 +22,10 @@ impl UserAccountRepository {
         &self,
         user_account_row: &UserAccountRow,
     ) -> Result<(), RepositoryError> {
-        use crate::database::schema::diesel_schema::user_account::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        diesel::insert_into(user_account)
-            .values(user_account_row)
-            .execute(&connection)?;
+        execute_pool!(
+            self.pool,
+            diesel::insert_into(user_account).values(user_account_row)
+        )?;
         Ok(())
     }
 
@@ -36,19 +33,13 @@ impl UserAccountRepository {
         &self,
         account_id: &str,
     ) -> Result<UserAccountRow, RepositoryError> {
-        use crate::database::schema::diesel_schema::user_account::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = user_account.filter(id.eq(account_id)).first(&connection)?;
-        Ok(result)
+        first_pool!(self.pool, user_account.filter(id.eq(account_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<UserAccountRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::user_account::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = user_account.filter(id.eq_any(ids)).load(&connection)?;
-        Ok(result)
+        load_pool!(self.pool, user_account.filter(id.eq_any(ids)))
     }
 }

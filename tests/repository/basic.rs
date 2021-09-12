@@ -1,18 +1,7 @@
 #[cfg(test)]
 mod repository_basic_test {
 
-    use remote_server::database::{
-        repository::{
-            repository::get_repositories, CustomerInvoiceRepository, ItemLineRepository,
-            ItemRepository, NameRepository, RequisitionLineRepository, RequisitionRepository,
-            StoreRepository, TransactLineRepository, TransactRepository, UserAccountRepository,
-        },
-        schema::{
-            ItemLineRow, ItemRow, NameRow, RequisitionLineRow, RequisitionRow, RequisitionRowType,
-            StoreRow, TransactLineRow, TransactLineRowType, TransactRow, TransactRowType,
-            UserAccountRow,
-        },
-    };
+    use remote_server::database::{repository::*, schema::*};
 
     use remote_server::util::test_db;
 
@@ -240,7 +229,10 @@ mod repository_basic_test {
 
     #[actix_rt::test]
     async fn simple_repository_tests() {
-        let settings = test_db::get_test_settings("omsupply-database-simple-repository-test");
+        let settings = test_db::get_test_settings(
+            "omsupply-database-simple-repository-test",
+            ConnectionType::Sqlite,
+        );
         // Initialise a new test database.
         test_db::setup(&settings.database).await;
         let repos = get_repositories(&settings).await;

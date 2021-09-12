@@ -5,6 +5,8 @@ use std::{
     io::Error as IoError,
 };
 
+use crate::database::repository::ConnectionType;
+
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub server: ServerSettings,
@@ -40,33 +42,28 @@ pub struct DatabaseSettings {
     pub port: u16,
     pub host: String,
     pub database_name: String,
+    pub database_type: ConnectionType,
 }
 
-#[cfg(not(feature = "sqlite"))]
 impl DatabaseSettings {
     pub fn connection_string(&self) -> String {
-        format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username, self.password, self.host, self.port, self.database_name
-        )
+        match self.database_type {
+            ConnectionType::Pg => format!(
+                "postgres://{}:{}@{}:{}/{}",
+                self.username, self.password, self.host, self.port, self.database_name
+            ),
+            ConnectionType::Sqlite => format!("{}.sqlite", self.database_name),
+        }
     }
 
     pub fn connection_string_without_db(&self) -> String {
-        format!(
-            "postgres://{}:{}@{}:{}",
-            self.username, self.password, self.host, self.port
-        )
-    }
-}
-
-#[cfg(feature = "sqlite")]
-impl DatabaseSettings {
-    pub fn connection_string(&self) -> String {
-        format!("{}.sqlite", self.database_name)
-    }
-
-    pub fn connection_string_without_db(&self) -> String {
-        return self.connection_string();
+        match self.database_type {
+            ConnectionType::Pg => format!(
+                "postgres://{}:{}@{}:{}",
+                self.username, self.password, self.host, self.port
+            ),
+            ConnectionType::Sqlite => format!("{}.sqlite", self.database_name),
+        }
     }
 }
 

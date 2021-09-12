@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Clone, Error, Debug)]
+#[derive(Error, Clone, Debug)]
 pub enum RepositoryError {
     /// Row not found but expected at least one row
     #[error("row not found but expected at least one row")]
@@ -8,6 +8,12 @@ pub enum RepositoryError {
     /// Row already exists
     #[error("row already exists")]
     UniqueViolation,
+    // Connection doesn't exist
+    #[error("connection does not exist")]
+    ConnectionDoesntExist(ConnectionType),
+    // Other connection error
+    #[error("r2d2 connection error")]
+    OtherConnectionError(String),
     /// Foreign key constraint is violated
     #[error("foreign key constraint is violated")]
     ForeignKeyViolation,
@@ -16,16 +22,5 @@ pub enum RepositoryError {
     DBError { msg: String },
 }
 
-#[cfg_attr(any(feature = "sqlite", feature = "postgres"), path = "diesel/mod.rs")]
-#[cfg_attr(
-    not(any(feature = "sqlite", feature = "postgres")),
-    path = "mock/mod.rs"
-)]
-pub mod repository;
-
-pub use repository::{
-    get_repositories, CustomerInvoiceRepository, IntegrationRecord, ItemLineRepository,
-    ItemRepository, NameRepository, RequisitionLineRepository, RequisitionRepository,
-    StoreRepository, SyncRepository, TransactLineRepository, TransactRepository,
-    UserAccountRepository,
-};
+pub mod diesel;
+pub use self::diesel::*;

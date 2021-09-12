@@ -1,48 +1,37 @@
-use super::DBBackendConnection;
-
 use crate::database::{
-    repository::{repository::get_connection, RepositoryError},
-    schema::ItemLineRow,
+    repository::{
+        macros::{execute_pool, first_pool, load_pool},
+        DbConnectionPool, RepositoryError,
+    },
+    schema::{diesel_schema::item_line::dsl::*, ItemLineRow},
 };
-
-use diesel::{
-    prelude::*,
-    r2d2::{ConnectionManager, Pool},
-};
-
-#[derive(Clone)]
+use diesel::prelude::*;
 pub struct ItemLineRepository {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pool: DbConnectionPool,
 }
 
 impl ItemLineRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> Self {
+    pub fn new(pool: DbConnectionPool) -> Self {
         ItemLineRepository { pool }
     }
 
     pub async fn insert_one(&self, item_line_row: &ItemLineRow) -> Result<(), RepositoryError> {
-        use crate::database::schema::diesel_schema::item_line::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        diesel::insert_into(item_line)
-            .values(item_line_row)
-            .execute(&connection)?;
+        execute_pool!(
+            self.pool,
+            diesel::insert_into(item_line).values(item_line_row)
+        )?;
+
         Ok(())
     }
 
     pub async fn find_one_by_id(&self, item_line_id: &str) -> Result<ItemLineRow, RepositoryError> {
-        use crate::database::schema::diesel_schema::item_line::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = item_line.filter(id.eq(item_line_id)).first(&connection)?;
-        Ok(result)
+        first_pool!(self.pool, item_line.filter(id.eq(item_line_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<ItemLineRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::item_line::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = item_line.filter(id.eq_any(ids)).load(&connection)?;
-        Ok(result)
+        load_pool!(self.pool, item_line.filter(id.eq_any(ids)))
     }
 }

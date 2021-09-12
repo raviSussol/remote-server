@@ -1,59 +1,48 @@
-use super::DBBackendConnection;
-
 use crate::database::{
-    repository::{repository::get_connection, RepositoryError},
-    schema::{TransactRow, TransactRowType},
+    repository::{
+        macros::{execute_pool, first_pool, get_results_pool, load_pool},
+        DbConnectionPool, RepositoryError,
+    },
+    schema::{diesel_schema::transact::dsl::*, TransactRow, TransactRowType},
 };
 
-use diesel::{
-    prelude::*,
-    r2d2::{ConnectionManager, Pool},
-};
+use diesel::prelude::*;
 
-#[derive(Clone)]
 pub struct TransactRepository {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pool: DbConnectionPool,
 }
 
 impl TransactRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> TransactRepository {
+    pub fn new(pool: DbConnectionPool) -> TransactRepository {
         TransactRepository { pool }
     }
 
     pub async fn insert_one(&self, transact_row: &TransactRow) -> Result<(), RepositoryError> {
-        use crate::database::schema::diesel_schema::transact::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        diesel::insert_into(transact)
-            .values(transact_row)
-            .execute(&connection)?;
+        execute_pool!(
+            self.pool,
+            diesel::insert_into(transact).values(transact_row)
+        )?;
         Ok(())
     }
 
     pub async fn find_one_by_id(&self, transact_id: &str) -> Result<TransactRow, RepositoryError> {
-        use crate::database::schema::diesel_schema::transact::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = transact.filter(id.eq(transact_id)).first(&connection);
-        result.map_err(|err| RepositoryError::from(err))
+        first_pool!(self.pool, transact.filter(id.eq(transact_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::transact::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = transact.filter(id.eq_any(ids)).load(&connection)?;
-        Ok(result)
+        load_pool!(self.pool, transact.filter(id.eq_any(ids)))
     }
 }
 
-#[derive(Clone)]
 pub struct CustomerInvoiceRepository {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pool: DbConnectionPool,
 }
 
 impl CustomerInvoiceRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> CustomerInvoiceRepository {
+    pub fn new(pool: DbConnectionPool) -> CustomerInvoiceRepository {
         CustomerInvoiceRepository { pool }
     }
 
@@ -61,31 +50,27 @@ impl CustomerInvoiceRepository {
         &self,
         name: &str,
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::transact::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = transact
-            .filter(
+        get_results_pool!(
+            self.pool,
+            transact.filter(
                 type_of
                     .eq(TransactRowType::CustomerInvoice)
-                    .and(name_id.eq(name)),
+                    .and(name_id.eq(name))
             )
-            .get_results(&connection)?;
-        Ok(result)
+        )
     }
 
     pub async fn find_many_by_store_id(
         &self,
         store: &str,
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::transact::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = transact
-            .filter(
+        get_results_pool!(
+            self.pool,
+            transact.filter(
                 type_of
                     .eq(TransactRowType::CustomerInvoice)
                     .and(store_id.eq(store)),
             )
-            .get_results(&connection)?;
-        Ok(result)
+        )
     }
 }

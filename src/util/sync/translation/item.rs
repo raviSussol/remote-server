@@ -101,7 +101,7 @@ impl LegacyItemRow {
 #[cfg(test)]
 mod tests {
     use crate::{
-        database::repository::{repository::get_repositories, ItemRepository},
+        database::repository::{get_repositories, ConnectionType, ItemRepository},
         server::data::RepositoryRegistry,
         util::{
             sync::translation::{import_sync_records, SyncRecord, SyncType},
@@ -111,7 +111,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_item_translation() {
-        let settings = test_db::get_test_settings("omsupply-database-item-translation");
+        let settings = test_db::get_test_settings(
+            "omsupply-database-item-translation",
+            ConnectionType::Sqlite,
+        );
         test_db::setup(&settings.database).await;
         let repositories = get_repositories(&settings).await;
         let registry = RepositoryRegistry { repositories };

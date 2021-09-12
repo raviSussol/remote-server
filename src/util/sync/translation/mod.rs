@@ -2,9 +2,7 @@ mod item;
 mod name;
 
 use crate::{
-    database::repository::{
-        repository::IntegrationUpsertRecord, IntegrationRecord, SyncRepository,
-    },
+    database::repository::{IntegrationRecord, IntegrationUpsertRecord, SyncRepository},
     server::data::RepositoryRegistry,
 };
 

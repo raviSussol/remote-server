@@ -1,14 +1,11 @@
-use super::{get_connection, DBBackendConnection, ItemRepository, NameRepository};
-
 use crate::database::{
-    repository::RepositoryError,
+    repository::{
+        macros::transaction, DbConnectionPool, ItemRepository, NameRepository, RepositoryError,
+    },
     schema::{ItemRow, NameRow},
 };
 
-use diesel::{
-    prelude::*,
-    r2d2::{ConnectionManager, Pool},
-};
+use diesel::prelude::*;
 
 pub enum IntegrationUpsertRecord {
     Name(NameRow),
@@ -19,13 +16,12 @@ pub struct IntegrationRecord {
     pub upserts: Vec<IntegrationUpsertRecord>,
 }
 
-#[derive(Clone)]
 pub struct SyncRepository {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pool: DbConnectionPool,
 }
 
 impl SyncRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> SyncRepository {
+    pub fn new(pool: DbConnectionPool) -> SyncRepository {
         SyncRepository { pool }
     }
 
@@ -33,8 +29,8 @@ impl SyncRepository {
         &self,
         integration_records: &IntegrationRecord,
     ) -> Result<(), RepositoryError> {
-        let connection = get_connection(&self.pool)?;
-        connection.transaction(|| {
+        let connection = self.pool.get_connection()?;
+        transaction!(&connection, || {
             for record in &integration_records.upserts {
                 match &record {
                     IntegrationUpsertRecord::Name(record) => {

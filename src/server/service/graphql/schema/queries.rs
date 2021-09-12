@@ -1,10 +1,5 @@
-use crate::database::repository::{
-    ItemLineRepository, ItemRepository, NameRepository, RequisitionRepository, StoreRepository,
-    TransactLineRepository, TransactRepository,
-};
-use crate::database::schema::{
-    ItemLineRow, ItemRow, NameRow, RequisitionRow, StoreRow, TransactLineRow, TransactRow,
-};
+use crate::database::repository::*;
+use crate::database::schema::*;
 use crate::server::service::graphql::schema::types::{
     Item, ItemLine, Name, Requisition, Store, Transact, TransactLine,
 };
