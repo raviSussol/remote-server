@@ -7,22 +7,10 @@ use serde::Deserialize;
 use crate::{database::repository::RepositoryError, util::settings::Settings};
 
 #[cfg(feature = "postgres")]
-pub use diesel::PgConnection;
+use diesel::PgConnection;
 
 #[cfg(feature = "sqlite")]
-pub type SqliteConnection = diesel::SqliteConnection;
-
-#[cfg(feature = "postgres")]
-type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
-
-#[cfg(feature = "sqlite")]
-type SqlitePooledConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
-
-#[cfg(feature = "postgres")]
-type PgPool = Pool<ConnectionManager<PgConnection>>;
-
-#[cfg(feature = "sqlite")]
-type SqlitePool = Pool<ConnectionManager<SqliteConnection>>;
+use diesel::SqliteConnection;
 
 // When we compile without postgres support or without sqlite support, ConnectionType and anything
 // touching it (which largely means just DbConnectionPool and DatabaseSettings.database_type) are
@@ -37,16 +25,16 @@ pub enum ConnectionType {
 #[derive(Clone)]
 pub enum DbConnectionPool {
     #[cfg(feature = "postgres")]
-    Pg(PgPool),
+    Pg(Pool<ConnectionManager<PgConnection>>),
     #[cfg(feature = "sqlite")]
-    Sqlite(SqlitePool),
+    Sqlite(Pool<ConnectionManager<SqliteConnection>>),
 }
 
 pub enum DbConnection {
     #[cfg(feature = "postgres")]
-    Pg(PgPooledConnection),
+    Pg(PooledConnection<ConnectionManager<PgConnection>>),
     #[cfg(feature = "sqlite")]
-    Sqlite(SqlitePooledConnection),
+    Sqlite(PooledConnection<ConnectionManager<SqliteConnection>>),
 }
 
 impl From<r2d2::Error> for RepositoryError {
@@ -76,14 +64,14 @@ impl DbConnectionPool {
         match settings.database.database_type {
             #[cfg(feature = "postgres")]
             ConnectionType::Pg => {
-                let manager = ConnectionManager::<PgConnection>::new(connection_string);
+                let manager = ConnectionManager::new(connection_string);
                 DbConnectionPool::Pg(Pool::new(manager).expect("Failed to connect to database"))
             }
             #[cfg(not(feature = "postgres"))]
             ConnectionType::Pg => panic!("not compiled with postgres support"),
             #[cfg(feature = "sqlite")]
             ConnectionType::Sqlite => {
-                let manager = ConnectionManager::<SqliteConnection>::new(connection_string);
+                let manager = ConnectionManager::new(connection_string);
                 DbConnectionPool::Sqlite(Pool::new(manager).expect("Failed to connect to database"))
             }
             #[cfg(not(feature = "sqlite"))]
