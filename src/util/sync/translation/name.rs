@@ -137,6 +137,7 @@ mod tests {
     };
 
     #[actix_rt::test]
+    #[cfg_attr(not(feature = "sqlite"), ignore)]
     async fn test_name_translation() {
         let settings = test_db::get_test_settings(
             "omsupply-database-name-translation",

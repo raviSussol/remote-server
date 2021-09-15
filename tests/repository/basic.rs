@@ -228,6 +228,7 @@ mod repository_basic_test {
     }
 
     #[actix_rt::test]
+    #[cfg_attr(not(feature = "sqlite"), ignore)]
     async fn simple_repository_tests() {
         let settings = test_db::get_test_settings(
             "omsupply-database-simple-repository-test",
