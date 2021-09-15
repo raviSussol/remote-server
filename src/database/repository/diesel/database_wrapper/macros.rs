@@ -9,12 +9,12 @@ macro_rules! database_operation_pool {
             #[cfg(feature = "sqlite")]
             #[allow(unused_variables)]
             $crate::database::repository::DbConnectionPool::Sqlite(pool) => $sqlite_query
-                .$operation(&*pool.get()?)
+                .$operation(&pool.get()?)
                 .map_err(RepositoryError::from),
             #[cfg(feature = "postgres")]
             #[allow(unused_variables)]
             $crate::database::repository::DbConnectionPool::Pg(pool) => $postgres_query
-                .$operation(&*pool.get()?)
+                .$operation(&pool.get()?)
                 .map_err(RepositoryError::from),
         }
     };
