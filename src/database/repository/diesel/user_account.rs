@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_pool, first_pool, load_pool},
+        macros::{execute, first, load},
         RepositoryError,
     },
     schema::{diesel_schema::user_account::dsl::*, UserAccountRow},
@@ -22,7 +22,7 @@ impl UserAccountRepository {
         &self,
         user_account_row: &UserAccountRow,
     ) -> Result<(), RepositoryError> {
-        execute_pool!(
+        execute!(
             self.pool,
             diesel::insert_into(user_account).values(user_account_row)
         )?;
@@ -33,13 +33,13 @@ impl UserAccountRepository {
         &self,
         account_id: &str,
     ) -> Result<UserAccountRow, RepositoryError> {
-        first_pool!(self.pool, user_account.filter(id.eq(account_id)))
+        first!(self.pool, user_account.filter(id.eq(account_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<UserAccountRow>, RepositoryError> {
-        load_pool!(self.pool, user_account.filter(id.eq_any(ids)))
+        load!(self.pool, user_account.filter(id.eq_any(ids)))
     }
 }

@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_pool, first_pool, get_results_pool, load_pool},
+        macros::{execute, first, get_results, load},
         RepositoryError,
     },
     schema::{diesel_schema::transact_line::dsl::*, TransactLineRow},
@@ -22,7 +22,7 @@ impl TransactLineRepository {
         &self,
         transact_line_row: &TransactLineRow,
     ) -> Result<(), RepositoryError> {
-        execute_pool!(
+        execute!(
             self.pool,
             diesel::insert_into(transact_line).values(transact_line_row)
         )?;
@@ -30,20 +30,20 @@ impl TransactLineRepository {
     }
 
     pub async fn find_one_by_id(&self, row_id: &str) -> Result<TransactLineRow, RepositoryError> {
-        first_pool!(self.pool, transact_line.filter(id.eq(row_id)))
+        first!(self.pool, transact_line.filter(id.eq(row_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<TransactLineRow>, RepositoryError> {
-        load_pool!(self.pool, transact_line.filter(id.eq_any(ids)))
+        load!(self.pool, transact_line.filter(id.eq_any(ids)))
     }
 
     pub async fn find_many_by_transact_id(
         &self,
         trans_id: &str,
     ) -> Result<Vec<TransactLineRow>, RepositoryError> {
-        get_results_pool!(self.pool, transact_line.filter(transact_id.eq(trans_id)))
+        get_results!(self.pool, transact_line.filter(transact_id.eq(trans_id)))
     }
 }

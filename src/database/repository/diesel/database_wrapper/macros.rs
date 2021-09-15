@@ -24,6 +24,7 @@ macro_rules! database_operation {
         )
     };
 }
+pub(crate) use database_operation;
 
 #[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/4609
 macro_rules! make_macro {
@@ -36,6 +37,7 @@ macro_rules! make_macro {
                 )
             };
         }
+        pub(crate) use $name;
     };
 }
 
@@ -43,10 +45,3 @@ make_macro!($, execute);
 make_macro!($, load);
 make_macro!($, first);
 make_macro!($, get_results);
-
-pub(crate) use database_operation;
-pub(crate) use execute as execute_connection;
-pub(crate) use execute as execute_pool;
-pub(crate) use first as first_pool;
-pub(crate) use get_results as get_results_pool;
-pub(crate) use load as load_pool;

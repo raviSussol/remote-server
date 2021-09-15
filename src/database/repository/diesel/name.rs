@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_connection, first_pool, load_pool},
+        macros::{execute, first, load},
         DbConnection, DbConnectionPool, RepositoryError,
     },
     schema::{diesel_schema::name_table::dsl::*, NameRow},
@@ -19,7 +19,7 @@ impl NameRepository {
         connection: &DbConnection,
         name_row: &NameRow,
     ) -> Result<(), RepositoryError> {
-        execute_connection!(connection, diesel::insert_into(name_table).values(name_row))?;
+        execute!(connection, diesel::insert_into(name_table).values(name_row))?;
         Ok(())
     }
 
@@ -27,7 +27,7 @@ impl NameRepository {
         connection: &DbConnection,
         name_row: &NameRow,
     ) -> Result<(), RepositoryError> {
-        execute_connection!(
+        execute!(
             connection,
             // Postgres
             diesel::insert_into(name_table)
@@ -48,10 +48,10 @@ impl NameRepository {
     }
 
     pub async fn find_one_by_id(&self, name_id: &str) -> Result<NameRow, RepositoryError> {
-        first_pool!(self.pool, name_table.filter(id.eq(name_id)))
+        first!(self.pool, name_table.filter(id.eq(name_id)))
     }
 
     pub async fn find_many_by_id(&self, ids: &[String]) -> Result<Vec<NameRow>, RepositoryError> {
-        load_pool!(self.pool, name_table.filter(id.eq_any(ids)))
+        load!(self.pool, name_table.filter(id.eq_any(ids)))
     }
 }

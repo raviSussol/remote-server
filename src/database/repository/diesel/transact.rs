@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_pool, first_pool, get_results_pool, load_pool},
+        macros::{execute, first, get_results, load},
         DbConnectionPool, RepositoryError,
     },
     schema::{diesel_schema::transact::dsl::*, TransactRow, TransactRowType},
@@ -18,7 +18,7 @@ impl TransactRepository {
     }
 
     pub async fn insert_one(&self, transact_row: &TransactRow) -> Result<(), RepositoryError> {
-        execute_pool!(
+        execute!(
             self.pool,
             diesel::insert_into(transact).values(transact_row)
         )?;
@@ -26,14 +26,14 @@ impl TransactRepository {
     }
 
     pub async fn find_one_by_id(&self, transact_id: &str) -> Result<TransactRow, RepositoryError> {
-        first_pool!(self.pool, transact.filter(id.eq(transact_id)))
+        first!(self.pool, transact.filter(id.eq(transact_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        load_pool!(self.pool, transact.filter(id.eq_any(ids)))
+        load!(self.pool, transact.filter(id.eq_any(ids)))
     }
 }
 
@@ -50,7 +50,7 @@ impl CustomerInvoiceRepository {
         &self,
         name: &str,
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        get_results_pool!(
+        get_results!(
             self.pool,
             transact.filter(
                 type_of
@@ -64,7 +64,7 @@ impl CustomerInvoiceRepository {
         &self,
         store: &str,
     ) -> Result<Vec<TransactRow>, RepositoryError> {
-        get_results_pool!(
+        get_results!(
             self.pool,
             transact.filter(
                 type_of

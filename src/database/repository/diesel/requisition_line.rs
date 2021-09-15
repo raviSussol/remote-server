@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_pool, first_pool, load_pool},
+        macros::{execute, first, load},
         DbConnectionPool, RepositoryError,
     },
     schema::{diesel_schema::requisition_line::dsl::*, RequisitionLineRow},
@@ -20,7 +20,7 @@ impl RequisitionLineRepository {
         &self,
         requisition_line_row: &RequisitionLineRow,
     ) -> Result<(), RepositoryError> {
-        execute_pool!(
+        execute!(
             self.pool,
             diesel::insert_into(requisition_line).values(requisition_line_row)
         )?;
@@ -31,21 +31,21 @@ impl RequisitionLineRepository {
         &self,
         row_id: &str,
     ) -> Result<RequisitionLineRow, RepositoryError> {
-        first_pool!(self.pool, requisition_line.filter(id.eq(row_id)))
+        first!(self.pool, requisition_line.filter(id.eq(row_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<RequisitionLineRow>, RepositoryError> {
-        load_pool!(self.pool, requisition_line.filter(id.eq_any(ids)))
+        load!(self.pool, requisition_line.filter(id.eq_any(ids)))
     }
 
     pub async fn find_many_by_requisition_id(
         &self,
         req_id: &str,
     ) -> Result<Vec<RequisitionLineRow>, RepositoryError> {
-        load_pool!(
+        load!(
             self.pool,
             requisition_line.filter(requisition_id.eq(req_id))
         )

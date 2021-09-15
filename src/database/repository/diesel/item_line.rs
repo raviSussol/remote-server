@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_pool, first_pool, load_pool},
+        macros::{execute, first, load},
         DbConnectionPool, RepositoryError,
     },
     schema::{diesel_schema::item_line::dsl::*, ItemLineRow},
@@ -16,7 +16,7 @@ impl ItemLineRepository {
     }
 
     pub async fn insert_one(&self, item_line_row: &ItemLineRow) -> Result<(), RepositoryError> {
-        execute_pool!(
+        execute!(
             self.pool,
             diesel::insert_into(item_line).values(item_line_row)
         )?;
@@ -25,13 +25,13 @@ impl ItemLineRepository {
     }
 
     pub async fn find_one_by_id(&self, item_line_id: &str) -> Result<ItemLineRow, RepositoryError> {
-        first_pool!(self.pool, item_line.filter(id.eq(item_line_id)))
+        first!(self.pool, item_line.filter(id.eq(item_line_id)))
     }
 
     pub async fn find_many_by_id(
         &self,
         ids: &[String],
     ) -> Result<Vec<ItemLineRow>, RepositoryError> {
-        load_pool!(self.pool, item_line.filter(id.eq_any(ids)))
+        load!(self.pool, item_line.filter(id.eq_any(ids)))
     }
 }

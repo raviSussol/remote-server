@@ -1,6 +1,6 @@
 use crate::database::{
     repository::{
-        macros::{execute_connection, first_pool, load_pool},
+        macros::{execute, first, load},
         DbConnection, DbConnectionPool, RepositoryError,
     },
     schema::{diesel_schema::item::dsl::*, ItemRow},
@@ -20,7 +20,7 @@ impl ItemRepository {
         connection: &DbConnection,
         item_row: &ItemRow,
     ) -> Result<(), RepositoryError> {
-        execute_connection!(
+        execute!(
             connection,
             // Postgres
             diesel::insert_into(item)
@@ -39,7 +39,7 @@ impl ItemRepository {
         connection: &DbConnection,
         item_row: &ItemRow,
     ) -> Result<(), RepositoryError> {
-        execute_connection!(connection, diesel::insert_into(item).values(item_row))?;
+        execute!(connection, diesel::insert_into(item).values(item_row))?;
         Ok(())
     }
 
@@ -48,14 +48,14 @@ impl ItemRepository {
     }
 
     pub async fn find_all(&self) -> Result<Vec<ItemRow>, RepositoryError> {
-        load_pool!(self.pool, item)
+        load!(self.pool, item)
     }
 
     pub async fn find_one_by_id(&self, item_id: &str) -> Result<ItemRow, RepositoryError> {
-        first_pool!(self.pool, item.filter(id.eq(item_id)))
+        first!(self.pool, item.filter(id.eq(item_id)))
     }
 
     pub async fn find_many_by_id(&self, ids: &[String]) -> Result<Vec<ItemRow>, RepositoryError> {
-        load_pool!(self.pool, item.filter(id.eq_any(ids)))
+        load!(self.pool, item.filter(id.eq_any(ids)))
     }
 }
