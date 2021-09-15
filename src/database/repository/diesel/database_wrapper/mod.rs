@@ -5,50 +5,46 @@ use serde::Deserialize;
 
 use crate::{database::repository::RepositoryError, util::settings::Settings};
 
-// Use sqlite instead of postgres and postgres instead of sqlite
 #[cfg(feature = "postgres")]
-pub type PgConnection = diesel::PgConnection;
-#[cfg(not(feature = "postgres"))]
-pub type PgConnection = std::marker::PhantomData<bool>;
+pub use diesel::PgConnection;
 
 #[cfg(feature = "sqlite")]
 pub type SqliteConnection = diesel::SqliteConnection;
-#[cfg(not(feature = "sqlite"))]
-pub type SqliteConnection = std::marker::PhantomData<bool>;
 
 #[cfg(feature = "postgres")]
 type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
-#[cfg(not(feature = "postgres"))]
-type PgPooledConnection = std::marker::PhantomData<bool>;
 
 #[cfg(feature = "sqlite")]
 type SqlitePooledConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
-#[cfg(not(feature = "sqlite"))]
-type SqlitePooledConnection = std::marker::PhantomData<bool>;
 
 #[cfg(feature = "postgres")]
 type PgPool = Pool<ConnectionManager<PgConnection>>;
-#[cfg(not(feature = "postgres"))]
-type PgPool = std::marker::PhantomData<bool>;
 
 #[cfg(feature = "sqlite")]
 type SqlitePool = Pool<ConnectionManager<SqliteConnection>>;
-#[cfg(not(feature = "sqlite"))]
-type SqlitePool = std::marker::PhantomData<bool>;
 
+// When we compile without postgres support or without sqlite support, ConnectionType and anything
+// touching it (which largely means just DbConnectionPool and DatabaseSettings.database_type) are
+// the ONLY places where the disabled database should appear in the compiled result. Everything
+// else should be cfg-gated out of existence, so that we can guarantee proper access.
 #[derive(Debug, Clone, Deserialize)]
 pub enum ConnectionType {
     Pg,
     Sqlite,
 }
 
+#[derive(Clone)]
 pub enum DbConnectionPool {
+    #[cfg(feature = "postgres")]
     Pg(PgPool),
+    #[cfg(feature = "sqlite")]
     Sqlite(SqlitePool),
 }
 
 pub enum DbConnection {
+    #[cfg(feature = "postgres")]
     Pg(PgPooledConnection),
+    #[cfg(feature = "sqlite")]
     Sqlite(SqlitePooledConnection),
 }
 
@@ -60,77 +56,31 @@ impl From<r2d2::Error> for RepositoryError {
 
 impl DbConnectionPool {
     pub fn new(settings: &Settings) -> DbConnectionPool {
+        let connection_string = &settings.database.connection_string();
         match settings.database.database_type {
-            ConnectionType::Pg => DbConnectionPool::new_pg(&settings.database.connection_string()),
-            ConnectionType::Sqlite => {
-                DbConnectionPool::new_sqlite(&settings.database.connection_string())
+            #[cfg(feature = "postgres")]
+            ConnectionType::Pg => {
+                let manager = ConnectionManager::<PgConnection>::new(connection_string);
+                DbConnectionPool::Pg(Pool::new(manager).expect("Failed to connect to database"))
             }
+            #[cfg(not(feature = "postgres"))]
+            ConnectionType::Pg => panic!("not compiled with postgres support"),
+            #[cfg(feature = "sqlite")]
+            ConnectionType::Sqlite => {
+                let manager = ConnectionManager::<SqliteConnection>::new(connection_string);
+                DbConnectionPool::Sqlite(Pool::new(manager).expect("Failed to connect to database"))
+            }
+            #[cfg(not(feature = "sqlite"))]
+            ConnectionType::Sqlite => panic!("not compiled with sqlite support"),
         }
-    }
-
-    #[cfg(feature = "postgres")]
-    pub fn new_pg(connection_string: &str) -> DbConnectionPool {
-        let connection_manager = ConnectionManager::<PgConnection>::new(connection_string);
-        DbConnectionPool::Pg(Pool::new(connection_manager).expect("Failed to connect to database"))
-    }
-
-    #[cfg(not(feature = "postgres"))]
-    pub fn new_pg(_: &str) -> DbConnectionPool {
-        panic!("postgres flag is not enabled")
-    }
-
-    #[cfg(feature = "sqlite")]
-    pub fn new_sqlite(connection_string: &str) -> DbConnectionPool {
-        let connection_manager = ConnectionManager::<SqliteConnection>::new(connection_string);
-        DbConnectionPool::Sqlite(
-            Pool::new(connection_manager).expect("Failed to connect to database"),
-        )
-    }
-
-    #[cfg(not(feature = "sqlite"))]
-    pub fn new_sqlite(_: &str) -> DbConnectionPool {
-        panic!("sqlite flag is not enabled")
-    }
-
-    #[cfg(feature = "postgres")]
-    pub fn get_pg_connection(&self) -> Result<PgPooledConnection, RepositoryError> {
-        match self {
-            DbConnectionPool::Pg(pool) => Ok(pool.get()?),
-            _ => Err(RepositoryError::ConnectionDoesntExist(ConnectionType::Pg)),
-        }
-    }
-
-    #[cfg(not(feature = "postgres"))]
-    pub fn get_pg_connection(&self) -> Result<PgPooledConnection, RepositoryError> {
-        panic!("postgres flag is not enabled")
-    }
-
-    #[cfg(feature = "sqlite")]
-    pub fn get_sqlite_connection(&self) -> Result<SqlitePooledConnection, RepositoryError> {
-        match self {
-            DbConnectionPool::Sqlite(pool) => Ok(pool.get()?),
-            _ => Err(RepositoryError::ConnectionDoesntExist(
-                ConnectionType::Sqlite,
-            )),
-        }
-    }
-
-    #[cfg(not(feature = "sqlite"))]
-    pub fn get_sqlite_connection(&self) -> Result<SqlitePooledConnection, RepositoryError> {
-        panic!("sqlite flag is not enabled")
     }
 
     pub fn get_connection(&self) -> Result<DbConnection, RepositoryError> {
         match self {
-            DbConnectionPool::Pg(_) => Ok(DbConnection::Pg(self.get_pg_connection()?)),
-            DbConnectionPool::Sqlite(_) => Ok(DbConnection::Sqlite(self.get_sqlite_connection()?)),
-        }
-    }
-
-    pub fn clone(&self) -> DbConnectionPool {
-        match self {
-            DbConnectionPool::Pg(pool) => DbConnectionPool::Pg(pool.clone()),
-            DbConnectionPool::Sqlite(pool) => DbConnectionPool::Sqlite(pool.clone()),
+            #[cfg(feature = "postgres")]
+            DbConnectionPool::Pg(pool) => Ok(DbConnection::Pg(pool.get()?)),
+            #[cfg(feature = "sqlite")]
+            DbConnectionPool::Sqlite(pool) => Ok(DbConnection::Sqlite(pool.get()?)),
         }
     }
 }
