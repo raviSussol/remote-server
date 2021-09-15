@@ -1,3 +1,7 @@
+// FIXME(chris-morgan, 2021-09-15): don’t *have* dead code. But for now these warnings distract
+// from *real* warnings.
+#![allow(dead_code)]
+
 mod connection;
 mod credentials;
 mod queue;
