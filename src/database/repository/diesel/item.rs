@@ -22,14 +22,12 @@ impl ItemRepository {
     ) -> Result<(), RepositoryError> {
         execute!(
             connection,
-            // Postgres
-            diesel::insert_into(item)
+            postgres => diesel::insert_into(item)
                 .values(item_row)
                 .on_conflict(id)
                 .do_update()
                 .set(item_row),
-            // Sqlite
-            diesel::replace_into(item).values(item_row)
+            sqlite => diesel::replace_into(item).values(item_row),
         )?;
 
         Ok(())

@@ -1,13 +1,19 @@
 macro_rules! database_operation {
-    ($connectionish:expr, $query:expr, $operation:ident) => {
+    ($connectionish:expr, $query:expr, $(,)? $operation:ident) => {
         $crate::database::repository::macros::database_operation!(
             $connectionish,
-            $query,
-            $query,
+            postgres => $query,
+            sqlite => $query,
             $operation
         )
     };
-    ($connectionish:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
+    (
+        $connectionish:expr,
+        postgres => $postgres_query:expr,
+        sqlite => $sqlite_query:expr,
+        $(,)?
+        $operation:ident
+    ) => {
         $connectionish.with_connection(
             #[cfg(feature = "sqlite")]
             |connection| {

@@ -29,14 +29,12 @@ impl NameRepository {
     ) -> Result<(), RepositoryError> {
         execute!(
             connection,
-            // Postgres
-            diesel::insert_into(name_table)
+            postgres => diesel::insert_into(name_table)
                 .values(name_row)
                 .on_conflict(id)
                 .do_update()
                 .set(name_row),
-            // Sqlite
-            diesel::replace_into(name_table).values(name_row)
+            sqlite => diesel::replace_into(name_table).values(name_row),
         )?;
 
         Ok(())
