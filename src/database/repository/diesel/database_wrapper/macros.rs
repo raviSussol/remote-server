@@ -1,4 +1,9 @@
 macro_rules! database_operation_pool {
+    ($pool:expr, $query:expr, $operation:ident) => {
+        $crate::database::repository::macros::database_operation_pool!(
+            $pool, $query, $query, $operation
+        )
+    };
     ($pool:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
         match &$pool {
             #[cfg(feature = "sqlite")]
@@ -16,6 +21,14 @@ macro_rules! database_operation_pool {
 }
 
 macro_rules! database_operation_connection {
+    ($connection:expr, $query:expr, $operation:ident) => {
+        $crate::database::repository::macros::database_operation_connection!(
+            $connection,
+            $query,
+            $query,
+            $operation
+        )
+    };
     ($connection:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
         match $connection {
             #[cfg(feature = "sqlite")]
@@ -32,100 +45,25 @@ macro_rules! database_operation_connection {
     };
 }
 
-macro_rules! execute_connection {
-    ($connection:expr, $query:expr) => {
-        $crate::database::repository::macros::database_operation_connection!(
-            $connection,
-            $query,
-            $query,
-            execute
-        )
-    };
-    ($connection:expr, $postgres_query:expr, $sqlite_query:expr) => {
-        $crate::database::repository::macros::database_operation_connection!(
-            $connection,
-            $postgres_query,
-            $sqlite_query,
-            execute
-        )
+#[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/4609
+macro_rules! make_macro {
+    ($DOLLAR:tt, $macro_name:ident, $call_macro:ident, $arg:ident) => {
+        macro_rules! $macro_name {
+            ($DOLLAR($args:tt)*) => {
+                $crate::database::repository::macros::$call_macro!(
+                    $DOLLAR($args)*,
+                    $arg
+                )
+            };
+        }
     };
 }
 
-macro_rules! execute_pool {
-    ($connection:expr, $query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $query,
-            $query,
-            execute
-        )
-    };
-    ($connection:expr, $postgres_query:expr,$sqlite_query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $postgres_query,
-            $sqlite_query,
-            execute
-        )
-    };
-}
-
-macro_rules! load_pool {
-    ($connection:expr, $query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $query,
-            $query,
-            load
-        )
-    };
-    ($connection:expr, $postgres_query:expr,$sqlite_query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $postgres_query,
-            $sqlite_query,
-            load
-        )
-    };
-}
-
-macro_rules! first_pool {
-    ($connection:expr, $query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $query,
-            $query,
-            first
-        )
-    };
-    ($connection:expr, $postgres_query:expr,$sqlite_query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $postgres_query,
-            $sqlite_query,
-            first
-        )
-    };
-}
-
-macro_rules! get_results_pool {
-    ($connection:expr, $query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $query,
-            $query,
-            get_results
-        )
-    };
-    ($connection:expr, $postgres_query:expr,$sqlite_query:expr) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $connection,
-            $postgres_query,
-            $sqlite_query,
-            get_results
-        )
-    };
-}
+make_macro!($, execute_connection, database_operation_connection, execute);
+make_macro!($, execute_pool, database_operation_pool, execute);
+make_macro!($, load_pool, database_operation_pool, load);
+make_macro!($, first_pool, database_operation_pool, first);
+make_macro!($, get_results_pool, database_operation_pool, load);
 
 pub(crate) use database_operation_connection;
 pub(crate) use database_operation_pool;
