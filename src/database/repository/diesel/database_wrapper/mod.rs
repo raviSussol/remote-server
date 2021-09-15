@@ -56,6 +56,23 @@ impl DbConnection {
             DbConnection::Pg(connection) => connection.transaction(f),
         }
     }
+
+    pub fn with_connection<
+        T,
+        #[cfg(feature = "sqlite")] E1: Into<RepositoryError>,
+        #[cfg(feature = "postgres")] E2: Into<RepositoryError>,
+    >(
+        &self,
+        #[cfg(feature = "sqlite")] sqlite_function: impl FnOnce(&SqliteConnection) -> Result<T, E1>,
+        #[cfg(feature = "postgres")] postgres_function: impl FnOnce(&PgConnection) -> Result<T, E2>,
+    ) -> Result<T, RepositoryError> {
+        match self {
+            #[cfg(feature = "sqlite")]
+            DbConnection::Sqlite(connection) => sqlite_function(&connection).map_err(Into::into),
+            #[cfg(feature = "postgres")]
+            DbConnection::Pg(connection) => postgres_function(&connection).map_err(Into::into),
+        }
+    }
 }
 
 impl DbConnectionPool {
@@ -85,6 +102,33 @@ impl DbConnectionPool {
             DbConnectionPool::Pg(pool) => Ok(DbConnection::Pg(pool.get()?)),
             #[cfg(feature = "sqlite")]
             DbConnectionPool::Sqlite(pool) => Ok(DbConnection::Sqlite(pool.get()?)),
+        }
+    }
+
+    pub fn with_connection<
+        T,
+        #[cfg(feature = "sqlite")] E1: Into<RepositoryError>,
+        #[cfg(feature = "postgres")] E2: Into<RepositoryError>,
+    >(
+        &self,
+        #[cfg(feature = "sqlite")] sqlite_function: impl FnOnce(
+            &PooledConnection<ConnectionManager<SqliteConnection>>,
+        ) -> Result<T, E1>,
+        #[cfg(feature = "postgres")] postgres_function: impl FnOnce(
+            &PooledConnection<ConnectionManager<PgConnection>>,
+        ) -> Result<T, E2>,
+    ) -> Result<T, RepositoryError> {
+        match self {
+            #[cfg(feature = "sqlite")]
+            DbConnectionPool::Sqlite(pool) => pool
+                .get()
+                .map_err(RepositoryError::from)
+                .and_then(|connection| sqlite_function(&connection).map_err(Into::into)),
+            #[cfg(feature = "postgres")]
+            DbConnectionPool::Pg(pool) => pool
+                .get()
+                .map_err(RepositoryError::from)
+                .and_then(|connection| postgres_function(&connection).map_err(Into::into)),
         }
     }
 }

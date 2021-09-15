@@ -1,74 +1,52 @@
-macro_rules! database_operation_pool {
-    ($pool:expr, $query:expr, $operation:ident) => {
-        $crate::database::repository::macros::database_operation_pool!(
-            $pool, $query, $query, $operation
-        )
-    };
-    ($pool:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
-        match &$pool {
-            #[cfg(feature = "sqlite")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnectionPool::Sqlite(pool) => $sqlite_query
-                .$operation(&pool.get()?)
-                .map_err(RepositoryError::from),
-            #[cfg(feature = "postgres")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnectionPool::Pg(pool) => $postgres_query
-                .$operation(&pool.get()?)
-                .map_err(RepositoryError::from),
-        }
-    };
-}
-
-macro_rules! database_operation_connection {
-    ($connection:expr, $query:expr, $operation:ident) => {
-        $crate::database::repository::macros::database_operation_connection!(
-            $connection,
+macro_rules! database_operation {
+    ($connectionish:expr, $query:expr, $operation:ident) => {
+        $crate::database::repository::macros::database_operation!(
+            $connectionish,
             $query,
             $query,
             $operation
         )
     };
-    ($connection:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
-        match $connection {
+    ($connectionish:expr, $postgres_query:expr, $sqlite_query:expr, $operation:ident) => {
+        $connectionish.with_connection(
             #[cfg(feature = "sqlite")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnection::Sqlite(connection) => $sqlite_query
-                .$operation(&*connection)
-                .map_err(RepositoryError::from),
+            |connection| {
+                $sqlite_query
+                    .$operation(connection)
+                    .map_err(RepositoryError::from)
+            },
             #[cfg(feature = "postgres")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnection::Pg(connection) => $postgres_query
-                .$operation(&*connection)
-                .map_err(RepositoryError::from),
-        }
+            |connection| {
+                $postgres_query
+                    .$operation(connection)
+                    .map_err(RepositoryError::from)
+            },
+        )
     };
 }
 
 #[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/4609
 macro_rules! make_macro {
-    ($DOLLAR:tt, $macro_name:ident, $call_macro:ident, $arg:ident) => {
-        macro_rules! $macro_name {
+    ($DOLLAR:tt, $name:ident) => {
+        macro_rules! $name {
             ($DOLLAR($args:tt)*) => {
-                $crate::database::repository::macros::$call_macro!(
+                $crate::database::repository::macros::database_operation!(
                     $DOLLAR($args)*,
-                    $arg
+                    $name
                 )
             };
         }
     };
 }
 
-make_macro!($, execute_connection, database_operation_connection, execute);
-make_macro!($, execute_pool, database_operation_pool, execute);
-make_macro!($, load_pool, database_operation_pool, load);
-make_macro!($, first_pool, database_operation_pool, first);
-make_macro!($, get_results_pool, database_operation_pool, load);
+make_macro!($, execute);
+make_macro!($, load);
+make_macro!($, first);
+make_macro!($, get_results);
 
-pub(crate) use database_operation_connection;
-pub(crate) use database_operation_pool;
-pub(crate) use execute_connection;
-pub(crate) use execute_pool;
-pub(crate) use first_pool;
-pub(crate) use get_results_pool;
-pub(crate) use load_pool;
+pub(crate) use database_operation;
+pub(crate) use execute as execute_connection;
+pub(crate) use execute as execute_pool;
+pub(crate) use first as first_pool;
+pub(crate) use get_results as get_results_pool;
+pub(crate) use load as load_pool;
