@@ -20,7 +20,7 @@ async-graphql = { version = "2.9.8", features = ["dataloader"] }
 async-graphql-actix-web = "2.9.8"
 async-trait = "0.1.16"
 diesel = { version = "1.4.7", default-features = false, features = ["r2d2", "numeric"] }
-diesel-derive-enum = { version = "1.1.1", default-features = false, optional = true }
+diesel-derive-enum = { version = "1.1.1", default-features = false }
 diesel_migrations = "1.4.0"
 libsqlite3-sys = { version = "0.22.2", features = ["bundled"], optional = true }
 r2d2 = "0.8.9"
