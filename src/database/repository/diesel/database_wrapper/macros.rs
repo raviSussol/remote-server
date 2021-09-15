@@ -127,23 +127,6 @@ macro_rules! get_results_pool {
     };
 }
 
-macro_rules! transaction {
-    ($connection:expr, $transaction_content:expr) => {
-        match $connection {
-            #[cfg(feature = "sqlite")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnection::Sqlite(connection) => {
-                connection.transaction($transaction_content)
-            }
-            #[cfg(feature = "postgres")]
-            #[allow(unused_variables)]
-            $crate::database::repository::DbConnection::Pg(connection) => {
-                connection.transaction($transaction_content)
-            }
-        }
-    };
-}
-
 pub(crate) use database_operation_connection;
 pub(crate) use database_operation_pool;
 pub(crate) use execute_connection;
@@ -151,4 +134,3 @@ pub(crate) use execute_pool;
 pub(crate) use first_pool;
 pub(crate) use get_results_pool;
 pub(crate) use load_pool;
-pub(crate) use transaction;

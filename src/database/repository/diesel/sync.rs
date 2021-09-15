@@ -1,11 +1,7 @@
 use crate::database::{
-    repository::{
-        macros::transaction, DbConnectionPool, ItemRepository, NameRepository, RepositoryError,
-    },
+    repository::{DbConnectionPool, ItemRepository, NameRepository, RepositoryError},
     schema::{ItemRow, NameRow},
 };
-
-use diesel::prelude::*;
 
 pub enum IntegrationUpsertRecord {
     Name(NameRow),
@@ -30,7 +26,7 @@ impl SyncRepository {
         integration_records: &IntegrationRecord,
     ) -> Result<(), RepositoryError> {
         let connection = self.pool.get_connection()?;
-        transaction!(&connection, || {
+        connection.transaction(|| {
             for record in &integration_records.upserts {
                 match &record {
                     IntegrationUpsertRecord::Name(record) => {

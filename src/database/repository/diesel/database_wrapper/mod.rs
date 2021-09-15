@@ -1,6 +1,7 @@
 pub mod macros;
 
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
+use diesel::{result::Error, Connection};
 use serde::Deserialize;
 
 use crate::{database::repository::RepositoryError, util::settings::Settings};
@@ -51,6 +52,21 @@ pub enum DbConnection {
 impl From<r2d2::Error> for RepositoryError {
     fn from(err: r2d2::Error) -> Self {
         RepositoryError::OtherConnectionError(err.to_string())
+    }
+}
+
+impl DbConnection {
+    pub fn transaction<T, E, F>(&self, f: F) -> Result<T, E>
+    where
+        F: FnOnce() -> Result<T, E>,
+        E: From<Error>,
+    {
+        match self {
+            #[cfg(feature = "sqlite")]
+            DbConnection::Sqlite(connection) => connection.transaction(f),
+            #[cfg(feature = "postgres")]
+            DbConnection::Pg(connection) => connection.transaction(f),
+        }
     }
 }
 
