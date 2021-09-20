@@ -1,4 +1,7 @@
-use super::{get_connection, DBBackendConnection};
+use core::time;
+use std::thread;
+
+use super::{get_connection, DBBackendConnection, IntegrationRecord, IntegrationUpsertRecord};
 use crate::{
     database::{
         repository::RepositoryError,
@@ -16,6 +19,7 @@ use crate::{
     },
 };
 
+use async_graphql::connection;
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool},
@@ -47,8 +51,21 @@ impl ItemQueryRepository {
         ItemQueryRepository { pool }
     }
 
-    pub fn count(&self) -> Result<i64, RepositoryError> {
+    pub fn count(&self, number: u32) -> Result<i64, RepositoryError> {
         let connection = get_connection(&self.pool)?;
+
+        let mut records = Vec::new();
+        for num in 1..number {
+            records.push(IntegrationUpsertRecord::Item(ItemRow {
+                id: "00000000-0000-0000-0000-000000000000".to_string(),
+                name: "00000000-0000-0000-0000-000000000000".to_string(),
+                code: "00000000-0000-0000-0000-000000000000".to_string(),
+            }))
+        }
+
+        let period = time::Duration::from_secs(60);
+        thread::sleep(period);
+
         Ok(item_dsl::item.count().get_result(&*connection)?)
     }
 

@@ -36,9 +36,9 @@ pub struct ItemList {
 
 #[Object]
 impl ItemList {
-    async fn total_count(&self, ctx: &Context<'_>) -> i64 {
+    async fn total_count(&self, ctx: &Context<'_>, number: u32) -> i64 {
         let repository = ctx.get_repository::<ItemQueryRepository>();
-        repository.count().unwrap()
+        repository.count(number).unwrap()
     }
 
     async fn nodes(&self, ctx: &Context<'_>) -> Vec<ItemQuery> {
