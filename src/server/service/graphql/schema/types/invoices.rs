@@ -47,6 +47,16 @@ impl From<InvoiceRowStatus> for InvoiceStatus {
     }
 }
 
+impl From<InvoiceStatus> for InvoiceRowStatus {
+    fn from(row: InvoiceStatus) -> InvoiceRowStatus {
+        match row {
+            InvoiceStatus::Draft => InvoiceRowStatus::Draft,
+            InvoiceStatus::Confirmed => InvoiceRowStatus::Confirmed,
+            InvoiceStatus::Finalised => InvoiceRowStatus::Finalised,
+        }
+    }
+}
+
 #[derive(SimpleObject, PartialEq, Debug)]
 #[graphql(complex)]
 #[graphql(name = "Invoice")]
