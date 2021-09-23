@@ -49,6 +49,12 @@ impl StoreRepository {
         Ok(())
     }
 
+    pub async fn all(&self) -> Result<Vec<StoreRow>, RepositoryError> {
+        use crate::database::schema::diesel_schema::store::dsl::*;
+        let connection = get_connection(&self.pool)?;
+        Ok(store.load(&connection)?)
+    }
+
     pub async fn find_one_by_id(&self, store_id: &str) -> Result<StoreRow, RepositoryError> {
         use crate::database::schema::diesel_schema::store::dsl::*;
         let connection = get_connection(&self.pool)?;
