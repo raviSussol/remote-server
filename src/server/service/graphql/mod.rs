@@ -9,7 +9,7 @@ use self::schema::Schema;
 use crate::server::data::{LoaderRegistry, RepositoryRegistry};
 
 // Sugar that helps make things neater and avoid errors that would only crop up at runtime.
-trait ContextExt {
+pub trait ContextExt {
     fn get_repository<T: anymap::any::Any + Send + Sync>(&self) -> &T;
     fn get_loader<T: anymap::any::Any + Send + Sync>(&self) -> &T;
 }
