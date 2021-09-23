@@ -1,8 +1,11 @@
-use super::DBBackendConnection;
+use super::{DBBackendConnection, DBConnection};
 
-use crate::database::{
-    repository::{repository::get_connection, RepositoryError},
-    schema::{InvoiceRow, InvoiceRowType},
+use crate::{
+    business::FullInvoice,
+    database::{
+        repository::{repository::get_connection, RepositoryError},
+        schema::InvoiceRow,
+    },
 };
 
 use diesel::{
@@ -28,11 +31,18 @@ impl InvoiceRepository {
         Ok(())
     }
 
-    pub async fn find_one_by_id(&self, invoice_id: &str) -> Result<InvoiceRow, RepositoryError> {
+    pub fn one(connection: &DBConnection, invoice_id: &str) -> Result<InvoiceRow, RepositoryError> {
         use crate::database::schema::diesel_schema::invoice::dsl::*;
+
+        invoice
+            .filter(id.eq(invoice_id))
+            .first(connection)
+            .map_err(RepositoryError::from)
+    }
+
+    pub async fn find_one_by_id(&self, invoice_id: &str) -> Result<InvoiceRow, RepositoryError> {
         let connection = get_connection(&self.pool)?;
-        let result = invoice.filter(id.eq(invoice_id)).first(&connection);
-        result.map_err(|err| RepositoryError::from(err))
+        InvoiceRepository::one(&connection, invoice_id)
     }
 
     pub async fn find_many_by_id(
@@ -46,44 +56,60 @@ impl InvoiceRepository {
     }
 }
 
-pub struct CustomerInvoiceRepository {
+pub struct FullInvoiceRepository {
     pool: Pool<ConnectionManager<DBBackendConnection>>,
 }
 
-impl CustomerInvoiceRepository {
-    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> CustomerInvoiceRepository {
-        CustomerInvoiceRepository { pool }
+impl From<FullInvoice> for InvoiceRow {
+    fn from(
+        FullInvoice {
+            id,
+            name_id,
+            store_id,
+            invoice_number,
+            r#type,
+            status,
+            comment,
+            their_reference,
+            entry_datetime,
+            confirm_datetime,
+            finalised_datetime,
+        }: FullInvoice,
+    ) -> Self {
+        InvoiceRow {
+            id,
+            name_id,
+            store_id,
+            invoice_number,
+            r#type,
+            status,
+            comment,
+            their_reference,
+            entry_datetime,
+            confirm_datetime,
+            finalised_datetime,
+        }
+    }
+}
+
+impl FullInvoiceRepository {
+    pub fn new(pool: Pool<ConnectionManager<DBBackendConnection>>) -> FullInvoiceRepository {
+        FullInvoiceRepository { pool }
     }
 
-    pub async fn find_many_by_name_id(
-        &self,
-        name: &str,
-    ) -> Result<Vec<InvoiceRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::invoice::dsl::*;
+    pub async fn insert(&self, invoice: FullInvoice) -> Result<(), RepositoryError> {
+        use crate::database::schema::diesel_schema::invoice::dsl as invoice_dsl;
         let connection = get_connection(&self.pool)?;
-        let result = invoice
-            .filter(
-                type_
-                    .eq(InvoiceRowType::CustomerInvoice)
-                    .and(name_id.eq(name)),
-            )
-            .get_results(&connection)?;
-        Ok(result)
-    }
 
-    pub async fn find_many_by_store_id(
-        &self,
-        store: &str,
-    ) -> Result<Vec<InvoiceRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::invoice::dsl::*;
-        let connection = get_connection(&self.pool)?;
-        let result = invoice
-            .filter(
-                type_
-                    .eq(InvoiceRowType::CustomerInvoice)
-                    .and(store_id.eq(store)),
-            )
-            .get_results(&connection)?;
-        Ok(result)
+        // Also insert the following in one transaction
+        // stock lines
+        // lines
+
+        let new_id = invoice.id.clone();
+        diesel::insert_into(invoice_dsl::invoice)
+            .values(InvoiceRow::from(invoice))
+            .execute(&connection)?;
+
+        Ok(())
     }
 }

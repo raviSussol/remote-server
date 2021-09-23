@@ -21,11 +21,11 @@ mod store;
 mod sync;
 mod user_account;
 
+pub use self::invoice::*;
 use actix_rt::blocking::BlockingError;
 use async_graphql::dataloader::DataLoader;
 pub use central_sync_buffer::CentralSyncBufferRepository;
 pub use central_sync_cursor::CentralSyncCursorRepository;
-pub use invoice::{CustomerInvoiceRepository, InvoiceRepository};
 pub use invoice_line::InvoiceLineRepository;
 pub use invoice_query::{InvoiceQueryJoin, InvoiceQueryRepository};
 pub use item::ItemRepository;
@@ -112,7 +112,7 @@ pub async fn get_repositories(settings: &Settings) -> RepositoryMap {
 
     let mut repositories: RepositoryMap = RepositoryMap::new();
 
-    repositories.insert(CustomerInvoiceRepository::new(pool.clone()));
+    repositories.insert(FullInvoiceRepository::new(pool.clone()));
     repositories.insert(ItemRepository::new(pool.clone()));
     repositories.insert(StockLineRepository::new(pool.clone()));
     repositories.insert(ItemQueryRepository::new(pool.clone()));
