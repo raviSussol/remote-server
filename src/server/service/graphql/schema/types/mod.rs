@@ -1,7 +1,7 @@
 use crate::{
     database::{
         loader::{InvoiceLoader, StoreLoader},
-        repository::{CustomerInvoiceRepository, InvoiceLineRepository, RequisitionLineRepository},
+        repository::{InvoiceLineRepository, RequisitionLineRepository},
         schema::{
             InvoiceLineRow, InvoiceRow, InvoiceRowType, RequisitionLineRow, RequisitionRow,
             RequisitionRowType, StoreRow,
@@ -35,27 +35,6 @@ pub struct Store {
 impl Store {
     pub async fn id(&self) -> &str {
         &self.store_row.id
-    }
-
-    pub async fn customer_invoices(&self, ctx: &Context<'_>) -> Vec<Invoice> {
-        let customer_invoice_repository = ctx.get_repository::<CustomerInvoiceRepository>();
-
-        let customer_invoice_rows: Vec<InvoiceRow> = customer_invoice_repository
-            .find_many_by_store_id(&self.store_row.id)
-            .await
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Failed to get customer invoices for store {}",
-                    self.store_row.id
-                )
-            });
-
-        customer_invoice_rows
-            .into_iter()
-            .map(|customer_invoice_row| Invoice {
-                invoice_row: customer_invoice_row,
-            })
-            .collect()
     }
 }
 
