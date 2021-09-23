@@ -1,15 +1,13 @@
+use super::GenericError;
+use super::{DBError, ForeignKeyError};
+use crate::server::service::graphql::schema::types::{InvoiceStatus, NameQuery};
 use async_graphql::*;
 
-use crate::{
-    business::supplier_invoice::InsertSupplierInvoiceError as BusinessError,
-    database::repository::InvoiceRepository,
-    server::service::graphql::schema::{
-        mutations::ForeignKeys,
-        types::{Invoice, InvoiceStatus, NameQuery},
-    },
-};
+pub mod insert;
+pub use self::insert::*;
 
-use super::{DBError, ForeignKeyError, RecordExists};
+pub mod update;
+pub use self::update::*;
 
 #[derive(InputObject)]
 pub struct InsertSupplierInvoiceInput {
@@ -31,12 +29,6 @@ pub struct UpdateSupplierInvoiceInput {
     // lines
 }
 
-#[derive(Union)]
-pub enum InvoiceOrInsertSupplierInvoiceError {
-    Invoice(Invoice),
-    Errors(InsertSupplierInvoiceErrors),
-}
-
 #[derive(SimpleObject)]
 pub struct InsertSupplierInvoiceErrors {
     id: String,
@@ -52,18 +44,14 @@ impl InsertSupplierInvoiceErrors {
     }
 }
 
-use self::InvoiceOrInsertSupplierInvoiceError as InvoiceWithError;
-
 #[derive(Interface)]
 #[graphql(field(name = "description", type = "String"))]
 pub enum InsertSupplierInvoiceError {
     ForeignKeyError(ForeignKeyError),
-    RecordExists(RecordExists),
+    GenericError(GenericError),
     OtherPartyNotASuppier(OtherPartyNotASuppier),
     DBError(DBError),
 }
-
-use self::InsertSupplierInvoiceError as ApiError;
 
 #[derive(SimpleObject)]
 pub struct OtherPartyNotASuppier {
@@ -71,53 +59,26 @@ pub struct OtherPartyNotASuppier {
     pub description: String,
 }
 
-impl InvoiceOrInsertSupplierInvoiceError {
-    pub async fn new(
-        id: String,
-        insert_result: Result<(), BusinessError>,
-        invoice_repository: &InvoiceRepository,
-    ) -> InvoiceWithError {
-        match insert_result {
-            Ok(_) => invoice_result(id, invoice_repository).await,
-            Err(error) => error_result(id, error),
-        }
-    }
+#[derive(SimpleObject)]
+pub struct UpdateSupplierInvoiceErrors {
+    id: String,
+    errors: Vec<UpdateSupplierInvoiceError>,
 }
 
-async fn invoice_result(id: String, invoice_repository: &InvoiceRepository) -> InvoiceWithError {
-    match invoice_repository.find_one_by_id(&id).await {
-        Ok(invoice_row) => InvoiceWithError::Invoice(Invoice { invoice_row }),
-        Err(error) => InvoiceWithError::Errors(InsertSupplierInvoiceErrors::new(
+impl UpdateSupplierInvoiceErrors {
+    fn new(id: String, error: UpdateSupplierInvoiceError) -> UpdateSupplierInvoiceErrors {
+        UpdateSupplierInvoiceErrors {
             id,
-            ApiError::DBError(DBError(error)),
-        )),
-    }
-}
-
-fn error_result(id: String, error: BusinessError) -> InvoiceWithError {
-    InvoiceWithError::Errors(InsertSupplierInvoiceErrors::new(id, error.into()))
-}
-
-impl From<BusinessError> for ApiError {
-    fn from(business_error: BusinessError) -> Self {
-        match business_error {
-            BusinessError::OtherPartyNotFound(other_party_id) => {
-                ApiError::ForeignKeyError(ForeignKeyError {
-                    description: "Name with other party id does not exist".to_string(),
-                    key: ForeignKeys::OtherPartyId,
-                    key_id: other_party_id,
-                })
-            }
-            BusinessError::OtherPartyIsNotASupplier(name_query) => {
-                ApiError::OtherPartyNotASuppier(OtherPartyNotASuppier {
-                    description: "Other party name is not a supplier".to_string(),
-                    other_party: name_query,
-                })
-            }
-            BusinessError::InvoiceExists => ApiError::RecordExists(RecordExists {
-                description: "Invoice with this id already exists".to_string(),
-            }),
-            BusinessError::DBError(error) => ApiError::DBError(DBError(error)),
+            errors: vec![error],
         }
     }
+}
+
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "String"))]
+pub enum UpdateSupplierInvoiceError {
+    ForeignKeyError(ForeignKeyError),
+    GenericError(GenericError),
+    OtherPartyNotASuppier(OtherPartyNotASuppier),
+    DBError(DBError),
 }

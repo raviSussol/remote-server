@@ -1,4 +1,4 @@
-use crate::business::insert_supplier_invoice;
+use crate::business::{insert_supplier_invoice, update_supplier_invoice};
 use crate::database::repository::{
     InvoiceRepository, RepositoryError, RequisitionLineRepository, RequisitionRepository,
 };
@@ -10,7 +10,10 @@ use crate::server::service::graphql::ContextExt;
 
 use async_graphql::*;
 
-use self::supplier_invoice::{InsertSupplierInvoiceInput, InvoiceOrInsertSupplierInvoiceError};
+use self::supplier_invoice::{
+    InsertSupplierInvoiceInput, InvoiceOrInsertSupplierInvoiceError,
+    InvoiceOrUpdateSupplierInvoiceError, UpdateSupplierInvoiceInput,
+};
 
 pub mod supplier_invoice;
 
@@ -28,6 +31,18 @@ impl Mutations {
         let insert_result = insert_supplier_invoice(ctx, input).await;
 
         InvoiceOrInsertSupplierInvoiceError::new(new_id, insert_result, invoice_repository).await
+    }
+
+    async fn update_supplier_invoice(
+        &self,
+        ctx: &Context<'_>,
+        input: UpdateSupplierInvoiceInput,
+    ) -> InvoiceOrUpdateSupplierInvoiceError {
+        let invoice_repository = ctx.get_repository::<InvoiceRepository>();
+        let new_id = input.id.clone();
+        let update_result = update_supplier_invoice(ctx, input).await;
+
+        InvoiceOrUpdateSupplierInvoiceError::new(new_id, update_result, invoice_repository).await
     }
 
     async fn insert_requisition(
@@ -93,7 +108,12 @@ pub struct ForeignKeyError {
 }
 
 #[derive(SimpleObject)]
-pub struct RecordExists {
+pub struct GenericError {
+    pub description: String,
+}
+
+#[derive(SimpleObject)]
+pub struct RecordDoesNotExist {
     pub description: String,
 }
 
