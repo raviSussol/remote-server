@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 
 use crate::{
     database::{
@@ -20,6 +20,9 @@ pub use self::check_store::*;
 pub mod insert;
 pub use self::insert::*;
 
+pub mod update;
+pub use self::update::*;
+
 pub struct FullInvoice {
     pub id: String,
     pub name_id: String,
@@ -40,4 +43,19 @@ pub enum InsertSupplierInvoiceError {
     OtherPartyIsNotASupplier(NameQuery),
     InvoiceExists,
     DBError(RepositoryError),
+}
+
+pub enum UpdateSupplierInvoiceError {
+    OtherPartyNotFound(String),
+    OtherPartyIsNotASupplier(NameQuery),
+    CannotEditFinalisedInvoice,         // ok
+    InvoiceDoesNotExist,                // ok
+    NotASupplierInvoice,                // ok
+    InvoiceDoesNotBelongToCurrentStore, // ok
+    CannoChangeInvoiceBackToDraft,      // ok
+    DBError(RepositoryError),
+}
+
+pub fn current_date_time() -> NaiveDateTime {
+    Utc::now().naive_utc()
 }
