@@ -71,6 +71,16 @@ impl NameQueryRepository {
             .map(NameQuery::from)
             .collect())
     }
+
+    pub fn one(&self, id: &str) -> Result<NameQuery, RepositoryError> {
+        let connection = get_connection(&self.pool)?;
+        // TODO (beyond M1), check that store_id matches current store
+        Ok(name_table_dsl::name_table
+            .left_join(name_store_join)
+            .filter(name_table_dsl::id.eq(id))
+            .first::<NameAndNameStoreJoin>(&*connection)?
+            .into())
+    }
 }
 
 #[cfg(test)]
