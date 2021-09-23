@@ -9,6 +9,7 @@
 #[macro_use]
 extern crate diesel;
 
+pub mod business;
 pub mod database;
 pub mod server;
 pub mod util;
