@@ -21,6 +21,16 @@ pub struct InsertSupplierInvoiceInput {
     // lines
 }
 
+#[derive(InputObject)]
+pub struct UpdateSupplierInvoiceInput {
+    pub id: String,
+    pub other_party_id: Option<String>,
+    pub status: Option<InvoiceStatus>,
+    pub comment: Option<String>,
+    pub their_reference: Option<String>,
+    // lines
+}
+
 #[derive(Union)]
 pub enum InvoiceOrInsertSupplierInvoiceError {
     Invoice(Invoice),
