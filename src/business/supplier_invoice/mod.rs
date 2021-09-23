@@ -48,11 +48,11 @@ pub enum InsertSupplierInvoiceError {
 pub enum UpdateSupplierInvoiceError {
     OtherPartyNotFound(String),
     OtherPartyIsNotASupplier(NameQuery),
-    CannotEditFinalisedInvoice,         // ok
-    InvoiceDoesNotExist,                // ok
-    NotASupplierInvoice,                // ok
-    InvoiceDoesNotBelongToCurrentStore, // ok
-    CannoChangeInvoiceBackToDraft,      // ok
+    CannotEditFinalisedInvoice,
+    InvoiceDoesNotExist,
+    NotASupplierInvoice,
+    InvoiceDoesNotBelongToCurrentStore,
+    CannoChangeInvoiceBackToDraft,
     DBError(RepositoryError),
 }
 
