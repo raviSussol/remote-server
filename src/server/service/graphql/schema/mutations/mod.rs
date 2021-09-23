@@ -1,16 +1,35 @@
-use crate::database::repository::{RequisitionLineRepository, RequisitionRepository};
+use crate::business::insert_supplier_invoice;
+use crate::database::repository::{
+    InvoiceRepository, RepositoryError, RequisitionLineRepository, RequisitionRepository,
+};
 use crate::database::schema::{RequisitionLineRow, RequisitionRow};
 use crate::server::service::graphql::schema::types::{
     InputRequisitionLine, Requisition, RequisitionType,
 };
 use crate::server::service::graphql::ContextExt;
 
-use async_graphql::{Context, Object};
+use async_graphql::*;
+
+use self::supplier_invoice::{InsertSupplierInvoiceInput, InvoiceOrInsertSupplierInvoiceError};
+
+pub mod supplier_invoice;
 
 pub struct Mutations;
 
 #[Object]
 impl Mutations {
+    async fn insert_supplier_invoice(
+        &self,
+        ctx: &Context<'_>,
+        input: InsertSupplierInvoiceInput,
+    ) -> InvoiceOrInsertSupplierInvoiceError {
+        let invoice_repository = ctx.get_repository::<InvoiceRepository>();
+        let new_id = input.id.clone();
+        let insert_result = insert_supplier_invoice(ctx, input).await;
+
+        InvoiceOrInsertSupplierInvoiceError::new(new_id, insert_result, invoice_repository).await
+    }
+
     async fn insert_requisition(
         &self,
         ctx: &Context<'_>,
@@ -56,5 +75,37 @@ impl Mutations {
         }
 
         Requisition { requisition_row }
+    }
+}
+
+// Common Mutation Errors
+
+#[derive(Enum, Copy, Clone, PartialEq, Eq)]
+pub enum ForeignKeys {
+    OtherPartyId,
+}
+
+#[derive(SimpleObject)]
+pub struct ForeignKeyError {
+    pub key: ForeignKeys,
+    pub key_id: String,
+    pub description: String,
+}
+
+#[derive(SimpleObject)]
+pub struct RecordExists {
+    pub description: String,
+}
+
+pub struct DBError(pub RepositoryError);
+
+#[Object]
+impl DBError {
+    pub async fn description(&self) -> &'static str {
+        "Dabase Error"
+    }
+
+    pub async fn full_error(&self) -> String {
+        format!("{:#}", self.0)
     }
 }
