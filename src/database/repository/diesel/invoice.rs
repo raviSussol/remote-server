@@ -110,4 +110,18 @@ impl FullInvoiceRepository {
 
         Ok(())
     }
+
+    pub async fn update(&self, invoice: FullInvoice) -> Result<(), RepositoryError> {
+        use crate::database::schema::diesel_schema::invoice::dsl as invoice_dsl;
+        let connection = get_connection(&self.pool)?;
+
+        // Also insert the following in one transaction
+        // stock lines
+        // lines
+        diesel::update(invoice_dsl::invoice)
+            .set(InvoiceRow::from(invoice))
+            .execute(&connection)?;
+
+        Ok(())
+    }
 }

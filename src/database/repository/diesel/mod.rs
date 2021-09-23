@@ -58,6 +58,7 @@ pub type DBConnection = PooledConnection<ConnectionManager<DBBackendConnection>>
 
 impl From<DieselError> for RepositoryError {
     fn from(err: DieselError) -> Self {
+        println!("{:#?}", err);
         let msg = match err {
             DieselError::InvalidCString(_) => "DIESEL_INVALID_C_STRING".to_string(),
             DieselError::DatabaseError(err, _) => {
