@@ -7,7 +7,7 @@ use crate::{
             FullInvoiceRepository, InvoiceRepository, NameQueryRepository, RepositoryError,
             StoreRepository,
         },
-        schema::{InvoiceRow, InvoiceRowType},
+        schema::InvoiceRowType,
     },
     server::service::graphql::{
         schema::{mutations::supplier_invoice::InsertSupplierInvoiceInput, types::InvoiceStatus},

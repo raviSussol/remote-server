@@ -104,8 +104,6 @@ impl FullInvoiceRepository {
         // Also insert the following in one transaction
         // stock lines
         // lines
-
-        let new_id = invoice.id.clone();
         diesel::insert_into(invoice_dsl::invoice)
             .values(InvoiceRow::from(invoice))
             .execute(&connection)?;
