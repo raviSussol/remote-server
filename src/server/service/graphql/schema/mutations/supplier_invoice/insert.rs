@@ -1,23 +1,26 @@
 use super::{
-    InsertSupplierInvoiceError as ApiError, InsertSupplierInvoiceErrors as ApiErrors,
+    InsertSupplierInvoiceError as ApiError, MutationErrorsWrapper, MutationErrorsWrapperNew,
     OtherPartyNotASuppier,
 };
 use crate::{
     business::supplier_invoice::InsertSupplierInvoiceError as BusinessError,
     database::repository::InvoiceRepository,
     server::service::graphql::schema::{
-        mutations::{DBError, ForeignKeyError, ForeignKeys, GenericError},
+        mutations::{DBError, ForeignKeyError, ForeignKeys, RecordAlreadyExist},
         types::Invoice,
     },
 };
 
 use async_graphql::*;
 
+type ApiErrors = MutationErrorsWrapper<ApiError>;
+
 #[derive(Union)]
 pub enum InvoiceOrInsertSupplierInvoiceError {
     Invoice(Invoice),
     Errors(ApiErrors),
 }
+
 use self::InvoiceOrInsertSupplierInvoiceError as InvoiceWithError;
 
 impl InvoiceOrInsertSupplierInvoiceError {
@@ -51,20 +54,14 @@ impl From<BusinessError> for ApiError {
         match business_error {
             BusinessError::OtherPartyNotFound(other_party_id) => {
                 ApiError::ForeignKeyError(ForeignKeyError {
-                    description: "Name with other party id does not exist".to_string(),
                     key: ForeignKeys::OtherPartyId,
-                    key_id: other_party_id,
+                    id: other_party_id,
                 })
             }
             BusinessError::OtherPartyIsNotASupplier(name_query) => {
-                ApiError::OtherPartyNotASuppier(OtherPartyNotASuppier {
-                    description: "Other party name is not a supplier".to_string(),
-                    other_party: name_query,
-                })
+                ApiError::OtherPartyNotASuppier(OtherPartyNotASuppier(name_query))
             }
-            BusinessError::InvoiceExists => ApiError::GenericError(GenericError {
-                description: "Invoice with this id already exists".to_string(),
-            }),
+            BusinessError::InvoiceExists => ApiError::RecordAlreadyExist(RecordAlreadyExist {}),
             BusinessError::DBError(error) => ApiError::DBError(DBError(error)),
         }
     }

@@ -1,17 +1,20 @@
 use super::{
-    OtherPartyNotASuppier, UpdateSupplierInvoiceError as ApiError,
-    UpdateSupplierInvoiceErrors as ApiErrors,
+    CannotChangeInvoiceBackToDraft, CannotEditFinalisedInvoice, InvoiceDoesNotBelongToCurrentStore,
+    MutationErrorsWrapper, MutationErrorsWrapperNew, NotASupplierInvoice, OtherPartyNotASuppier,
+    UpdateSupplierInvoiceError as ApiError,
 };
 use crate::{
     business::supplier_invoice::UpdateSupplierInvoiceError as BusinessError,
     database::repository::InvoiceRepository,
     server::service::graphql::schema::{
-        mutations::{DBError, ForeignKeyError, ForeignKeys, GenericError},
+        mutations::{DBError, ForeignKeyError, ForeignKeys, RecordDoesNotExist},
         types::Invoice,
     },
 };
 
 use async_graphql::*;
+
+type ApiErrors = MutationErrorsWrapper<ApiError>;
 
 #[derive(Union)]
 pub enum InvoiceOrUpdateSupplierInvoiceError {
@@ -51,35 +54,29 @@ impl From<BusinessError> for ApiError {
         match business_error {
             BusinessError::OtherPartyNotFound(other_party_id) => {
                 ApiError::ForeignKeyError(ForeignKeyError {
-                    description: "Name with other party id does not exist".to_string(),
                     key: ForeignKeys::OtherPartyId,
-                    key_id: other_party_id,
+                    id: other_party_id,
                 })
             }
             BusinessError::OtherPartyIsNotASupplier(name_query) => {
-                ApiError::OtherPartyNotASuppier(OtherPartyNotASuppier {
-                    description: "Other party name is not a supplier".to_string(),
-                    other_party: name_query,
-                })
+                ApiError::OtherPartyNotASuppier(OtherPartyNotASuppier(name_query))
             }
-            BusinessError::InvoiceDoesNotExist => ApiError::GenericError(GenericError {
-                description: "Invoice with this id does not exist".to_string(),
-            }),
+            BusinessError::InvoiceDoesNotExist => {
+                ApiError::RecordDoesNotExist(RecordDoesNotExist {})
+            }
 
-            BusinessError::CannotEditFinalisedInvoice => ApiError::GenericError(GenericError {
-                description: "Cannot edit finalised invoice".to_string(),
-            }),
-            BusinessError::NotASupplierInvoice => ApiError::GenericError(GenericError {
-                description: "Not a supplier invoice".to_string(),
-            }),
-            BusinessError::InvoiceDoesNotBelongToCurrentStore => {
-                ApiError::GenericError(GenericError {
-                    description: "Invoice does not belong to current store".to_string(),
-                })
+            BusinessError::CannotEditFinalisedInvoice => {
+                ApiError::CannotEditFinalisedInvoice(CannotEditFinalisedInvoice {})
             }
-            BusinessError::CannoChangeInvoiceBackToDraft => ApiError::GenericError(GenericError {
-                description: "Canno change invoice back to draft".to_string(),
-            }),
+            BusinessError::NotASupplierInvoice => {
+                ApiError::NotASupplierInvoice(NotASupplierInvoice {})
+            }
+            BusinessError::InvoiceDoesNotBelongToCurrentStore => {
+                ApiError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})
+            }
+            BusinessError::CannoChangeInvoiceBackToDraft => {
+                ApiError::CannotChangeInvoiceBackToDraft(CannotChangeInvoiceBackToDraft {})
+            }
             BusinessError::DBError(error) => ApiError::DBError(DBError(error)),
         }
     }

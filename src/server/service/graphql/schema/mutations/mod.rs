@@ -100,21 +100,39 @@ pub enum ForeignKeys {
     OtherPartyId,
 }
 
-#[derive(SimpleObject)]
 pub struct ForeignKeyError {
     pub key: ForeignKeys,
-    pub key_id: String,
-    pub description: String,
+    pub id: String,
+}
+#[Object]
+impl ForeignKeyError {
+    pub async fn description(&self) -> &'static str {
+        "FK record doesn't exist"
+    }
+
+    pub async fn key(&self) -> ForeignKeys {
+        self.key
+    }
+
+    pub async fn id(&self) -> &str {
+        &self.id
+    }
 }
 
-#[derive(SimpleObject)]
-pub struct GenericError {
-    pub description: String,
+pub struct RecordDoesNotExist;
+#[Object]
+impl RecordDoesNotExist {
+    pub async fn description(&self) -> &'static str {
+        "Record does not exist"
+    }
 }
 
-#[derive(SimpleObject)]
-pub struct RecordDoesNotExist {
-    pub description: String,
+pub struct RecordAlreadyExist;
+#[Object]
+impl RecordAlreadyExist {
+    pub async fn description(&self) -> &'static str {
+        "Record already exists"
+    }
 }
 
 pub struct DBError(pub RepositoryError);
