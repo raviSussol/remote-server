@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod repository_test {
     mod data {
-        use chrono::NaiveDateTime;
+        use chrono::{NaiveDate, NaiveDateTime};
 
         use crate::database::schema::{InvoiceRowStatus, MasterListNameJoinRow};
 
@@ -186,13 +186,12 @@ mod repository_test {
                 invoice_id: "invoice1".to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some("".to_string()),
+                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
                 total_after_tax: 0.0,
-                available_number_of_packs: 1,
-                total_number_of_packs: 1,
+                number_of_packs: 1,
             }
         }
         pub fn invoice_line_2() -> InvoiceLineRow {
@@ -202,13 +201,12 @@ mod repository_test {
                 invoice_id: "invoice1".to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some("".to_string()),
+                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
                 total_after_tax: 0.0,
-                available_number_of_packs: 1,
-                total_number_of_packs: 1,
+                number_of_packs: 1,
             }
         }
 
@@ -219,13 +217,12 @@ mod repository_test {
                 invoice_id: "invoice2".to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some("".to_string()),
+                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
                 total_after_tax: 0.0,
-                available_number_of_packs: 1,
-                total_number_of_packs: 1,
+                number_of_packs: 1,
             }
         }
 
@@ -272,10 +269,10 @@ mod repository_test {
         database::{
             repository::{
                 get_repositories, repository::MasterListRepository, CentralSyncBufferRepository,
-                CustomerInvoiceRepository, DBBackendConnection, DBConnection,
-                InvoiceLineRepository, InvoiceRepository, ItemRepository, MasterListLineRepository,
-                MasterListNameJoinRepository, NameRepository, RequisitionLineRepository,
-                RequisitionRepository, StockLineRepository, StoreRepository, UserAccountRepository,
+                DBBackendConnection, DBConnection, InvoiceLineRepository, InvoiceRepository,
+                ItemRepository, MasterListLineRepository, MasterListNameJoinRepository,
+                NameRepository, RequisitionLineRepository, RequisitionRepository,
+                StockLineRepository, StoreRepository, UserAccountRepository,
             },
             schema::{
                 CentralSyncBufferRow, InvoiceLineRow, InvoiceRow, InvoiceRowType, ItemRow,
@@ -504,27 +501,11 @@ mod repository_test {
         store_repo.insert_one(&data::store_1()).await.unwrap();
 
         let repo = registry.get::<InvoiceRepository>().unwrap();
-        let customer_invoice_repo = registry.get::<CustomerInvoiceRepository>().unwrap();
 
         let item1 = data::invoice_1();
         repo.insert_one(&item1).await.unwrap();
         let loaded_item = repo.find_one_by_id(item1.id.as_str()).await.unwrap();
         assert_eq!(item1, loaded_item);
-
-        // customer invoice
-        let item1 = data::invoice_2();
-        repo.insert_one(&item1).await.unwrap();
-        let loaded_item = customer_invoice_repo
-            .find_many_by_name_id(&item1.name_id)
-            .await
-            .unwrap();
-        assert_eq!(1, loaded_item.len());
-
-        let loaded_item = customer_invoice_repo
-            .find_many_by_store_id(&item1.store_id)
-            .await
-            .unwrap();
-        assert_eq!(1, loaded_item.len());
     }
 
     #[actix_rt::test]
