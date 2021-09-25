@@ -98,6 +98,7 @@ impl Mutations {
 #[derive(Enum, Copy, Clone, PartialEq, Eq)]
 pub enum ForeignKeys {
     OtherPartyId,
+    ItemId,
 }
 
 pub struct ForeignKeyError {
@@ -145,5 +146,28 @@ impl DBError {
 
     pub async fn full_error(&self) -> String {
         format!("{:#}", self.0)
+    }
+}
+
+#[derive(Enum, Copy, Clone, PartialEq, Eq)]
+pub enum RangeFields {
+    SellPricePerPack,
+    CostPricePerPack,
+    PackSize,
+}
+
+pub struct ValueOutOfRange {
+    pub field: RangeFields,
+    pub description: String,
+}
+
+#[Object]
+impl ValueOutOfRange {
+    pub async fn description(&self) -> &str {
+        &self.description
+    }
+
+    pub async fn field(&self) -> &RangeFields {
+        &self.field
     }
 }
