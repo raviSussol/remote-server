@@ -1,4 +1,5 @@
 use async_graphql::{Context, Object, SimpleObject};
+use chrono::NaiveDate;
 use std::convert::TryInto;
 
 use crate::database::schema::StockLineRow;
@@ -15,7 +16,7 @@ pub struct StockLineQuery {
     pub sell_price_per_pack: f64,
     pub available_number_of_packs: i32,
     pub total_number_of_packs: i32,
-    pub expiry_date: Option<String>,
+    pub expiry_date: Option<NaiveDate>,
 }
 
 impl From<StockLineRow> for StockLineQuery {

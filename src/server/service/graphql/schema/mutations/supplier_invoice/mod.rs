@@ -9,6 +9,11 @@ pub use self::insert::*;
 pub mod update;
 pub use self::update::*;
 
+pub mod lines;
+pub use self::lines::*;
+
+pub type OptVec<T> = Option<Vec<T>>;
+
 #[derive(InputObject)]
 pub struct InsertSupplierInvoiceInput {
     pub id: String,
@@ -16,7 +21,7 @@ pub struct InsertSupplierInvoiceInput {
     pub status: InvoiceStatus,
     pub comment: Option<String>,
     pub their_reference: Option<String>,
-    // lines
+    pub lines: OptVec<InsertSupplierInvoiceLineInput>,
 }
 
 #[derive(InputObject)]
@@ -30,36 +35,21 @@ pub struct UpdateSupplierInvoiceInput {
 }
 
 #[derive(SimpleObject)]
-#[graphql(concrete(
-    name = "InsertSupplierInvoiceErrors",
-    params(InsertSupplierInvoiceError)
-))]
-#[graphql(concrete(
-    name = "UpdateSupplierInvoiceErrors",
-    params(UpdateSupplierInvoiceError)
-))]
-pub struct MutationErrorsWrapper<ErrorType: OutputType> {
-    id: String,
-    errors: Vec<ErrorType>,
+pub struct InsertSupplierInvoiceErrors {
+    pub id: String,
+    pub errors: OptVec<InsertSupplierInvoiceError>,
+    pub lines: OptVec<InsertSupplierInvoiceLineErrors>,
 }
 
-pub trait MutationErrorsWrapperNew<MutationErrorsWrapperType, ErrorType: OutputType> {
-    fn new(id: String, error: ErrorType) -> MutationErrorsWrapperType;
-}
-
-impl<ErrorType: OutputType> MutationErrorsWrapperNew<MutationErrorsWrapper<ErrorType>, ErrorType>
-    for MutationErrorsWrapper<ErrorType>
-{
-    fn new(id: String, error: ErrorType) -> MutationErrorsWrapper<ErrorType> {
-        MutationErrorsWrapper {
-            id,
-            errors: vec![error],
-        }
-    }
+#[derive(SimpleObject)]
+pub struct UpdateSupplierInvoiceErrors {
+    pub id: String,
+    pub errors: OptVec<UpdateSupplierInvoiceError>,
+    pub lines: OptVec<UpdateSupplierInvoiceLineErrors>,
 }
 
 #[derive(Interface)]
-#[graphql(field(name = "description", type = "String"))]
+#[graphql(field(name = "description", type = "&str"))]
 pub enum InsertSupplierInvoiceError {
     ForeignKeyError(ForeignKeyError),
     RecordAlreadyExist(RecordAlreadyExist),
@@ -68,7 +58,7 @@ pub enum InsertSupplierInvoiceError {
 }
 
 #[derive(Interface)]
-#[graphql(field(name = "description", type = "String"))]
+#[graphql(field(name = "description", type = "&str"))]
 pub enum UpdateSupplierInvoiceError {
     ForeignKeyError(ForeignKeyError),
     RecordDoesNotExist(RecordDoesNotExist),
@@ -77,6 +67,21 @@ pub enum UpdateSupplierInvoiceError {
     CannotEditFinalisedInvoice(CannotEditFinalisedInvoice),
     InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore),
     CannotChangeInvoiceBackToDraft(CannotChangeInvoiceBackToDraft),
+    DBError(DBError),
+}
+
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "&str"))]
+pub enum InsertSupplierInvoiceLineError {
+    ForeignKeyError(ForeignKeyError),
+    RecordAlreadyExist(RecordAlreadyExist),
+    OtherPartyNotASuppier(OtherPartyNotASuppier),
+    DBError(DBError),
+}
+
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "&str"))]
+pub enum UpdateSupplierInvoiceLineError {
     DBError(DBError),
 }
 

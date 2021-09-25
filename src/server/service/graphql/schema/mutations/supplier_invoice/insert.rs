@@ -1,6 +1,6 @@
 use super::{
-    InsertSupplierInvoiceError as ApiError, MutationErrorsWrapper, MutationErrorsWrapperNew,
-    OtherPartyNotASuppier,
+    InsertSupplierInvoiceError as ApiError, InsertSupplierInvoiceErrors as ApiErrors,
+    InsertSupplierInvoiceLineErrors as ApiLineError, OptVec, OtherPartyNotASuppier,
 };
 use crate::{
     business::supplier_invoice::InsertSupplierInvoiceError as BusinessError,
@@ -12,8 +12,6 @@ use crate::{
 };
 
 use async_graphql::*;
-
-type ApiErrors = MutationErrorsWrapper<ApiError>;
 
 #[derive(Union)]
 pub enum InvoiceOrInsertSupplierInvoiceError {
@@ -39,19 +37,28 @@ impl InvoiceOrInsertSupplierInvoiceError {
 async fn invoice_result(id: String, invoice_repository: &InvoiceRepository) -> InvoiceWithError {
     match invoice_repository.find_one_by_id(&id).await {
         Ok(invoice_row) => InvoiceWithError::Invoice(Invoice { invoice_row }),
-        Err(error) => {
-            InvoiceWithError::Errors(ApiErrors::new(id, ApiError::DBError(DBError(error))))
-        }
+        Err(error) => InvoiceWithError::Errors(ApiErrors {
+            id,
+            errors: ApiError::DBError(DBError(error)).into(),
+            lines: None,
+        }),
+    }
+}
+
+impl From<ApiError> for OptVec<ApiError> {
+    fn from(error: ApiError) -> Self {
+        Some(vec![error])
     }
 }
 
 fn error_result(id: String, error: BusinessError) -> InvoiceWithError {
-    InvoiceWithError::Errors(ApiErrors::new(id, error.into()))
+    let (errors, lines) = error.into();
+    InvoiceWithError::Errors(ApiErrors { id, errors, lines })
 }
 
-impl From<BusinessError> for ApiError {
+impl From<BusinessError> for (OptVec<ApiError>, OptVec<ApiLineError>) {
     fn from(business_error: BusinessError) -> Self {
-        match business_error {
+        let api_error = match business_error {
             BusinessError::OtherPartyNotFound(other_party_id) => {
                 ApiError::ForeignKeyError(ForeignKeyError {
                     key: ForeignKeys::OtherPartyId,
@@ -63,6 +70,18 @@ impl From<BusinessError> for ApiError {
             }
             BusinessError::InvoiceExists => ApiError::RecordAlreadyExist(RecordAlreadyExist {}),
             BusinessError::DBError(error) => ApiError::DBError(DBError(error)),
-        }
+            BusinessError::InvoiceLineErrors(invoice_line_errors) => {
+                return (
+                    None,
+                    Some(
+                        invoice_line_errors
+                            .into_iter()
+                            .map(ApiLineError::from)
+                            .collect(),
+                    ),
+                )
+            }
+        };
+        (api_error.into(), None)
     }
 }

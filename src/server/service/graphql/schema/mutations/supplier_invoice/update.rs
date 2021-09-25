@@ -1,7 +1,7 @@
 use super::{
     CannotChangeInvoiceBackToDraft, CannotEditFinalisedInvoice, InvoiceDoesNotBelongToCurrentStore,
-    MutationErrorsWrapper, MutationErrorsWrapperNew, NotASupplierInvoice, OtherPartyNotASuppier,
-    UpdateSupplierInvoiceError as ApiError,
+    NotASupplierInvoice, OtherPartyNotASuppier, UpdateSupplierInvoiceError as ApiError,
+    UpdateSupplierInvoiceErrors as ApiErrors,
 };
 use crate::{
     business::supplier_invoice::UpdateSupplierInvoiceError as BusinessError,
@@ -13,8 +13,6 @@ use crate::{
 };
 
 use async_graphql::*;
-
-type ApiErrors = MutationErrorsWrapper<ApiError>;
 
 #[derive(Union)]
 pub enum InvoiceOrUpdateSupplierInvoiceError {
@@ -39,14 +37,20 @@ impl InvoiceOrUpdateSupplierInvoiceError {
 async fn invoice_result(id: String, invoice_repository: &InvoiceRepository) -> InvoiceWithError {
     match invoice_repository.find_one_by_id(&id).await {
         Ok(invoice_row) => InvoiceWithError::Invoice(Invoice { invoice_row }),
-        Err(error) => {
-            InvoiceWithError::Errors(ApiErrors::new(id, ApiError::DBError(DBError(error))))
-        }
+        Err(error) => InvoiceWithError::Errors(ApiErrors {
+            id,
+            errors: Some(vec![ApiError::DBError(DBError(error))]),
+            lines: None,
+        }),
     }
 }
 
 fn error_result(id: String, error: BusinessError) -> InvoiceWithError {
-    InvoiceWithError::Errors(ApiErrors::new(id, error.into()))
+    InvoiceWithError::Errors(ApiErrors {
+        id,
+        errors: Some(vec![error.into()]),
+        lines: None,
+    })
 }
 
 impl From<BusinessError> for ApiError {
