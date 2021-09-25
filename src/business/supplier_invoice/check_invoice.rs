@@ -1,19 +1,19 @@
-use super::{InsertSupplierInvoiceError, UpdateSupplierInvoiceError};
+use super::{FullInvoice, InsertSupplierInvoiceError, UpdateSupplierInvoiceError};
 use crate::{
     database::{
-        repository::{InvoiceRepository, RepositoryError},
+        repository::{FullInvoiceRepository, RepositoryError},
         schema::{InvoiceRow, InvoiceRowStatus, InvoiceRowType},
     },
     server::service::graphql::schema::types::InvoiceStatus,
 };
 
 pub async fn check_invoice_insert(
-    invoice_respository: &InvoiceRepository,
+    repository: &FullInvoiceRepository,
     invoice_id: &str,
 ) -> Result<(), InsertSupplierInvoiceError> {
     use self::InsertSupplierInvoiceError::*;
 
-    match invoice_respository.find_one_by_id(invoice_id).await {
+    match repository.one(invoice_id).await {
         Ok(_) => Err(InvoiceExists),
         Err(error) => match &error {
             RepositoryError::NotFound => Ok(()),
@@ -47,14 +47,14 @@ pub fn check_invoice_update(
     Ok(())
 }
 
-pub async fn invoice_row(
-    invoice_respository: &InvoiceRepository,
+pub async fn get_invoice(
+    repository: &FullInvoiceRepository,
     invoice_id: &str,
-) -> Result<InvoiceRow, UpdateSupplierInvoiceError> {
+) -> Result<FullInvoice, UpdateSupplierInvoiceError> {
     use self::UpdateSupplierInvoiceError::*;
 
-    match invoice_respository.find_one_by_id(invoice_id).await {
-        Ok(invoice_row) => Ok(invoice_row),
+    match repository.one(invoice_id).await {
+        Ok(invoice) => Ok(invoice),
         Err(error) => match &error {
             RepositoryError::NotFound => Err(InvoiceDoesNotExist),
             _ => Err(DBError(error)),

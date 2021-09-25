@@ -4,10 +4,10 @@ use chrono::NaiveDateTime;
 use crate::{
     database::{
         repository::{
-            FullInvoiceRepository, InvoiceRepository, NameQueryRepository, RepositoryError,
-            StoreRepository,
+            FullInvoiceRepository, InvoiceLineRepository, ItemRepository, NameQueryRepository,
+            RepositoryError, StoreRepository,
         },
-        schema::InvoiceRowType,
+        schema::{InvoiceRow, InvoiceRowType},
     },
     server::service::graphql::{
         schema::{mutations::supplier_invoice::InsertSupplierInvoiceInput, types::InvoiceStatus},
@@ -17,7 +17,7 @@ use crate::{
 
 use super::{
     check_invoice_insert, check_other_party_insert, current_date_time, current_store_id,
-    FullInvoice, InsertSupplierInvoiceError,
+    get_new_insert_lines, FullInvoice, InsertSupplierInvoiceError,
 };
 
 impl From<RepositoryError> for InsertSupplierInvoiceError {
@@ -34,19 +34,21 @@ pub async fn insert_supplier_invoice(
         status,
         comment,
         their_reference,
+        lines,
     }: InsertSupplierInvoiceInput,
 ) -> Result<(), InsertSupplierInvoiceError> {
     let name_query_respository = ctx.get_repository::<NameQueryRepository>();
     let full_invoice_repository = ctx.get_repository::<FullInvoiceRepository>();
-    let invoice_repository = ctx.get_repository::<InvoiceRepository>();
     let store_repository = ctx.get_repository::<StoreRepository>();
+    let item_respository = ctx.get_repository::<ItemRepository>();
+    let invoice_line_repository = ctx.get_repository::<InvoiceLineRepository>();
 
-    check_invoice_insert(invoice_repository, &id).await?;
+    check_invoice_insert(full_invoice_repository, &id).await?;
     check_other_party_insert(name_query_respository, &other_party_id).await?;
 
     let current_datetime = current_date_time();
 
-    let invoice = FullInvoice {
+    let invoice = InvoiceRow {
         id,
         comment,
         their_reference,
@@ -58,10 +60,14 @@ pub async fn insert_supplier_invoice(
         finalised_datetime: finalised_datetime(&status, &current_datetime),
         status: status.into(),
         entry_datetime: current_datetime,
-        // lines
     };
 
-    full_invoice_repository.insert(invoice).await?;
+    let lines =
+        get_new_insert_lines(lines, invoice_line_repository, item_respository, &invoice).await?;
+
+    let full_invoice = FullInvoice { invoice, lines };
+
+    full_invoice_repository.insert(full_invoice).await?;
 
     Ok(())
 }

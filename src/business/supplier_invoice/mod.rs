@@ -3,7 +3,7 @@ use chrono::{NaiveDateTime, Utc};
 use crate::{
     database::{
         repository::RepositoryError,
-        schema::{InvoiceRowStatus, InvoiceRowType},
+        schema::{InvoiceLineRow, InvoiceRow, StockLineRow},
     },
     server::service::graphql::schema::types::NameQuery,
 };
@@ -23,26 +23,36 @@ pub use self::insert::*;
 pub mod update;
 pub use self::update::*;
 
+pub mod lines;
+pub use self::lines::*;
+
 pub struct FullInvoice {
-    pub id: String,
-    pub name_id: String,
-    pub store_id: String,
-    pub invoice_number: i32,
-    pub r#type: InvoiceRowType,
-    pub status: InvoiceRowStatus,
-    pub comment: Option<String>,
-    pub their_reference: Option<String>,
-    pub entry_datetime: NaiveDateTime,
-    pub confirm_datetime: Option<NaiveDateTime>,
-    pub finalised_datetime: Option<NaiveDateTime>,
-    // lines
+    pub invoice: InvoiceRow,
+    pub lines: Vec<FullInvoiceLine>,
+}
+pub struct FullInvoiceLine {
+    pub line: InvoiceLineRow,
+    pub batch: Option<StockLineRow>,
 }
 
 pub enum InsertSupplierInvoiceError {
     OtherPartyNotFound(String),
     OtherPartyIsNotASupplier(NameQuery),
     InvoiceExists,
+    InvoiceLineErrors(Vec<InsertSupplierInvoiceLineErrors>),
     DBError(RepositoryError),
+}
+
+pub struct InsertSupplierInvoiceLineErrors {
+    pub id: String,
+    pub errors: Vec<InsertSupplierInvoiceLineError>,
+}
+pub enum InsertSupplierInvoiceLineError {
+    PackSizeMustBeAboveOne(u32),
+    SellPricePerPackMustBePositive(f64),
+    CostPricePerPackMustBePositive(f64),
+    InvoiceLineAlreadyExists,
+    ItemIdNotFound(String),
 }
 
 pub enum UpdateSupplierInvoiceError {
