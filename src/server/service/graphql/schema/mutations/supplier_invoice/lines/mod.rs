@@ -1,6 +1,10 @@
 pub mod insert;
 pub use self::insert::*;
 
+pub mod upsert;
+pub use self::upsert::*;
+
+use crate::business::RequiredInsertField;
 use crate::server::service::graphql::schema::mutations::{
     DBError, ForeignKeyError, RecordAlreadyExist, ValueOutOfRange,
 };
@@ -38,9 +42,9 @@ pub struct InsertSupplierInvoiceLineErrors {
 }
 
 #[derive(SimpleObject)]
-pub struct UpdateSupplierInvoiceLineErrors {
+pub struct UpsertSupplierInvoiceLineErrors {
     pub id: String,
-    pub errors: Vec<UpdateSupplierInvoiceLineError>,
+    pub errors: Vec<UpsertSupplierInvoiceLineError>,
 }
 
 #[derive(Interface)]
@@ -54,6 +58,62 @@ pub enum InsertSupplierInvoiceLineError {
 
 #[derive(Interface)]
 #[graphql(field(name = "description", type = "&str"))]
-pub enum UpdateSupplierInvoiceLineError {
+pub enum UpsertSupplierInvoiceLineError {
+    RecordAlreadyExist(RecordAlreadyExist),
+    ValueOutOfRange(ValueOutOfRange),
+    ForeignKeyError(ForeignKeyError),
+    InsertFieldMissing(InsertFieldMissing),
+    InvoiceLineIsReserved(InvoiceLineIsReserved),
+    InvoiceLineBelongsToAnotherInvoice(InvoiceLineBelongsToAnotherInvoice),
     DBError(DBError),
+}
+
+#[derive(Enum, Copy, Clone, PartialEq, Eq)]
+pub enum MissingInsertField {
+    PackSize,
+    NumberOfPacks,
+    ItemId,
+    CostPricePerPack,
+    SellPricePerPack,
+}
+
+pub struct InvoiceLineIsReserved;
+#[Object]
+impl InvoiceLineIsReserved {
+    pub async fn description(&self) -> &'static str {
+        "Invoice line is reserved"
+    }
+}
+
+pub struct InvoiceLineBelongsToAnotherInvoice;
+#[Object]
+impl InvoiceLineBelongsToAnotherInvoice {
+    pub async fn description(&self) -> &'static str {
+        "Invoice line belongs to another invoice"
+    }
+}
+
+pub struct InsertFieldMissing(pub MissingInsertField);
+#[Object]
+impl InsertFieldMissing {
+    pub async fn description(&self) -> &'static str {
+        "Field missing for insert line"
+    }
+
+    pub async fn field(&self) -> &MissingInsertField {
+        &self.0
+    }
+}
+
+impl From<RequiredInsertField> for MissingInsertField {
+    fn from(missing_field: RequiredInsertField) -> Self {
+        use self::MissingInsertField::*;
+        match missing_field {
+            RequiredInsertField::PackSize => PackSize,
+            RequiredInsertField::NumberOfPacks => NumberOfPacks,
+            RequiredInsertField::ItemId => ItemId,
+            RequiredInsertField::CostPricePerPack => CostPricePerPack,
+            RequiredInsertField::SellPricePerPack => SellPricePerPack,
+        }
+    }
 }

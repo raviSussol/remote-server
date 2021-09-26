@@ -1,7 +1,7 @@
 use super::{
     CannotChangeInvoiceBackToDraft, CannotEditFinalisedInvoice, InvoiceDoesNotBelongToCurrentStore,
-    NotASupplierInvoice, OtherPartyNotASuppier, UpdateSupplierInvoiceError as ApiError,
-    UpdateSupplierInvoiceErrors as ApiErrors,
+    NotASupplierInvoice, OptVec, OtherPartyNotASuppier, UpdateSupplierInvoiceError as ApiError,
+    UpdateSupplierInvoiceErrors as ApiErrors, UpsertSupplierInvoiceLineErrors as ApiLineError,
 };
 use crate::{
     business::supplier_invoice::UpdateSupplierInvoiceError as BusinessError,
@@ -45,17 +45,20 @@ async fn invoice_result(id: String, invoice_repository: &InvoiceRepository) -> I
     }
 }
 
-fn error_result(id: String, error: BusinessError) -> InvoiceWithError {
-    InvoiceWithError::Errors(ApiErrors {
-        id,
-        errors: Some(vec![error.into()]),
-        lines: None,
-    })
+impl From<ApiError> for OptVec<ApiError> {
+    fn from(error: ApiError) -> Self {
+        Some(vec![error])
+    }
 }
 
-impl From<BusinessError> for ApiError {
+fn error_result(id: String, error: BusinessError) -> InvoiceWithError {
+    let (errors, lines) = error.into();
+    InvoiceWithError::Errors(ApiErrors { id, errors, lines })
+}
+
+impl From<BusinessError> for (OptVec<ApiError>, OptVec<ApiLineError>) {
     fn from(business_error: BusinessError) -> Self {
-        match business_error {
+        let api_error = match business_error {
             BusinessError::OtherPartyNotFound(other_party_id) => {
                 ApiError::ForeignKeyError(ForeignKeyError {
                     key: ForeignKeys::OtherPartyId,
@@ -82,6 +85,18 @@ impl From<BusinessError> for ApiError {
                 ApiError::CannotChangeInvoiceBackToDraft(CannotChangeInvoiceBackToDraft {})
             }
             BusinessError::DBError(error) => ApiError::DBError(DBError(error)),
-        }
+            BusinessError::InvoiceLineErrors(invoice_line_errors) => {
+                return (
+                    None,
+                    Some(
+                        invoice_line_errors
+                            .into_iter()
+                            .map(ApiLineError::from)
+                            .collect(),
+                    ),
+                )
+            }
+        };
+        (api_error.into(), None)
     }
 }

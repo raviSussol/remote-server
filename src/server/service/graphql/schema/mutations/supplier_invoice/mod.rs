@@ -45,7 +45,7 @@ pub struct InsertSupplierInvoiceErrors {
 pub struct UpdateSupplierInvoiceErrors {
     pub id: String,
     pub errors: OptVec<UpdateSupplierInvoiceError>,
-    pub lines: OptVec<UpdateSupplierInvoiceLineErrors>,
+    pub lines: OptVec<UpsertSupplierInvoiceLineErrors>,
 }
 
 #[derive(Interface)]
