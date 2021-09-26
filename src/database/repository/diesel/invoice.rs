@@ -158,27 +158,20 @@ impl FullInvoiceRepository {
             // Deletes
 
             if let Some(deletes) = invoice.deletes {
-                let invoice_ids: Vec<String> =
-                    deletes.into_iter().map(|invoice| invoice.id).collect();
-
-                diesel::delete(invoice_dsl::invoice.filter(invoice_dsl::id.eq_any(invoice_ids)))
+                diesel::delete(invoice_dsl::invoice.filter(invoice_dsl::id.eq_any(deletes)))
                     .execute(&connection)?;
             }
 
             if let Some(deletes) = lines.deletes {
-                let line_ids: Vec<String> = deletes.into_iter().map(|line| line.id).collect();
-
                 diesel::delete(
-                    invoice_line_dsl::invoice_line.filter(invoice_line_dsl::id.eq_any(line_ids)),
+                    invoice_line_dsl::invoice_line.filter(invoice_line_dsl::id.eq_any(deletes)),
                 )
                 .execute(&connection)?;
             }
 
             if let Some(deletes) = batches.deletes {
-                let batch_ids: Vec<String> = deletes.into_iter().map(|batch| batch.id).collect();
-
                 diesel::delete(
-                    stock_line_dsl::stock_line.filter(stock_line_dsl::id.eq_any(batch_ids)),
+                    stock_line_dsl::stock_line.filter(stock_line_dsl::id.eq_any(deletes)),
                 )
                 .execute(&connection)?;
             }
