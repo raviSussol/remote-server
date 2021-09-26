@@ -35,6 +35,70 @@ pub struct FullInvoiceLine {
     pub batch: Option<StockLineRow>,
 }
 
+pub struct Mutations<T> {
+    pub inserts: Option<Vec<T>>,
+    pub updates: Option<Vec<T>>,
+    pub deletes: Option<Vec<T>>,
+}
+
+impl<T> Mutations<T> {
+    fn new() -> Mutations<T> {
+        Mutations {
+            inserts: None,
+            updates: None,
+            deletes: None,
+        }
+    }
+    fn new_inserts(value: T) -> Mutations<T> {
+        Mutations {
+            inserts: Some(vec![value]),
+            updates: None,
+            deletes: None,
+        }
+    }
+    fn new_updates(value: T) -> Mutations<T> {
+        Mutations {
+            inserts: None,
+            updates: Some(vec![value]),
+            deletes: None,
+        }
+    }
+    fn new_deletes(value: T) -> Mutations<T> {
+        Mutations {
+            inserts: None,
+            updates: None,
+            deletes: Some(vec![value]),
+        }
+    }
+    fn add_insert(&mut self, value: T) -> &Self {
+        add_to_mutations(&mut self.inserts, value);
+        self
+    }
+
+    fn add_update(&mut self, value: T) -> &Self {
+        add_to_mutations(&mut self.updates, value);
+        self
+    }
+
+    fn add_delete(&mut self, value: T) -> &Self {
+        add_to_mutations(&mut self.deletes, value);
+        self
+    }
+}
+
+fn add_to_mutations<T>(mutations: &mut Option<Vec<T>>, value: T) {
+    match mutations {
+        Some(mutations) => mutations.push(value),
+        None => *mutations = Some(vec![value]),
+    };
+}
+
+pub struct FullInvoiceMutation {
+    pub invoice: Mutations<InvoiceRow>,
+    pub lines: Mutations<InvoiceLineRow>,
+    pub batches: Mutations<StockLineRow>,
+}
+
 pub enum InsertSupplierInvoiceError {
     OtherPartyNotFound(String),
     OtherPartyIsNotASupplier(NameQuery),

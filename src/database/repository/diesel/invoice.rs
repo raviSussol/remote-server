@@ -1,7 +1,7 @@
 use super::DBBackendConnection;
 
 use crate::{
-    business::{FullInvoice, FullInvoiceLine},
+    business::{FullInvoice, FullInvoiceLine, FullInvoiceMutation},
     database::{
         repository::{repository::get_connection, RepositoryError},
         schema::{InvoiceLineRow, InvoiceRow, StockLineRow},
@@ -100,46 +100,89 @@ impl FullInvoiceRepository {
         })
     }
 
-    pub async fn insert(&self, invoice: FullInvoice) -> Result<(), RepositoryError> {
+    pub async fn mutate(
+        &self,
+        FullInvoiceMutation {
+            invoice,
+            lines,
+            batches,
+        }: FullInvoiceMutation,
+    ) -> Result<(), RepositoryError> {
         let connection = get_connection(&self.pool)?;
-
-        let mut stock_lines = Vec::new();
-        let mut invoice_lines = Vec::new();
-
-        let invoice_row = invoice.invoice;
-        for line in invoice.lines.into_iter() {
-            invoice_lines.push(line.line);
-            if let Some(stock_line) = line.batch {
-                stock_lines.push(stock_line)
-            }
-        }
 
         connection.transaction::<(), RepositoryError, _>(|| {
-            diesel::insert_into(invoice_dsl::invoice)
-                .values(invoice_row)
+            // Inserts
+            if let Some(inserts) = invoice.inserts {
+                diesel::insert_into(invoice_dsl::invoice)
+                    .values(inserts)
+                    .execute(&*connection)?;
+            }
+
+            if let Some(inserts) = batches.inserts {
+                diesel::insert_into(stock_line_dsl::stock_line)
+                    .values(inserts)
+                    .execute(&*connection)?;
+            }
+
+            if let Some(inserts) = lines.inserts {
+                diesel::insert_into(invoice_line_dsl::invoice_line)
+                    .values(inserts)
+                    .execute(&*connection)?;
+            }
+
+            // Updates
+            if let Some(updates) = batches.updates {
+                for update in updates.into_iter() {
+                    diesel::update(stock_line_dsl::stock_line)
+                        .set(update)
+                        .execute(&connection)?;
+                }
+            }
+
+            if let Some(updates) = lines.updates {
+                for update in updates.into_iter() {
+                    diesel::update(invoice_line_dsl::invoice_line)
+                        .set(update)
+                        .execute(&connection)?;
+                }
+            }
+
+            if let Some(updates) = invoice.updates {
+                for update in updates.into_iter() {
+                    diesel::update(invoice_dsl::invoice)
+                        .set(update)
+                        .execute(&connection)?;
+                }
+            }
+
+            // Deletes
+
+            if let Some(deletes) = invoice.deletes {
+                let invoice_ids: Vec<String> =
+                    deletes.into_iter().map(|invoice| invoice.id).collect();
+
+                diesel::delete(invoice_dsl::invoice.filter(invoice_dsl::id.eq_any(invoice_ids)))
+                    .execute(&connection)?;
+            }
+
+            if let Some(deletes) = lines.deletes {
+                let line_ids: Vec<String> = deletes.into_iter().map(|line| line.id).collect();
+
+                diesel::delete(
+                    invoice_line_dsl::invoice_line.filter(invoice_line_dsl::id.eq_any(line_ids)),
+                )
                 .execute(&connection)?;
+            }
 
-            diesel::insert_into(stock_line_dsl::stock_line)
-                .values(stock_lines)
-                .execute(&*connection)?;
+            if let Some(deletes) = batches.deletes {
+                let batch_ids: Vec<String> = deletes.into_iter().map(|batch| batch.id).collect();
 
-            diesel::insert_into(invoice_line_dsl::invoice_line)
-                .values(invoice_lines)
-                .execute(&*connection)?;
+                diesel::delete(
+                    stock_line_dsl::stock_line.filter(stock_line_dsl::id.eq_any(batch_ids)),
+                )
+                .execute(&connection)?;
+            }
             Ok(())
         })
-    }
-
-    pub async fn update(&self, invoice: FullInvoice) -> Result<(), RepositoryError> {
-        let connection = get_connection(&self.pool)?;
-
-        // Also insert the following in one transaction
-        // stock lines
-        // lines
-        diesel::update(invoice_dsl::invoice)
-            .set(invoice.invoice)
-            .execute(&connection)?;
-
-        Ok(())
     }
 }

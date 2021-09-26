@@ -14,8 +14,8 @@ use crate::{
 };
 
 use super::{
-    check_invoice_update, current_date_time, current_store_id, get_invoice, FullInvoice,
-    UpdateSupplierInvoiceError,
+    check_invoice_update, current_date_time, current_store_id, get_invoice, FullInvoiceMutation,
+    Mutations, UpdateSupplierInvoiceError,
 };
 
 impl From<RepositoryError> for UpdateSupplierInvoiceError {
@@ -65,12 +65,13 @@ pub async fn update_supplier_invoice(
         previous_invoice_row.status = status;
     }
 
-    let invoice = FullInvoice {
-        invoice: previous_invoice_row,
-        lines: Vec::new(),
+    let invoice = FullInvoiceMutation {
+        invoice: Mutations::new_updates(previous_invoice_row),
+        lines: Mutations::new(),
+        batches: Mutations::new(),
     };
 
-    full_invoice_repository.update(invoice).await?;
+    full_invoice_repository.mutate(invoice).await?;
 
     Ok(())
 }

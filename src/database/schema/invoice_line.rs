@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use super::diesel_schema::invoice_line;
 use super::diesel_schema::invoice_line_stats;
 
-#[derive(Clone, Queryable, Insertable, Debug, PartialEq)]
+#[derive(Clone, Queryable, AsChangeset, Identifiable, Insertable, Debug, PartialEq)]
 #[table_name = "invoice_line"]
 pub struct InvoiceLineRow {
     pub id: String,

@@ -5,26 +5,27 @@ use uuid::Uuid;
 use crate::{
     database::{
         repository::{InvoiceLineRepository, ItemRepository},
-        schema::{InvoiceLineRow, InvoiceRow, InvoiceRowStatus, StockLineRow},
+        schema::{InvoiceLineRow, InvoiceRow, StockLineRow},
     },
     server::service::graphql::schema::mutations::supplier_invoice::InsertSupplierInvoiceLineInput,
 };
 
 use super::{
-    FullInvoiceLine, InsertSupplierInvoiceError, InsertSupplierInvoiceLineError as Error,
-    InsertSupplierInvoiceLineErrors as LineErrors,
+    InsertSupplierInvoiceError, InsertSupplierInvoiceLineError as Error,
+    InsertSupplierInvoiceLineErrors as LineErrors, Mutations,
 };
 
 type Errors = Vec<LineErrors>;
 type Input = InsertSupplierInvoiceLineInput;
 
-pub async fn get_new_insert_lines(
+pub async fn get_insert_line_and_batches(
     lines: Option<Vec<Input>>,
     invoice_line_repository: &InvoiceLineRepository,
     item_respository: &ItemRepository,
     invoice: &InvoiceRow,
-) -> Result<Vec<FullInvoiceLine>, InsertSupplierInvoiceError> {
-    let mut result = Vec::new();
+) -> Result<(Mutations<InvoiceLineRow>, Mutations<StockLineRow>), InsertSupplierInvoiceError> {
+    let mut new_lines = Mutations::new();
+    let mut new_batches = Mutations::new();
 
     if let Some(lines) = lines {
         let all_errors = merge_errors(vec![
@@ -38,22 +39,16 @@ pub async fn get_new_insert_lines(
         }
 
         for line in lines {
-            let mut invoice_line = FullInvoiceLine {
-                line: create_line(line, invoice),
-                batch: None,
-            };
+            let mut new_line = create_line(line, invoice);
+            let new_batch = create_batch(&new_line, invoice);
+            new_line.stock_line_id = Some(new_batch.id.clone());
 
-            if invoice.status != InvoiceRowStatus::Draft {
-                let batch = create_batch(&invoice_line.line, invoice);
-                invoice_line.line.stock_line_id = Some(batch.id.clone());
-                invoice_line.batch = Some(batch);
-            }
-
-            result.push(invoice_line);
+            new_lines.add_insert(new_line);
+            new_batches.add_insert(new_batch);
         }
     }
 
-    Ok(result)
+    Ok((new_lines, new_batches))
 }
 
 fn create_line(

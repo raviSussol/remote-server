@@ -17,7 +17,7 @@ use crate::{
 
 use super::{
     check_invoice_insert, check_other_party_insert, current_date_time, current_store_id,
-    get_new_insert_lines, FullInvoice, InsertSupplierInvoiceError,
+    get_insert_line_and_batches, FullInvoiceMutation, InsertSupplierInvoiceError, Mutations,
 };
 
 impl From<RepositoryError> for InsertSupplierInvoiceError {
@@ -62,12 +62,17 @@ pub async fn insert_supplier_invoice(
         entry_datetime: current_datetime,
     };
 
-    let lines =
-        get_new_insert_lines(lines, invoice_line_repository, item_respository, &invoice).await?;
+    let (lines, batches) =
+        get_insert_line_and_batches(lines, invoice_line_repository, item_respository, &invoice)
+            .await?;
 
-    let full_invoice = FullInvoice { invoice, lines };
+    let full_invoice = FullInvoiceMutation {
+        invoice: Mutations::new_inserts(invoice),
+        lines,
+        batches,
+    };
 
-    full_invoice_repository.insert(full_invoice).await?;
+    full_invoice_repository.mutate(full_invoice).await?;
 
     Ok(())
 }
