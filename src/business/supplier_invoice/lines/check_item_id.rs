@@ -1,15 +1,20 @@
 use crate::{
     business::{
-        InsertSupplierInvoiceError, InsertSupplierInvoiceLineError, InsertSupplierInvoiceLineErrors,
+        InsertSupplierInvoiceLineError, InsertSupplierInvoiceLineErrors,
+        UpsertSupplierInvoiceLineError,
     },
     database::repository::{ItemRepository, RepositoryError},
-    server::service::graphql::schema::mutations::supplier_invoice::InsertSupplierInvoiceLineInput,
+    server::service::graphql::schema::mutations::supplier_invoice::{
+        InsertSupplierInvoiceLineInput, UpsertSupplierInvoiceLineInput,
+    },
 };
+
+use super::UpsertSupplierInvoiceLineErrors;
 
 pub async fn check_item_id_insert(
     lines: &Vec<InsertSupplierInvoiceLineInput>,
     repository: &ItemRepository,
-) -> Result<Vec<InsertSupplierInvoiceLineErrors>, InsertSupplierInvoiceError> {
+) -> Result<Vec<InsertSupplierInvoiceLineErrors>, RepositoryError> {
     let lines_with_item_id: Vec<LineWithItemId> = lines.iter().map(LineWithItemId::from).collect();
 
     let error_lines = get_lines_with_wrong_item_ids(lines_with_item_id, repository).await?;
@@ -18,6 +23,46 @@ pub async fn check_item_id_insert(
         .into_iter()
         .map(InsertSupplierInvoiceLineErrors::from)
         .collect())
+}
+
+pub async fn check_item_id_upsert(
+    lines: &Vec<UpsertSupplierInvoiceLineInput>,
+    repository: &ItemRepository,
+) -> Result<Vec<UpsertSupplierInvoiceLineErrors>, RepositoryError> {
+    let lines_with_item_id: Vec<LineWithItemId> =
+        lines.iter().filter_map(OptLineWithItemId::from).collect();
+
+    let error_lines = get_lines_with_wrong_item_ids(lines_with_item_id, repository).await?;
+
+    Ok(error_lines
+        .into_iter()
+        .map(UpsertSupplierInvoiceLineErrors::from)
+        .collect())
+}
+
+type OptLineWithItemId = Option<LineWithItemId>;
+
+impl From<&UpsertSupplierInvoiceLineInput> for OptLineWithItemId {
+    fn from(line: &UpsertSupplierInvoiceLineInput) -> Self {
+        match &line.item_id {
+            Some(item_id) => Some(LineWithItemId {
+                id: line.id.clone(),
+                item_id: item_id.clone(),
+            }),
+            None => None,
+        }
+    }
+}
+
+impl From<LineWithItemId> for UpsertSupplierInvoiceLineErrors {
+    fn from(line: LineWithItemId) -> Self {
+        UpsertSupplierInvoiceLineErrors {
+            id: line.id.clone(),
+            errors: vec![UpsertSupplierInvoiceLineError::ItemIdNotFound(
+                line.item_id.clone(),
+            )],
+        }
+    }
 }
 
 impl From<&InsertSupplierInvoiceLineInput> for LineWithItemId {

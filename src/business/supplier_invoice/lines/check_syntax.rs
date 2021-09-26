@@ -1,7 +1,11 @@
 use crate::{
     business::{InsertSupplierInvoiceLineError, InsertSupplierInvoiceLineErrors},
-    server::service::graphql::schema::mutations::supplier_invoice::InsertSupplierInvoiceLineInput,
+    server::service::graphql::schema::mutations::supplier_invoice::{
+        InsertSupplierInvoiceLineInput, UpsertSupplierInvoiceLineInput,
+    },
 };
+
+use super::{UpsertSupplierInvoiceLineError, UpsertSupplierInvoiceLineErrors};
 
 pub fn check_syntax_insert(
     lines: &Vec<InsertSupplierInvoiceLineInput>,
@@ -26,6 +30,81 @@ pub fn check_syntax_insert(
         }
     }
     result
+}
+
+pub fn check_syntax_upsert(
+    lines: &Vec<UpsertSupplierInvoiceLineInput>,
+) -> Vec<UpsertSupplierInvoiceLineErrors> {
+    let mut result = Vec::new();
+
+    for line in lines {
+        let errors: Vec<UpsertSupplierInvoiceLineError> = check_syntax(
+            line.pack_size,
+            line.sell_price_per_pack,
+            line.cost_price_per_pack,
+        )
+        .into_iter()
+        .map(UpsertSupplierInvoiceLineError::from)
+        .collect();
+
+        if errors.len() > 0 {
+            result.push(UpsertSupplierInvoiceLineErrors {
+                id: line.id.clone(),
+                errors,
+            });
+        }
+    }
+    result
+}
+
+pub struct InsertsFromUpsert {
+    pub inserts: Vec<InsertSupplierInvoiceLineInput>,
+    pub errors: Vec<UpsertSupplierInvoiceLineErrors>,
+}
+
+fn get_insert_form_upsert(
+    UpsertSupplierInvoiceLineInput {
+        id,
+        pack_size,
+        batch,
+        number_of_packs,
+        item_id,
+        cost_price_per_pack,
+        sell_price_per_pack,
+        expiry_date,
+    }: UpsertSupplierInvoiceLineInput,
+) -> Result<InsertSupplierInvoiceLineInput, UpsertSupplierInvoiceLineError> {
+    use super::RequiredInsertField::*;
+    use UpsertSupplierInvoiceLineError::*;
+
+    Ok(InsertSupplierInvoiceLineInput {
+        id,
+        pack_size: pack_size.ok_or(InsertFieldMissing(PackSize))?,
+        batch,
+        number_of_packs: number_of_packs.ok_or(InsertFieldMissing(NumberOfPacks))?,
+        item_id: item_id.ok_or(InsertFieldMissing(ItemId))?,
+        cost_price_per_pack: cost_price_per_pack.ok_or(InsertFieldMissing(CostPricePerPack))?,
+        sell_price_per_pack: sell_price_per_pack.ok_or(InsertFieldMissing(SellPricePerPack))?,
+        expiry_date,
+    })
+}
+
+pub fn get_inserts_from_upsert(lines: Vec<UpsertSupplierInvoiceLineInput>) -> InsertsFromUpsert {
+    let mut inserts = Vec::new();
+    let mut errors = Vec::new();
+
+    for line in lines.into_iter() {
+        let id = line.id.clone();
+        match get_insert_form_upsert(line) {
+            Ok(insert) => inserts.push(insert),
+            Err(error) => errors.push(UpsertSupplierInvoiceLineErrors {
+                id,
+                errors: vec![error],
+            }),
+        }
+    }
+
+    InsertsFromUpsert { inserts, errors }
 }
 
 enum CheckSyntaxError {
@@ -66,6 +145,23 @@ fn check_syntax(
 impl From<CheckSyntaxError> for InsertSupplierInvoiceLineError {
     fn from(error: CheckSyntaxError) -> Self {
         use InsertSupplierInvoiceLineError::*;
+        match error {
+            CheckSyntaxError::PackSizeMustBeAboveOne(pack_size) => {
+                PackSizeMustBeAboveOne(pack_size)
+            }
+            CheckSyntaxError::SellPricePerPackMustBePositive(price) => {
+                SellPricePerPackMustBePositive(price)
+            }
+            CheckSyntaxError::CostPricePerPackMustBePositive(price) => {
+                CostPricePerPackMustBePositive(price)
+            }
+        }
+    }
+}
+
+impl From<CheckSyntaxError> for UpsertSupplierInvoiceLineError {
+    fn from(error: CheckSyntaxError) -> Self {
+        use UpsertSupplierInvoiceLineError::*;
         match error {
             CheckSyntaxError::PackSizeMustBeAboveOne(pack_size) => {
                 PackSizeMustBeAboveOne(pack_size)

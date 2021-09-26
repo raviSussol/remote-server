@@ -38,7 +38,7 @@ pub struct FullInvoiceLine {
 pub struct Mutations<T> {
     pub inserts: Option<Vec<T>>,
     pub updates: Option<Vec<T>>,
-    pub deletes: Option<Vec<T>>,
+    pub deletes: Option<Vec<String>>,
 }
 
 impl<T> Mutations<T> {
@@ -63,7 +63,7 @@ impl<T> Mutations<T> {
             deletes: None,
         }
     }
-    fn new_deletes(value: T) -> Mutations<T> {
+    fn new_deletes(value: String) -> Mutations<T> {
         Mutations {
             inserts: None,
             updates: None,
@@ -80,7 +80,7 @@ impl<T> Mutations<T> {
         self
     }
 
-    fn add_delete(&mut self, value: T) -> &Self {
+    fn add_delete(&mut self, value: String) -> &Self {
         add_to_mutations(&mut self.deletes, value);
         self
     }
@@ -115,9 +115,22 @@ pub enum UpdateSupplierInvoiceError {
     NotASupplierInvoice,
     InvoiceDoesNotBelongToCurrentStore,
     CannoChangeInvoiceBackToDraft,
+    InvoiceLineErrors(Vec<UpsertSupplierInvoiceLineErrors>),
     DBError(RepositoryError),
 }
 
 pub fn current_date_time() -> NaiveDateTime {
     Utc::now().naive_utc()
+}
+
+impl From<RepositoryError> for InsertSupplierInvoiceError {
+    fn from(error: RepositoryError) -> Self {
+        InsertSupplierInvoiceError::DBError(error)
+    }
+}
+
+impl From<RepositoryError> for UpdateSupplierInvoiceError {
+    fn from(error: RepositoryError) -> Self {
+        UpdateSupplierInvoiceError::DBError(error)
+    }
 }

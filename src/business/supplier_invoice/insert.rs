@@ -5,7 +5,7 @@ use crate::{
     database::{
         repository::{
             FullInvoiceRepository, InvoiceLineRepository, ItemRepository, NameQueryRepository,
-            RepositoryError, StoreRepository,
+            StoreRepository,
         },
         schema::{InvoiceRow, InvoiceRowType},
     },
@@ -15,13 +15,10 @@ use crate::{
     },
 };
 
-use super::{FullInvoiceMutation, InsertSupplierInvoiceError, Mutations, check_invoice_insert, check_other_party_insert, current_date_time, current_store_id, get_insert_lines_and_batches};
-
-impl From<RepositoryError> for InsertSupplierInvoiceError {
-    fn from(error: RepositoryError) -> Self {
-        InsertSupplierInvoiceError::DBError(error)
-    }
-}
+use super::{
+    check_invoice_insert, check_other_party_insert, current_date_time, current_store_id,
+    get_insert_lines_and_batches, FullInvoiceMutation, InsertSupplierInvoiceError, Mutations,
+};
 
 pub async fn insert_supplier_invoice(
     ctx: &Context<'_>,

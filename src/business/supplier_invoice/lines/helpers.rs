@@ -5,6 +5,14 @@ use crate::{
 use std::convert::TryInto;
 use uuid::Uuid;
 
+pub fn convert_packsize(pack_size: u32) -> i32 {
+    pack_size.try_into().unwrap_or(1)
+}
+
+pub fn convert_number_of_packs(number_of_packs: u32) -> i32 {
+    number_of_packs.try_into().unwrap_or(0)
+}
+
 pub fn create_insert_line(
     InsertSupplierInvoiceLineInput {
         id,
@@ -18,9 +26,6 @@ pub fn create_insert_line(
     }: InsertSupplierInvoiceLineInput,
     invoice: &InvoiceRow,
 ) -> InvoiceLineRow {
-    let pack_size = pack_size.try_into().unwrap_or(1);
-    let number_of_packs = number_of_packs.try_into().unwrap_or(0);
-
     let total_after_tax = cost_price_per_pack * pack_size as f64 * number_of_packs as f64;
 
     InvoiceLineRow {
@@ -30,8 +35,8 @@ pub fn create_insert_line(
         stock_line_id: None,
         batch,
         expiry_date,
-        pack_size,
-        number_of_packs,
+        pack_size: convert_packsize(pack_size),
+        number_of_packs: convert_packsize(number_of_packs),
         cost_price_per_pack,
         sell_price_per_pack,
         total_after_tax,
