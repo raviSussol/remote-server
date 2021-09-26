@@ -15,10 +15,7 @@ use crate::{
     },
 };
 
-use super::{
-    check_invoice_insert, check_other_party_insert, current_date_time, current_store_id,
-    get_insert_line_and_batches, FullInvoiceMutation, InsertSupplierInvoiceError, Mutations,
-};
+use super::{FullInvoiceMutation, InsertSupplierInvoiceError, Mutations, check_invoice_insert, check_other_party_insert, current_date_time, current_store_id, get_insert_lines_and_batches};
 
 impl From<RepositoryError> for InsertSupplierInvoiceError {
     fn from(error: RepositoryError) -> Self {
@@ -63,7 +60,7 @@ pub async fn insert_supplier_invoice(
     };
 
     let (lines, batches) =
-        get_insert_line_and_batches(lines, invoice_line_repository, item_respository, &invoice)
+        get_insert_lines_and_batches(lines, invoice_line_repository, item_respository, &invoice)
             .await?;
 
     let full_invoice = FullInvoiceMutation {

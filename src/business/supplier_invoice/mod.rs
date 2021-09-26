@@ -107,18 +107,6 @@ pub enum InsertSupplierInvoiceError {
     DBError(RepositoryError),
 }
 
-pub struct InsertSupplierInvoiceLineErrors {
-    pub id: String,
-    pub errors: Vec<InsertSupplierInvoiceLineError>,
-}
-pub enum InsertSupplierInvoiceLineError {
-    PackSizeMustBeAboveOne(u32),
-    SellPricePerPackMustBePositive(f64),
-    CostPricePerPackMustBePositive(f64),
-    InvoiceLineAlreadyExists,
-    ItemIdNotFound(String),
-}
-
 pub enum UpdateSupplierInvoiceError {
     OtherPartyNotFound(String),
     OtherPartyIsNotASupplier(NameQuery),

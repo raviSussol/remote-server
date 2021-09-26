@@ -32,6 +32,7 @@ pub async fn update_supplier_invoice(
         status,
         comment,
         their_reference,
+        ..
     }: UpdateSupplierInvoiceInput,
 ) -> Result<(), UpdateSupplierInvoiceError> {
     let name_query_respository = ctx.get_repository::<NameQueryRepository>();

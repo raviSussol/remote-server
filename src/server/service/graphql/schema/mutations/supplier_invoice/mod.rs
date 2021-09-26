@@ -31,7 +31,7 @@ pub struct UpdateSupplierInvoiceInput {
     pub status: Option<InvoiceStatus>,
     pub comment: Option<String>,
     pub their_reference: Option<String>,
-    // lines
+    pub lines: OptVec<UpsertSupplierInvoiceLineInput>,
 }
 
 #[derive(SimpleObject)]

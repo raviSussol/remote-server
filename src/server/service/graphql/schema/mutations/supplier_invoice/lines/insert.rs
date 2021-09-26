@@ -1,56 +1,16 @@
+use super::{
+    InsertSupplierInvoiceLineError as SingleApiError,
+    InsertSupplierInvoiceLineErrors as ApiLineError,
+};
 use crate::{
     business::{
         InsertSupplierInvoiceLineError as BusinessSingleError,
         InsertSupplierInvoiceLineErrors as BusinessLineError,
     },
     server::service::graphql::schema::mutations::{
-        DBError, ForeignKeyError, ForeignKeys, RangeFields, RecordAlreadyExist, ValueOutOfRange,
+        ForeignKeyError, ForeignKeys, RangeFields, RecordAlreadyExist, ValueOutOfRange,
     },
 };
-use async_graphql::*;
-use chrono::NaiveDate;
-
-#[derive(InputObject)]
-pub struct InsertSupplierInvoiceLineInput {
-    pub id: String,
-    pub item_id: String,
-    pub pack_size: u32,
-    pub batch: Option<String>,
-    pub cost_price_per_pack: f64,
-    pub sell_price_per_pack: f64,
-    pub expiry_date: Option<NaiveDate>,
-    pub number_of_packs: u32,
-}
-
-#[derive(SimpleObject)]
-pub struct InsertSupplierInvoiceLineErrors {
-    pub id: String,
-    pub errors: Vec<InsertSupplierInvoiceLineError>,
-}
-
-#[derive(SimpleObject)]
-pub struct UpdateSupplierInvoiceLineErrors {
-    pub id: String,
-    pub errors: Vec<UpdateSupplierInvoiceLineError>,
-}
-
-#[derive(Interface)]
-#[graphql(field(name = "description", type = "&str"))]
-pub enum InsertSupplierInvoiceLineError {
-    RecordAlreadyExist(RecordAlreadyExist),
-    ValueOutOfRange(ValueOutOfRange),
-    ForeignKeyError(ForeignKeyError),
-    DBError(DBError),
-}
-
-#[derive(Interface)]
-#[graphql(field(name = "description", type = "&str"))]
-pub enum UpdateSupplierInvoiceLineError {
-    DBError(DBError),
-}
-
-type SingleApiError = InsertSupplierInvoiceLineError;
-type ApiLineError = InsertSupplierInvoiceLineErrors;
 
 impl From<BusinessLineError> for ApiLineError {
     fn from(error: BusinessLineError) -> Self {
