@@ -8,8 +8,8 @@ use crate::database::schema::{InvoiceLineRow, RequisitionRow, StoreRow};
 use crate::server::service::graphql::schema::types::{InvoiceLine, Requisition, Store};
 use crate::server::service::graphql::ContextExt;
 
-use super::types::{InvoiceList, InvoiceNode, ItemList, NameList};
-use async_graphql::{Context, Object};
+use super::types::{InvoiceList, InvoiceNode, ItemList, NameList, StockLineQuery};
+use async_graphql::{Context, Object, SimpleObject};
 use pagination::Pagination;
 pub struct Queries;
 

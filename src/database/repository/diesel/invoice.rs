@@ -108,74 +108,75 @@ impl FullInvoiceRepository {
             batches,
         }: FullInvoiceMutation,
     ) -> Result<(), RepositoryError> {
-        let connection = get_connection(&self.pool)?;
+        todo!()
+        // let connection = get_connection(&self.pool)?;
 
-        connection.transaction::<(), RepositoryError, _>(|| {
-            // Inserts
-            if let Some(inserts) = invoice.inserts {
-                diesel::insert_into(invoice_dsl::invoice)
-                    .values(inserts)
-                    .execute(&*connection)?;
-            }
+        // connection.transaction::<(), RepositoryError, _>(|| {
+        //     // Inserts
+        //     if let Some(inserts) = invoice.inserts {
+        //         diesel::insert_into(invoice_dsl::invoice)
+        //             .values(inserts)
+        //             .execute(&*connection)?;
+        //     }
 
-            if let Some(inserts) = batches.inserts {
-                diesel::insert_into(stock_line_dsl::stock_line)
-                    .values(inserts)
-                    .execute(&*connection)?;
-            }
+        //     if let Some(inserts) = batches.inserts {
+        //         diesel::insert_into(stock_line_dsl::stock_line)
+        //             .values(inserts)
+        //             .execute(&*connection)?;
+        //     }
 
-            if let Some(inserts) = lines.inserts {
-                diesel::insert_into(invoice_line_dsl::invoice_line)
-                    .values(inserts)
-                    .execute(&*connection)?;
-            }
+        //     if let Some(inserts) = lines.inserts {
+        //         diesel::insert_into(invoice_line_dsl::invoice_line)
+        //             .values(inserts)
+        //             .execute(&*connection)?;
+        //     }
 
-            // Updates
-            if let Some(updates) = batches.updates {
-                for update in updates.into_iter() {
-                    diesel::update(stock_line_dsl::stock_line)
-                        .set(update)
-                        .execute(&connection)?;
-                }
-            }
+        //     // Updates
+        //     if let Some(updates) = batches.updates {
+        //         for update in updates.into_iter() {
+        //             diesel::update(stock_line_dsl::stock_line)
+        //                 .set(update)
+        //                 .execute(&connection)?;
+        //         }
+        //     }
 
-            if let Some(updates) = lines.updates {
-                for update in updates.into_iter() {
-                    diesel::update(invoice_line_dsl::invoice_line)
-                        .set(update)
-                        .execute(&connection)?;
-                }
-            }
+        //     if let Some(updates) = lines.updates {
+        //         for update in updates.into_iter() {
+        //             diesel::update(invoice_line_dsl::invoice_line)
+        //                 .set(update)
+        //                 .execute(&connection)?;
+        //         }
+        //     }
 
-            if let Some(updates) = invoice.updates {
-                for update in updates.into_iter() {
-                    diesel::update(invoice_dsl::invoice)
-                        .set(update)
-                        .execute(&connection)?;
-                }
-            }
+        //     if let Some(updates) = invoice.updates {
+        //         for update in updates.into_iter() {
+        //             diesel::update(invoice_dsl::invoice)
+        //                 .set(update)
+        //                 .execute(&connection)?;
+        //         }
+        //     }
 
-            // Deletes
+        //     // Deletes
 
-            if let Some(deletes) = invoice.deletes {
-                diesel::delete(invoice_dsl::invoice.filter(invoice_dsl::id.eq_any(deletes)))
-                    .execute(&connection)?;
-            }
+        //     if let Some(deletes) = invoice.deletes {
+        //         diesel::delete(invoice_dsl::invoice.filter(invoice_dsl::id.eq_any(deletes)))
+        //             .execute(&connection)?;
+        //     }
 
-            if let Some(deletes) = lines.deletes {
-                diesel::delete(
-                    invoice_line_dsl::invoice_line.filter(invoice_line_dsl::id.eq_any(deletes)),
-                )
-                .execute(&connection)?;
-            }
+        //     if let Some(deletes) = lines.deletes {
+        //         diesel::delete(
+        //             invoice_line_dsl::invoice_line.filter(invoice_line_dsl::id.eq_any(deletes)),
+        //         )
+        //         .execute(&connection)?;
+        //     }
 
-            if let Some(deletes) = batches.deletes {
-                diesel::delete(
-                    stock_line_dsl::stock_line.filter(stock_line_dsl::id.eq_any(deletes)),
-                )
-                .execute(&connection)?;
-            }
-            Ok(())
-        })
+        //     if let Some(deletes) = batches.deletes {
+        //         diesel::delete(
+        //             stock_line_dsl::stock_line.filter(stock_line_dsl::id.eq_any(deletes)),
+        //         )
+        //         .execute(&connection)?;
+        //     }
+        //     Ok(())
+        //  }//)
     }
 }

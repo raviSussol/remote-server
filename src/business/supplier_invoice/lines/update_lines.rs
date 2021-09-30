@@ -70,18 +70,5 @@ fn get_updated_invoice_line(mut line: InvoiceLineRow, update_line: Input) -> Inv
         number_of_packs,
     } = update_line;
 
-    line.item_id = item_id.unwrap_or(line.item_id);
-    line.pack_size = pack_size.map(convert_packsize).unwrap_or(line.pack_size);
-    line.batch = batch.or(line.batch);
-    line.cost_price_per_pack = cost_price_per_pack.unwrap_or(line.cost_price_per_pack);
-    line.sell_price_per_pack = sell_price_per_pack.unwrap_or(line.sell_price_per_pack);
-    line.expiry_date = expiry_date.or(line.expiry_date);
-    line.number_of_packs = number_of_packs
-        .map(convert_number_of_packs)
-        .unwrap_or(line.number_of_packs);
-
-    line.total_after_tax =
-        line.cost_price_per_pack * line.pack_size as f64 * line.number_of_packs as f64;
-
-    line
+    todo!()
 }

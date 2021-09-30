@@ -15,7 +15,7 @@ use self::supplier_invoice::{
     InvoiceOrUpdateSupplierInvoiceError, UpdateSupplierInvoiceInput,
 };
 
-use super::types::{InvoiceLine, StockLineQuery};
+use super::types::{InvoiceLine, InvoiceLines, StockLineQuery};
 
 pub mod supplier_invoice;
 
@@ -30,8 +30,8 @@ pub struct UpdateCustomerInvoiceItemInput {
 
 #[derive(SimpleObject)]
 pub struct CustomerInvoiceLineUpdates {
-    inserts: Vec<InvoiceLine>,
-    updates: Vec<InvoiceLine>,
+    inserts: InvoiceLines,
+    updates: InvoiceLines,
     deletes: Vec<String>,
 }
 

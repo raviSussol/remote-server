@@ -125,7 +125,7 @@ impl From<InvoiceQueryJoin> for InvoiceNode {
 }
 
 #[derive(PartialEq, Debug)]
-struct InvoiceLines {
+pub struct InvoiceLines {
     invoice_id: String,
 }
 
