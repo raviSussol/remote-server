@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod repository_test {
     mod data {
-        use chrono::{NaiveDate, NaiveDateTime};
+        use chrono::NaiveDateTime;
 
         use crate::database::schema::{InvoiceRowStatus, MasterListNameJoinRow};
 
@@ -182,47 +182,50 @@ mod repository_test {
         pub fn invoice_line_1() -> InvoiceLineRow {
             InvoiceLineRow {
                 id: "test1".to_string(),
-                item_id: "item1".to_string(),
-                invoice_id: "invoice1".to_string(),
+                item_id: item_1().id.to_string(),
+                invoice_id: invoice_1().id.to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
+                expiry_date: Some(NaiveDateTime::from_timestamp(4000, 0)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
-                total_after_tax: 0.0,
-                number_of_packs: 1,
+                total_after_tax: 1.0,
+                available_number_of_packs: 1,
+                total_number_of_packs: 1,
             }
         }
         pub fn invoice_line_2() -> InvoiceLineRow {
             InvoiceLineRow {
                 id: "test2-with-optional".to_string(),
-                item_id: "item1".to_string(),
-                invoice_id: "invoice1".to_string(),
+                item_id: item_1().id.to_string(),
+                invoice_id: invoice_1().id.to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
+                expiry_date: Some(NaiveDateTime::from_timestamp(4001, 0)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
-                total_after_tax: 0.0,
-                number_of_packs: 1,
+                total_after_tax: 2.0,
+                available_number_of_packs: 1,
+                total_number_of_packs: 1,
             }
         }
 
         pub fn invoice_line_3() -> InvoiceLineRow {
             InvoiceLineRow {
                 id: "test3".to_string(),
-                item_id: "item2".to_string(),
-                invoice_id: "invoice2".to_string(),
+                item_id: item_2().id.to_string(),
+                invoice_id: invoice_2().id.to_string(),
                 stock_line_id: None,
                 batch: Some("".to_string()),
-                expiry_date: Some(NaiveDate::from_yo(2021, 9)),
+                expiry_date: Some(NaiveDateTime::from_timestamp(4002, 0)),
                 pack_size: 1,
                 cost_price_per_pack: 0.0,
                 sell_price_per_pack: 0.0,
-                total_after_tax: 0.0,
-                number_of_packs: 1,
+                total_after_tax: 3.0,
+                available_number_of_packs: 1,
+                total_number_of_packs: 1,
             }
         }
 
@@ -269,7 +272,8 @@ mod repository_test {
         database::{
             repository::{
                 get_repositories, repository::MasterListRepository, CentralSyncBufferRepository,
-                DBBackendConnection, DBConnection, InvoiceLineRepository, InvoiceRepository,
+                CustomerInvoiceRepository, DBBackendConnection, DBConnection,
+                InvoiceLineQueryRepository, InvoiceLineRepository, InvoiceRepository,
                 ItemRepository, MasterListLineRepository, MasterListNameJoinRepository,
                 NameRepository, RequisitionLineRepository, RequisitionRepository,
                 StockLineRepository, StoreRepository, UserAccountRepository,
@@ -501,11 +505,27 @@ mod repository_test {
         store_repo.insert_one(&data::store_1()).await.unwrap();
 
         let repo = registry.get::<InvoiceRepository>().unwrap();
+        let customer_invoice_repo = registry.get::<CustomerInvoiceRepository>().unwrap();
 
         let item1 = data::invoice_1();
         repo.insert_one(&item1).await.unwrap();
         let loaded_item = repo.find_one_by_id(item1.id.as_str()).await.unwrap();
         assert_eq!(item1, loaded_item);
+
+        // customer invoice
+        let item1 = data::invoice_2();
+        repo.insert_one(&item1).await.unwrap();
+        let loaded_item = customer_invoice_repo
+            .find_many_by_name_id(&item1.name_id)
+            .await
+            .unwrap();
+        assert_eq!(1, loaded_item.len());
+
+        let loaded_item = customer_invoice_repo
+            .find_many_by_store_id(&item1.store_id)
+            .await
+            .unwrap();
+        assert_eq!(1, loaded_item.len());
     }
 
     #[actix_rt::test]
@@ -555,6 +575,45 @@ mod repository_test {
             .await
             .unwrap();
         assert_eq!(2, all_items.len());
+    }
+
+    #[actix_rt::test]
+    async fn test_invoice_line_query_repository() {
+        let settings =
+            test_db::get_test_settings("omsupply-database-invoice-line-query-repository");
+        test_db::setup(&settings.database).await;
+        let registry = get_repositories(&settings).await;
+
+        // setup
+        let item_repo = registry.get::<ItemRepository>().unwrap();
+        item_repo.insert_one(&data::item_1()).await.unwrap();
+        item_repo.insert_one(&data::item_2()).await.unwrap();
+        let name_repo = registry.get::<NameRepository>().unwrap();
+        name_repo.insert_one(&data::name_1()).await.unwrap();
+        let store_repo = registry.get::<StoreRepository>().unwrap();
+        store_repo.insert_one(&data::store_1()).await.unwrap();
+        let stock_line_repo = registry.get::<StockLineRepository>().unwrap();
+        stock_line_repo
+            .insert_one(&data::stock_line_1())
+            .await
+            .unwrap();
+        let invoice_repo = registry.get::<InvoiceRepository>().unwrap();
+        invoice_repo.insert_one(&data::invoice_1()).await.unwrap();
+        invoice_repo.insert_one(&data::invoice_2()).await.unwrap();
+        let repo = registry.get::<InvoiceLineRepository>().unwrap();
+        let item1 = data::invoice_line_1();
+        repo.insert_one(&item1).await.unwrap();
+        let item2 = data::invoice_line_2();
+        repo.insert_one(&item2).await.unwrap();
+        let item3 = data::invoice_line_3();
+        repo.insert_one(&item3).await.unwrap();
+
+        // line stats
+        let repo = registry.get::<InvoiceLineQueryRepository>().unwrap();
+        let result = repo.stats(&vec![data::invoice_1().id]).await.unwrap();
+        let stats_invoice_1 = result.get(0).unwrap();
+        assert_eq!(stats_invoice_1.invoice_id, data::invoice_1().id);
+        assert_eq!(stats_invoice_1.total_after_tax, 3.0);
     }
 
     #[actix_rt::test]

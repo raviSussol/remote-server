@@ -5,7 +5,7 @@ use crate::{
             diesel_schema::{
                 invoice::dsl as invoice_dsl, name_table::dsl as name_dsl, store::dsl as store_dsl,
             },
-            InvoiceLineStatsRow, InvoiceRow, NameRow, StoreRow,
+            InvoiceRow, NameRow, StoreRow,
         },
     },
     server::service::graphql::schema::queries::pagination::{Pagination, PaginationOption},
@@ -29,17 +29,9 @@ impl InvoiceQueryRepository {
         InvoiceQueryRepository { pool }
     }
 
-    /// Calculates invoice line stats for a given invoice
-    pub async fn stats(
-        &self,
-        invoice_ids: &[String],
-    ) -> Result<Vec<InvoiceLineStatsRow>, RepositoryError> {
-        use crate::database::schema::diesel_schema::invoice_line_stats::dsl as invoice_line_stats_dsl;
+    pub fn count(&self) -> Result<i64, RepositoryError> {
         let connection = get_connection(&self.pool)?;
-
-        Ok(invoice_line_stats_dsl::invoice_line_stats
-            .filter(invoice_line_stats_dsl::invoice_id.eq_any(invoice_ids))
-            .load::<InvoiceLineStatsRow>(&connection)?)
+        Ok(invoice_dsl::invoice.count().get_result(&*connection)?)
     }
 
     /// Gets all invoices
@@ -56,5 +48,14 @@ impl InvoiceQueryRepository {
             .offset(pagination.offset())
             .limit(pagination.first())
             .load::<InvoiceQueryJoin>(&*connection)?)
+    }
+
+    pub async fn find_one_by_id(&self, row_id: &str) -> Result<InvoiceQueryJoin, RepositoryError> {
+        let connection = get_connection(&self.pool)?;
+        Ok(invoice_dsl::invoice
+            .filter(invoice_dsl::id.eq(row_id))
+            .inner_join(name_dsl::name_table)
+            .inner_join(store_dsl::store)
+            .first::<InvoiceQueryJoin>(&*connection)?)
     }
 }

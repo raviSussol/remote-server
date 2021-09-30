@@ -23,8 +23,11 @@ pub use self::item::*;
 pub mod stock_line;
 pub use self::stock_line::*;
 
-pub mod invoices;
-pub use self::invoices::*;
+pub mod invoice_query;
+pub use self::invoice_query::*;
+
+pub mod invoices_query;
+pub use self::invoices_query::*;
 
 #[derive(Clone)]
 pub struct Store {
