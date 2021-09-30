@@ -9,12 +9,117 @@ use crate::server::service::graphql::schema::types::{InvoiceLine, Requisition, S
 use crate::server::service::graphql::ContextExt;
 
 use super::types::{InvoiceList, InvoiceNode, ItemList, NameList};
-use async_graphql::{Context, Object};
+use async_graphql::*
 use pagination::Pagination;
 pub struct Queries;
 
+pub struct Hammer {
+    length: i32,
+}
+
+pub struct Nail {
+    weight: f64,
+}
+
+pub struct HammerNode {
+    hammer: Hammer,
+}
+
+pub struct NailNode {
+    nail: Nail,
+}
+
+#[Object]
+impl HammerNode {
+    async fn length(&self) -> i32 {
+        self.hammer.length
+    }
+}
+
+#[Object]
+impl NailNode {
+    async fn weight(&self) -> f64 {
+        self.nail.weight
+    }
+}
+
+#[derive(SimpleObject)]
+#[graphql(concrete(name = "HammerConnection", params(HammerNode)))]
+#[graphql(concrete(name = "NailConnection", params(NailNode)))]
+pub struct Connection<T: OutputType> {
+    total_count: i32,
+    nodes: Vec<T>,
+}
+
+pub struct ConnectionRequest {
+    total_count: bool,
+    nodes: bool,
+}
+
+impl From<&Context<'_>> for ConnectionRequest {
+    fn from(ctx: &Context<'_>) -> Self {
+        ConnectionRequest {
+            total_count: ctx.look_ahead().field("totalCount").exists(),
+            nodes: ctx.look_ahead().field("nodes").exists(),
+        }
+    }
+}
+
+pub struct Hammers {
+    hammers: Vec<Hammer>,
+    total_count: i32,
+}
+
+pub fn hammers_service(_: Option<Pagination>, request: ConnectionRequest) -> Hammers {
+    let mut hammers = Vec::new();
+    let mut total_count = 0;
+
+    if request.total_count {
+        // Query DB ..
+        total_count = 2;
+    }
+
+    if request.nodes {
+        // Query DB, with pagination
+        hammers = vec![Hammer { length: 30 }, Hammer { length: 10 }]
+    }
+
+    Hammers {
+        hammers,
+        total_count,
+    }
+}
+
+impl From<Hammer> for HammerNode {
+    fn from(hammer: Hammer) -> Self {
+        HammerNode { hammer }
+    }
+}
+
+impl From<Hammers> for Connection<HammerNode> {
+    fn from(
+        Hammers {
+            total_count,
+            hammers,
+        }: Hammers,
+    ) -> Self {
+        Connection {
+            total_count,
+            nodes: hammers.into_iter().map(HammerNode::from).collect(),
+        }
+    }
+}
+
 #[Object]
 impl Queries {
+    pub async fn hammers(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "pagination (first and offset)")] page: Option<Pagination>,
+    ) -> Connection<HammerNode> {
+        hammers_service(page, ctx.into()).into()
+    }
+
     #[allow(non_snake_case)]
     pub async fn apiVersion(&self) -> String {
         "1.0".to_string()
