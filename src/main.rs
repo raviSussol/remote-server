@@ -1,5 +1,6 @@
 #![allow(where_clauses_object_safety)]
 
+use actix_cors::Cors;
 use remote_server::{
     database::{loader::get_loaders, repository::get_repositories},
     server::{
@@ -58,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(actor_registry_data.clone())
             .wrap(logger_middleware())
             .wrap(compress_middleware())
+            .wrap(Cors::permissive())
             .configure(graphql_config(
                 repository_registry_data.clone(),
                 loader_registry_data.clone(),
@@ -71,9 +73,6 @@ async fn main() -> std::io::Result<()> {
     // and so we want an orderly exit. This achieves it nicely.
     tokio::select! {
         result = http_server => result,
-        () = async {
-          sync_sender.schedule_send(Duration::from_secs(settings.sync.interval)).await;
-        } => unreachable!("Sync receiver unexpectedly died!?"),
         () = async {
           sync_receiver.listen(repository_registry_sync_data).await;
         } => unreachable!("Sync scheduler unexpectedly died!?"),

@@ -15,12 +15,94 @@ use self::supplier_invoice::{
     InvoiceOrUpdateSupplierInvoiceError, UpdateSupplierInvoiceInput,
 };
 
+use super::types::{InvoiceLine, StockLineQuery};
+
 pub mod supplier_invoice;
 
 pub struct Mutations;
 
+#[derive(InputObject)]
+pub struct UpdateCustomerInvoiceItemInput {
+    pub stock_line_id: String,
+    pub issue: u32,
+    pub hold: Option<bool>,
+}
+
+#[derive(SimpleObject)]
+pub struct CustomerInvoiceLineUpdates {
+    inserts: Vec<InvoiceLine>,
+    updates: Vec<InvoiceLine>,
+    deletes: Vec<String>,
+}
+
+#[derive(Union)]
+pub enum UpdateCustomerInvoiceItemResult {
+    Updates(CustomerInvoiceLineUpdates),
+    Errors(UpdateCustomerInvoiceItemErrors),
+}
+#[derive(SimpleObject)]
+pub struct UpdateCustomerInvoiceItemErrors {
+    pub errors: Vec<UpdateCustomerInvoiceItemError>,
+}
+
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "&str"))]
+pub enum UpdateCustomerInvoiceItemError {
+    DoesntBelongToCustomerInvoiceItem(DoesntBelongToCustomerInvoiceItem),
+    DuplicateStockLine(DuplicateStockLine),
+    ReductionBelowZero(ReductionBelowZero),
+}
+
+pub struct DoesntBelongToCustomerInvoiceItem;
+#[Object]
+impl DoesntBelongToCustomerInvoiceItem {
+    pub async fn description(&self) -> &'static str {
+        "Line does not belong to this Item"
+    }
+
+    pub async fn stock_line_id(&self) -> &'static str {
+        "id"
+    }
+}
+
+pub struct DuplicateStockLine;
+#[Object]
+impl DuplicateStockLine {
+    pub async fn description(&self) -> &'static str {
+        "Multiple stock lines with the same id"
+    }
+
+    pub async fn stock_line_id(&self) -> &'static str {
+        "id"
+    }
+}
+
+pub struct ReductionBelowZero;
+#[Object]
+impl ReductionBelowZero {
+    pub async fn description(&self) -> &'static str {
+        "Cannot reduce line below zero"
+    }
+
+    pub async fn issue(&self) -> &'static u32 {
+        todo!()
+    }
+
+    pub async fn stock_line(&self) -> &'static StockLineQuery {
+        todo!()
+    }
+}
+
 #[Object]
 impl Mutations {
+    async fn update_customer_invoice_item(
+        &self,
+        ctx: &Context<'_>,
+        input: Vec<UpdateCustomerInvoiceItemInput>,
+    ) -> UpdateCustomerInvoiceItemResult {
+        todo!()
+    }
+
     async fn insert_supplier_invoice(
         &self,
         ctx: &Context<'_>,

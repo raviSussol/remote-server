@@ -7,13 +7,35 @@ use crate::database::schema::{InvoiceLineRow, InvoiceRow, RequisitionRow, StoreR
 use crate::server::service::graphql::schema::types::{Invoice, InvoiceLine, Requisition, Store};
 use crate::server::service::graphql::ContextExt;
 
-use super::types::{InvoicesList, ItemList, NameList};
-use async_graphql::{Context, Object};
+use super::types::{InvoicesList, ItemList, NameList, StockLineQuery};
+use async_graphql::{Context, Object, SimpleObject};
 use pagination::Pagination;
 pub struct Queries;
 
+#[derive(SimpleObject)]
+pub struct CustomerInvoiceItem {
+    item_id: String,
+    item_name: String,
+    lines: Vec<CustomerInvoiceItemLine>,
+}
+#[derive(SimpleObject)]
+pub struct CustomerInvoiceItemLine {
+    issue: String,
+    hold: bool,
+    stock_line: StockLineQuery,
+}
+
 #[Object]
 impl Queries {
+    pub async fn customer_invoice_item(
+        &self,
+        _ctx: &Context<'_>,
+        item_id: String,
+        invoice_id: String,
+    ) -> CustomerInvoiceItem {
+        todo!()
+    }
+
     #[allow(non_snake_case)]
     pub async fn apiVersion(&self) -> String {
         "1.0".to_string()
