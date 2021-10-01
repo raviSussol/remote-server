@@ -19,7 +19,6 @@ use std::{
     env,
     net::TcpListener,
     sync::{Arc, Mutex},
-    time::Duration,
 };
 
 #[actix_web::main]
@@ -32,7 +31,7 @@ async fn main() -> std::io::Result<()> {
 
     let repositories: RepositoryMap = get_repositories(&settings).await;
     let loaders: LoaderMap = get_loaders(&settings).await;
-    let (mut sync_sender, mut sync_receiver): (SyncSenderActor, SyncReceiverActor) =
+    let (sync_sender, mut sync_receiver): (SyncSenderActor, SyncReceiverActor) =
         sync::get_sync_actors();
 
     let repository_registry = RepositoryRegistry { repositories };
@@ -73,10 +72,7 @@ async fn main() -> std::io::Result<()> {
     tokio::select! {
         result = http_server => result,
         () = async {
-          sync_sender.schedule_send(Duration::from_secs(settings.sync.interval)).await;
-        } => unreachable!("Sync receiver unexpectedly died!?"),
-        () = async {
             sync_receiver.listen(&mut synchroniser, &repository_registry_data_sync).await;
-        } => unreachable!("Sync scheduler unexpectedly died!?"),
+        } => unreachable!("Sync receiver unexpectedly died!?")
     }
 }
