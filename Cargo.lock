@@ -384,6 +384,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
+name = "ascii"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eab1c04a571841102f5345a8fc0f6bb3d31c315dec879b5c6e42e40ce7ffa34e"
+
+[[package]]
 name = "ascii-canvas"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -500,7 +506,7 @@ checksum = "fa783e684f90d2946817f9975e13adcf0c02378f881f87e3f5aa588c4a52ced8"
 dependencies = [
  "Inflector",
  "async-graphql-parser",
- "darling",
+ "darling 0.12.4",
  "proc-macro-crate",
  "proc-macro2",
  "quote",
@@ -908,6 +914,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "combine"
+version = "3.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da3da6baa321ec19e1cc41d31bf599f00c783d0517095cdaf0332e3fe8d20680"
+dependencies = [
+ "ascii",
+ "byteorder",
+ "either",
+ "memchr",
+ "unreachable",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1074,13 +1093,76 @@ dependencies = [
 ]
 
 [[package]]
+name = "cynic"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de84d904b14924970dcf24fed5f494dc281164d528e61ce45edd3d8976701e2c"
+dependencies = [
+ "cynic-proc-macros",
+ "json-decode",
+ "reqwest",
+ "serde 1.0.130",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "cynic-codegen"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b089cd8322ef8b9bd747254c45f96c9bf348bcfd256690bf2bb1d855d1802444"
+dependencies = [
+ "Inflector",
+ "darling 0.10.2",
+ "graphql-parser",
+ "lazy_static",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "cynic-proc-macros"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c47e83a8229268232e5fdcfaa312c8c9ca3b34682653949da39ab244de7588a"
+dependencies = [
+ "cynic-codegen",
+ "syn",
+]
+
+[[package]]
+name = "darling"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d706e75d87e35569db781a9b5e2416cff1236a47ed380831f959382ccd5f858"
+dependencies = [
+ "darling_core 0.10.2",
+ "darling_macro 0.10.2",
+]
+
+[[package]]
 name = "darling"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f2c43f534ea4b0b049015d00269734195e6d3f0f6635cb692251aca6f9f8b3c"
 dependencies = [
- "darling_core",
- "darling_macro",
+ "darling_core 0.12.4",
+ "darling_macro 0.12.4",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0c960ae2da4de88a91b2d920c2a7233b400bc33cb28453a2987822d8392519b"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim 0.9.3",
+ "syn",
 ]
 
 [[package]]
@@ -1093,7 +1175,18 @@ dependencies = [
  "ident_case",
  "proc-macro2",
  "quote",
- "strsim",
+ "strsim 0.10.0",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9b5a2f4ac4969822c62224815d069952656cadc7084fdca9751e6d959189b72"
+dependencies = [
+ "darling_core 0.10.2",
+ "quote",
  "syn",
 ]
 
@@ -1103,7 +1196,7 @@ version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29b5acf0dea37a7f66f7b25d2c5e93fd46f8f6968b1a5d7a3e02e97768afc95a"
 dependencies = [
- "darling_core",
+ "darling_core 0.12.4",
  "quote",
  "syn",
 ]
@@ -1532,6 +1625,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "graphql-parser"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1abd4ce5247dfc04a03ccde70f87a048458c9356c7e41d21ad8c407b3dde6f2"
+dependencies = [
+ "combine",
+ "thiserror",
+]
+
+[[package]]
 name = "h2"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1844,6 +1947,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4bf49d50e2961077d9c99f4b7997d770a1114f087c3c2e0069b36c13fc2979d"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "json-decode"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0450444ba98be6f4a931b2d256be9da433fa578013d1818bd94fa6ddb2f3d213"
+dependencies = [
+ "serde 1.0.130",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -2724,6 +2838,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "config",
+ "cynic",
  "diesel",
  "diesel-derive-enum",
  "diesel_migrations",
@@ -3181,6 +3296,12 @@ dependencies = [
 
 [[package]]
 name = "strsim"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
+
+[[package]]
+name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
@@ -3585,6 +3706,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
 
 [[package]]
+name = "unreachable"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "382810877fe448991dfc7f0dd6e3ae5d58088fd0ea5e35189655f84e6814fa56"
+dependencies = [
+ "void",
+]
+
+[[package]]
 name = "url"
 version = "2.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3626,6 +3756,12 @@ name = "version_check"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
+
+[[package]]
+name = "void"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
 
 [[package]]
 name = "waker-fn"

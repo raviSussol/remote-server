@@ -21,6 +21,60 @@ mod graphql {
         util::test_db,
     };
 
+    use cynic::{
+        selection_set::{field, float, map1, map2, string, vec},
+        Operation, QueryRoot, SelectionSet,
+    };
+
+    #[allow(dead_code)]
+    struct InvoicesRoot {
+        invoices: InvoicesConnection,
+    }
+
+    impl QueryRoot for InvoicesRoot {}
+
+    #[allow(dead_code)]
+    struct InvoicesConnection {
+        nodes: Vec<Invoice>,
+    }
+
+    #[allow(dead_code)]
+    struct Invoice {
+        id: String,
+        pricing: InvoicePricing,
+    }
+
+    #[allow(dead_code)]
+    struct InvoicePricing {
+        total_after_tax: f64,
+    }
+
+    fn build_invoices_query() -> Operation<'static, InvoicesRoot> {
+        let select_invoice_pricing: SelectionSet<'_, InvoicePricing, InvoicePricing> = map1(
+            |total_after_tax| InvoicePricing { total_after_tax },
+            field("totalAfterTax", vec![], float()),
+        );
+
+        let select_invoice: SelectionSet<'_, Invoice, Invoice> = map2(
+            |id, pricing| Invoice { id, pricing },
+            field("id", vec![], string()),
+            field("pricing", vec![], select_invoice_pricing),
+        );
+
+        let select_invoices_connection: SelectionSet<'_, InvoicesConnection, InvoicesConnection> =
+            map1(
+                |nodes| InvoicesConnection { nodes },
+                field("nodes", vec![], vec(select_invoice)),
+            );
+
+        let select_invoices_root: SelectionSet<'_, InvoicesRoot, InvoicesRoot> = map1(
+            |invoices| InvoicesRoot { invoices },
+            field("invoices", vec![], select_invoices_connection),
+        );
+
+        Operation::query(select_invoices_root)
+    }
+
     #[actix_rt::test]
     async fn test_graphql_invoices_query() {
         let settings = test_db::get_test_settings("omsupply-database-gql-invoices-query");
@@ -77,11 +131,12 @@ mod graphql {
         )
         .await;
 
+        let invoices_query = build_invoices_query();
+
         // Test query:
-        let payload = r#"{"query":"{invoices{nodes{id,pricing{totalAfterTax}}}}"}"#.as_bytes();
         let req = actix_web::test::TestRequest::post()
             .header("content-type", "application/json")
-            .set_payload(payload)
+            .set_json(&invoices_query)
             .uri("/graphql")
             .to_request();
 
