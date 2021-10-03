@@ -26,7 +26,15 @@ mod graphql {
         Operation, QueryRoot, SelectionSet,
     };
 
+    use serde::Serialize;
+
     #[allow(dead_code)]
+    #[derive(Serialize)]
+    struct InvoicesResult {
+        data: InvoicesRoot,
+    }
+
+    #[derive(Serialize)]
     struct InvoicesRoot {
         invoices: InvoicesConnection,
     }
@@ -34,24 +42,27 @@ mod graphql {
     impl QueryRoot for InvoicesRoot {}
 
     #[allow(dead_code)]
+    #[derive(Serialize)]
     struct InvoicesConnection {
         nodes: Vec<Invoice>,
     }
 
     #[allow(dead_code)]
+    #[derive(Serialize)]
     struct Invoice {
         id: String,
         pricing: InvoicePricing,
     }
 
     #[allow(dead_code)]
+    #[derive(Serialize)]
     struct InvoicePricing {
-        total_after_tax: f64,
+        totalAfterTax: f64,
     }
 
     fn build_invoices_query() -> Operation<'static, InvoicesRoot> {
         let select_invoice_pricing: SelectionSet<'_, InvoicePricing, InvoicePricing> = map1(
-            |total_after_tax| InvoicePricing { total_after_tax },
+            |totalAfterTax| InvoicePricing { totalAfterTax },
             field("totalAfterTax", vec![], float()),
         );
 
@@ -79,10 +90,10 @@ mod graphql {
     async fn test_graphql_invoices_query() {
         let settings = test_db::get_test_settings("omsupply-database-gql-invoices-query");
         test_db::setup(&settings.database).await;
+
         let repositories = get_repositories(&settings).await;
         let loaders = get_loaders(&settings).await;
 
-        // setup
         let name_repository = repositories.get::<NameRepository>().unwrap();
         let store_repository = repositories.get::<StoreRepository>().unwrap();
         let item_repository = repositories.get::<ItemRepository>().unwrap();
@@ -133,20 +144,45 @@ mod graphql {
 
         let invoices_query = build_invoices_query();
 
-        // Test query:
-        let req = actix_web::test::TestRequest::post()
+        let request = actix_web::test::TestRequest::post()
             .header("content-type", "application/json")
             .set_json(&invoices_query)
             .uri("/graphql")
             .to_request();
 
-        let res = actix_web::test::read_response(&mut app, req).await;
-        let body = String::from_utf8(res.to_vec()).expect("Failed to parse response");
+        let response = actix_web::test::read_response(&mut app, request).await;
+        let result = String::from_utf8(response.to_vec()).expect("Failed to parse response");
 
-        // TODO find a more robust way to compare the results
-        assert_eq!(
-            body,
-            "{\"data\":{\"invoices\":{\"nodes\":[{\"id\":\"customer_invoice_a\",\"pricing\":{\"totalAfterTax\":3.0}},{\"id\":\"customer_invoice_b\",\"pricing\":{\"totalAfterTax\":7.0}},{\"id\":\"supplier_invoice_a\",\"pricing\":{\"totalAfterTax\":11.0}},{\"id\":\"supplier_invoice_b\",\"pricing\":{\"totalAfterTax\":15.0}}]}}}"
-        );
+        let expected = serde_json::to_string(&InvoicesResult {
+            data: InvoicesRoot {
+                invoices: InvoicesConnection {
+                    nodes: vec![
+                        Invoice {
+                            id: "customer_invoice_a".to_owned(),
+                            pricing: InvoicePricing { totalAfterTax: 3.0 },
+                        },
+                        Invoice {
+                            id: "customer_invoice_b".to_owned(),
+                            pricing: InvoicePricing { totalAfterTax: 7.0 },
+                        },
+                        Invoice {
+                            id: "supplier_invoice_a".to_owned(),
+                            pricing: InvoicePricing {
+                                totalAfterTax: 11.0,
+                            },
+                        },
+                        Invoice {
+                            id: "supplier_invoice_b".to_owned(),
+                            pricing: InvoicePricing {
+                                totalAfterTax: 15.0,
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+        .expect("Failed to parse result");
+
+        assert_eq!(result, expected);
     }
 }
