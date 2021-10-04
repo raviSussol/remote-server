@@ -28,7 +28,6 @@ mod graphql {
 
     use serde::Serialize;
 
-    #[allow(dead_code)]
     #[derive(Serialize)]
     struct InvoicesResult {
         data: InvoicesRoot,
@@ -41,20 +40,17 @@ mod graphql {
 
     impl QueryRoot for InvoicesRoot {}
 
-    #[allow(dead_code)]
     #[derive(Serialize)]
     struct InvoicesConnection {
         nodes: Vec<Invoice>,
     }
 
-    #[allow(dead_code)]
     #[derive(Serialize)]
     struct Invoice {
         id: String,
         pricing: InvoicePricing,
     }
 
-    #[allow(dead_code)]
     #[allow(non_snake_case)]
     #[derive(Serialize)]
     struct InvoicePricing {
