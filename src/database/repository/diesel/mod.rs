@@ -18,6 +18,7 @@ mod name_query;
 mod requisition;
 mod requisition_line;
 mod stock_line;
+mod storage_connection;
 mod store;
 mod sync;
 mod user_account;
@@ -42,6 +43,7 @@ pub use name_query::{
 pub use requisition::RequisitionRepository;
 pub use requisition_line::RequisitionLineRepository;
 pub use stock_line::StockLineRepository;
+pub use storage_connection::{StorageConnection, StorageConnectionManager};
 pub use store::StoreRepository;
 pub use sync::{IntegrationRecord, IntegrationUpsertRecord, SyncRepository};
 pub use user_account::UserAccountRepository;
@@ -136,6 +138,8 @@ pub async fn get_repositories(settings: &Settings) -> RepositoryMap {
     repositories.insert(MasterListRepository::new(pool.clone()));
     repositories.insert(MasterListLineRepository::new(pool.clone()));
     repositories.insert(MasterListNameJoinRepository::new(pool.clone()));
+
+    repositories.insert(StorageConnectionManager::new(pool.clone()));
 
     repositories.insert(DataLoader::new(StockLineRepository::new(pool.clone())));
 

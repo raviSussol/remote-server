@@ -1,7 +1,7 @@
 use super::{
     get_connection, master_list::MasterListRepository, master_list_line::MasterListLineRepository,
     master_list_name_join::MasterListNameJoinRepository, DBBackendConnection, ItemRepository,
-    NameRepository, StoreRepository,
+    NameRepository, StorageConnectionManager, StoreRepository,
 };
 
 use crate::database::{
@@ -40,6 +40,8 @@ impl SyncRepository {
         &self,
         integration_records: &IntegrationRecord,
     ) -> Result<(), RepositoryError> {
+        let manager = StorageConnectionManager::new(self.pool);
+
         let connection = get_connection(&self.pool)?;
         connection.transaction(|| {
             for record in &integration_records.upserts {
