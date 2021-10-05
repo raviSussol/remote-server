@@ -17,7 +17,7 @@ pub struct Queries;
 #[derive(Union)]
 pub enum LoginStoreResponse {
     Error(ErrorWrapper<LoginStoreErrorInterface>),
-    Response(StoreNode),
+    Response(UserInfo),
 }
 
 #[derive(Union)]
@@ -32,11 +32,18 @@ pub enum LoginResponse {
     UserInfo(UserInfo),
 }
 
+#[derive(Union)]
+pub enum UserInfoResponse {
+    Error(ErrorWrapper<UserInfoErrorInterface>),
+    UserInfo(UserInfo),
+}
+
 // ERROR WRAPPER
 #[derive(SimpleObject)]
 #[graphql(concrete(name = "LoginError", params(LoginErrorInterface)))]
 #[graphql(concrete(name = "LoginStoreError", params(LoginStoreErrorInterface)))]
 #[graphql(concrete(name = "ListError", params(ListErrorInterface)))]
+#[graphql(concrete(name = "UserInfoError", params(UserInfoErrorInterface)))]
 pub struct ErrorWrapper<T: OutputType> {
     error: T,
 }
@@ -64,6 +71,13 @@ pub enum ListErrorInterface {
     SortError(SortError),
     FilterError(FilterError),
     PaginationError(PaginationError),
+}
+
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "&str"))]
+pub enum UserInfoErrorInterface {
+    DBError(DBError),
+    AuthenticationError(AuthenticationError),
 }
 
 // ERRORS
@@ -156,6 +170,10 @@ impl Queries {
     }
 
     pub async fn login_store(&self, _ctx: &Context<'_>, store_id: String) -> LoginStoreResponse {
+        todo!()
+    }
+
+    pub async fn useInfo(&self, _ctx: &Context<'_>) -> UserInfoResponse {
         todo!()
     }
 
