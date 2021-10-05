@@ -59,17 +59,15 @@ mod graphql {
 
     #[actix_rt::test]
     async fn get_requisition_by_id_is_success() {
-        let mock_names: Vec<NameRow> = mock_names();
-        let mock_stores: Vec<StoreRow> = mock_stores();
-        let mock_requisitions: Vec<RequisitionRow> = mock_requisitions();
-
         let settings = test_db::get_test_settings("omsupply-database-simple-repository-test");
-
-        // Initialise a new test database.
         test_db::setup(&settings.database).await;
 
         let repositories = get_repositories(&settings).await;
         let loaders = get_loaders(&settings).await;
+
+        let mock_names: Vec<NameRow> = mock_names();
+        let mock_stores: Vec<StoreRow> = mock_stores();
+        let mock_requisitions: Vec<RequisitionRow> = mock_requisitions();
 
         let name_repository = repositories.get::<NameRepository>().unwrap();
         let store_repository = repositories.get::<StoreRepository>().unwrap();

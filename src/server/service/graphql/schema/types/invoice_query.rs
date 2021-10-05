@@ -10,6 +10,8 @@ use crate::{
 use async_graphql::{dataloader::DataLoader, ComplexObject, Context, Enum, Object, SimpleObject};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
+use serde::Serialize;
+
 #[derive(Enum, Copy, Clone, PartialEq, Eq, Debug)]
 pub enum InvoiceType {
     CustomerInvoice,
@@ -25,7 +27,8 @@ impl From<InvoiceRowType> for InvoiceType {
     }
 }
 
-#[derive(Enum, Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Enum, Copy, Clone, PartialEq, Eq, Debug, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InvoiceStatus {
     Draft,
     Confirmed,

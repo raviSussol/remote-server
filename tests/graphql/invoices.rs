@@ -51,8 +51,8 @@ mod graphql {
         pricing: InvoicePricing,
     }
 
-    #[allow(non_snake_case)]
     #[derive(Serialize)]
+    #[allow(non_snake_case)]
     struct InvoicePricing {
         totalAfterTax: f64,
     }
@@ -98,6 +98,7 @@ mod graphql {
         let stock_repository = repositories.get::<StockLineRepository>().unwrap();
         let invoice_repository = repositories.get::<InvoiceRepository>().unwrap();
         let invoice_line_repository = repositories.get::<InvoiceLineRepository>().unwrap();
+
         let mock_names: Vec<NameRow> = mock_names();
         let mock_stores: Vec<StoreRow> = mock_stores();
         let mock_items: Vec<ItemRow> = mock_items();
