@@ -295,9 +295,8 @@ mod repository_test {
                 CustomerInvoiceRepository, DBBackendConnection, DBConnection,
                 InvoiceLineQueryRepository, InvoiceLineRepository, InvoiceRepository,
                 ItemRepository, MasterListLineRepository, MasterListNameJoinRepository,
-                NameQueryFilter, NameQueryRepository, NameQuerySort, NameQuerySortField,
-                NameRepository, RequisitionLineRepository, RequisitionRepository,
-                SimpleStringFilter, StockLineRepository, StoreRepository, UserAccountRepository,
+                NameQueryRepository, NameRepository, RequisitionLineRepository,
+                RequisitionRepository, StockLineRepository, StoreRepository, UserAccountRepository,
             },
             schema::{
                 CentralSyncBufferRow, InvoiceLineRow, InvoiceRow, InvoiceRowType, ItemRow,

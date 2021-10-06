@@ -1,16 +1,19 @@
-use crate::database::repository::{
-    EqualFilter, ItemAndMasterList, ItemFilter, ItemQueryRepository, ItemSort, SimpleStringFilter,
-    StockLineRepository,
-};
+use crate::database::repository::StockLineRepository;
+use crate::domain::item::{Item, ItemFilter};
+use crate::domain::{EqualFilter, SimpleStringFilter};
 use crate::server::service::graphql::schema::types::StockLineQuery;
-use crate::server::service::graphql::{schema::queries::pagination::Pagination, ContextExt};
+use crate::server::service::graphql::ContextExt;
+use crate::service::{ListError, ListResult};
 use async_graphql::dataloader::DataLoader;
-use async_graphql::{ComplexObject, Context, Enum, InputObject, Object, SimpleObject};
+use async_graphql::*;
 
-use super::{EqualFilterBoolInput, SimpleStringFilterInput, SortInput, StockLineList};
+use super::{
+    Connector, ConnectorErrorInterface, EqualFilterBoolInput, ErrorWrapper,
+    SimpleStringFilterInput, SortInput, StockLineList,
+};
 
 #[derive(Enum, Copy, Clone, PartialEq, Eq)]
-#[graphql(remote = "crate::database::repository::repository::ItemSortField")]
+#[graphql(remote = "crate::domain::item::ItemSortField")]
 pub enum ItemSortFieldInput {
     Name,
     Code,
@@ -18,7 +21,6 @@ pub enum ItemSortFieldInput {
 pub type ItemSortInput = SortInput<ItemSortFieldInput>;
 
 #[derive(InputObject, Clone)]
-
 pub struct ItemFilterInput {
     pub name: Option<SimpleStringFilterInput>,
     pub code: Option<SimpleStringFilterInput>,
@@ -35,33 +37,32 @@ impl From<ItemFilterInput> for ItemFilter {
     }
 }
 
-#[derive(SimpleObject, PartialEq, Debug)]
-#[graphql(complex)]
-#[graphql(name = "Item")]
-pub struct ItemQuery {
-    pub id: String,
-    pub name: String,
-    pub code: String,
-    // Is visible is from master list join
-    pub is_visible: bool,
+#[derive(PartialEq, Debug)]
+pub struct ItemNode {
+    item: Item,
 }
 
-impl From<ItemAndMasterList> for ItemQuery {
-    fn from((item_row, _, master_list_name_join_option): ItemAndMasterList) -> Self {
-        ItemQuery {
-            id: item_row.id,
-            name: item_row.name,
-            code: item_row.code,
-            is_visible: master_list_name_join_option.is_some(),
-        }
+#[Object]
+impl ItemNode {
+    pub async fn id(&self) -> &str {
+        &self.item.id
     }
-}
 
-#[ComplexObject]
-impl ItemQuery {
+    pub async fn name(&self) -> &str {
+        &self.item.name
+    }
+
+    pub async fn code(&self) -> &str {
+        &self.item.code
+    }
+
+    pub async fn is_visible(&self) -> bool {
+        self.item.is_visible
+    }
+
     async fn available_batches(&self, ctx: &Context<'_>) -> StockLineList {
         let repository = ctx.get_repository::<DataLoader<StockLineRepository>>();
-        let result = repository.load_one(self.id.clone()).await.unwrap();
+        let result = repository.load_one(self.item.id.clone()).await.unwrap();
         StockLineList {
             stock_lines: result.map_or(Vec::new(), |stock_lines| {
                 stock_lines.into_iter().map(StockLineQuery::from).collect()
@@ -70,37 +71,23 @@ impl ItemQuery {
     }
 }
 
-pub struct ItemList {
-    pub pagination: Option<Pagination>,
-    pub filter: Option<ItemFilterInput>,
-    pub sort: Option<Vec<ItemSortInput>>,
+#[derive(Union)]
+pub enum ItemsResponse {
+    Error(ErrorWrapper<ConnectorErrorInterface>),
+    Response(Connector<ItemNode>),
 }
 
-#[Object]
-impl ItemList {
-    async fn total_count(&self, ctx: &Context<'_>) -> i64 {
-        let repository = ctx.get_repository::<ItemQueryRepository>();
-        repository.count().unwrap()
+impl From<Result<ListResult<Item>, ListError>> for ItemsResponse {
+    fn from(result: Result<ListResult<Item>, ListError>) -> Self {
+        match result {
+            Ok(response) => ItemsResponse::Response(response.into()),
+            Err(error) => ItemsResponse::Error(error.into()),
+        }
     }
+}
 
-    async fn nodes(&self, ctx: &Context<'_>) -> Vec<ItemQuery> {
-        let repository = ctx.get_repository::<ItemQueryRepository>();
-
-        let filter = self.filter.clone().map(ItemFilter::from);
-
-        // Currently only one sort option is supported, use the first from the list.
-        let first_sort = self
-            .sort
-            .as_ref()
-            .map(|sort_list| sort_list.first())
-            .flatten()
-            .map(ItemSort::from);
-
-        repository
-            .all(&self.pagination, &filter, &first_sort)
-            .unwrap()
-            .into_iter()
-            .map(ItemQuery::from)
-            .collect()
+impl From<Item> for ItemNode {
+    fn from(item: Item) -> Self {
+        ItemNode { item }
     }
 }

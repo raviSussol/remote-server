@@ -1,41 +1,53 @@
-use super::{get_connection, DBBackendConnection, EqualFilter, SimpleStringFilter, Sort};
+use super::{get_connection, DBBackendConnection, LeftJoinBoxedStatementFourWay};
 use crate::{
     database::{
         repository::RepositoryError,
         schema::{
             diesel_schema::{
-                item::dsl as item_dsl, master_list_line::dsl as master_list_line_dsl,
-                master_list_name_join::dsl as master_list_name_join_dsl,
+                item, item::dsl as item_dsl, master_list, master_list::dsl as master_list_dsl,
+                master_list_line, master_list_line::dsl as master_list_line_dsl,
+                master_list_name_join, master_list_name_join::dsl as master_list_name_join_dsl,
             },
-            ItemRow, MasterListLineRow, MasterListNameJoinRow,
+            ItemRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow,
         },
     },
-    server::service::graphql::schema::queries::pagination::{Pagination, PaginationOption},
+    domain::{
+        item::{Item, ItemFilter, ItemSort, ItemSortField},
+        Pagination,
+    },
 };
 
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
-pub struct ItemFilter {
-    pub name: Option<SimpleStringFilter>,
-    pub code: Option<SimpleStringFilter>,
-    /// If true it only returns ItemAndMasterList that have a name join row
-    pub is_visible: Option<EqualFilter<bool>>,
-}
 
-pub enum ItemSortField {
-    Name,
-    Code,
-}
-
-pub type ItemSort = Sort<ItemSortField>;
-
-pub type ItemAndMasterList = (
+pub type ItemQuery = (
     ItemRow,
-    Option<MasterListLineRow>,
-    Option<MasterListNameJoinRow>,
+    Option<(
+        MasterListLineRow,
+        Option<(MasterListRow, Option<MasterListNameJoinRow>)>,
+    )>,
 );
+
+impl From<ItemQuery> for Item {
+    fn from((item_row, master_list_line_option): ItemQuery) -> Self {
+        let mut is_visible = false;
+        if let Some((_, master_list_option)) = master_list_line_option {
+            if let Some((_, master_list_name_join_option)) = master_list_line_option {
+                if let Some(_) = master_list_name_join_option {
+                    is_visible = true;
+                }
+            }
+        }
+        Item {
+            id: item_row.id,
+            name: item_row.name,
+            code: item_row.code,
+            is_visible,
+        }
+    }
+}
 
 pub struct ItemQueryRepository {
     pool: Pool<ConnectionManager<DBBackendConnection>>,
@@ -46,57 +58,23 @@ impl ItemQueryRepository {
         ItemQueryRepository { pool }
     }
 
-    pub fn count(&self) -> Result<i64, RepositoryError> {
+    pub fn count(&self, filter: &Option<ItemFilter>) -> Result<i64, RepositoryError> {
+        // TODO (beyond M1), check that store_id matches current store
         let connection = get_connection(&self.pool)?;
-        Ok(item_dsl::item.count().get_result(&*connection)?)
+
+        let query = create_filtered_query(filter);
+
+        Ok(query.count().get_result(&*connection)?)
     }
-
-    pub fn all(
+    pub fn query(
         &self,
-        pagination: &Option<Pagination>,
+        pagination: Pagination,
         filter: &Option<ItemFilter>,
-        sort: &Option<ItemSort>,
-    ) -> Result<Vec<ItemAndMasterList>, RepositoryError> {
+        sort: Option<ItemSort>,
+    ) -> Result<Vec<Item>, RepositoryError> {
         let connection = get_connection(&self.pool)?;
-        // Join master_list_line
-        let item_and_master_list_line =
-            item_dsl::item.left_join(master_list_line_dsl::master_list_line);
-        // Join master_list_line_join (can only use primary key in joinable!)
-        // and trying to reduce joins (instead of going to master_list then to master_list_name_join)
-        let item_and_all_join = item_and_master_list_line.left_join(
-            master_list_name_join_dsl::master_list_name_join
-                .on(master_list_line_dsl::master_list_id
-                    .eq(master_list_name_join_dsl::master_list_id)),
-        );
 
-        let mut query = item_and_all_join
-            .offset(pagination.offset())
-            .limit(pagination.first())
-            .into_boxed();
-
-        if let Some(f) = filter {
-            if let Some(code) = &f.code {
-                if let Some(eq) = &code.equal_to {
-                    query = query.filter(item_dsl::code.eq(eq));
-                } else if let Some(like) = &code.like {
-                    query = query.filter(item_dsl::code.like(format!("%{}%", like)));
-                }
-            }
-            if let Some(name) = &f.name {
-                if let Some(eq) = &name.equal_to {
-                    query = query.filter(item_dsl::name.eq(eq));
-                } else if let Some(like) = &name.like {
-                    query = query.filter(item_dsl::name.like(format!("%{}%", like)));
-                }
-            }
-            if let Some(is_visible) = f.is_visible.as_ref().map(|v| v.equal_to).flatten() {
-                if is_visible {
-                    query = query.filter(master_list_name_join_dsl::id.is_not_null());
-                } else {
-                    query = query.filter(master_list_name_join_dsl::id.is_null());
-                }
-            }
-        }
+        let mut query = create_filtered_query(filter);
 
         if let Some(sort) = sort {
             match sort.key {
@@ -119,8 +97,57 @@ impl ItemQueryRepository {
             query = query.order(item_dsl::id.asc())
         }
 
-        Ok(query.load::<ItemAndMasterList>(&*connection)?)
+        let result = query
+            .offset(pagination.offset as i64)
+            .limit(pagination.limit as i64)
+            .load::<ItemQuery>(&*connection)?;
+
+        Ok(result.into_iter().map(Item::from).collect())
     }
+}
+
+pub fn create_filtered_query<'a, 'b: 'a>(
+    filter: &'b Option<ItemFilter>,
+) -> LeftJoinBoxedStatementFourWay<
+    'a,
+    item::table,
+    master_list_line::table,
+    master_list::table,
+    master_list_name_join::table,
+> {
+    let mut query = item_dsl::item
+        .left_join(
+            master_list_line_dsl::master_list_line.left_join(
+                master_list_dsl::master_list
+                    .left_join(master_list_name_join_dsl::master_list_name_join),
+            ),
+        )
+        .into_boxed();
+
+    if let Some(f) = filter {
+        if let Some(code) = &f.code {
+            if let Some(eq) = &code.equal_to {
+                query = query.filter(item_dsl::code.eq(eq));
+            } else if let Some(like) = &code.like {
+                query = query.filter(item_dsl::code.like(format!("%{}%", like)));
+            }
+        }
+        if let Some(name) = &f.name {
+            if let Some(eq) = &name.equal_to {
+                query = query.filter(item_dsl::name.eq(eq));
+            } else if let Some(like) = &name.like {
+                query = query.filter(item_dsl::name.like(format!("%{}%", like)));
+            }
+        }
+        if let Some(is_visible) = f.is_visible.as_ref().map(|v| v.equal_to).flatten() {
+            if is_visible {
+                query = query.filter(master_list_name_join_dsl::id.is_not_null());
+            } else {
+                query = query.filter(master_list_name_join_dsl::id.is_null());
+            }
+        }
+    }
+    query
 }
 
 #[cfg(test)]
@@ -133,11 +160,10 @@ mod tests {
                 repository::{
                     MasterListLineRepository, MasterListNameJoinRepository, MasterListRepository,
                 },
-                EqualFilter, ItemFilter, ItemQueryRepository, ItemRepository, NameRepository,
+                ItemQueryRepository, ItemRepository, NameRepository,
             },
             schema::{ItemRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow, NameRow},
         },
-        server::service::graphql::schema::queries::pagination::{Pagination, DEFAULT_PAGE_SIZE},
         util::test_db,
     };
     // TODO this is very repetitive, although it's ok for tests to be 'wet' I think we can do better (and still have readable tests)
@@ -169,7 +195,7 @@ mod tests {
         // Test
         // .count()
         assert_eq!(
-            usize::try_from(item_query_repository.count().unwrap()).unwrap(),
+            usize::try_from(item_query_repository.count(None).unwrap()).unwrap(),
             rows.len()
         );
 

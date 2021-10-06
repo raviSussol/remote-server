@@ -6,12 +6,14 @@ use async_graphql::Context;
 use async_graphql_actix_web::{Request, Response};
 
 use self::schema::Schema;
+use crate::database::repository::DBConnectionPool;
 use crate::server::data::{LoaderRegistry, RepositoryRegistry};
 
 // Sugar that helps make things neater and avoid errors that would only crop up at runtime.
 trait ContextExt {
     fn get_repository<T: anymap::any::Any + Send + Sync>(&self) -> &T;
     fn get_loader<T: anymap::any::Any + Send + Sync>(&self) -> &T;
+    fn get_connection_pool(&self) -> &DBConnectionPool;
 }
 
 impl<'a> ContextExt for Context<'a> {
@@ -22,11 +24,16 @@ impl<'a> ContextExt for Context<'a> {
     fn get_loader<T: anymap::any::Any + Send + Sync>(&self) -> &T {
         self.data_unchecked::<Data<LoaderRegistry>>().get::<T>()
     }
+
+    fn get_connection_pool(&self) -> &DBConnectionPool {
+        self.data_unchecked::<Data<DBConnectionPool>>()
+    }
 }
 
 pub fn config(
     repository_registry: Data<RepositoryRegistry>,
     loader_registry: Data<LoaderRegistry>,
+    connection_pool: Data<DBConnectionPool>,
 ) -> impl FnOnce(&mut actix_web::web::ServiceConfig) {
     |cfg| {
         let schema = Schema::build(
@@ -36,6 +43,7 @@ pub fn config(
         )
         .data(repository_registry)
         .data(loader_registry)
+        .data(connection_pool)
         .finish();
         cfg.service(
             actix_web::web::scope("/graphql")

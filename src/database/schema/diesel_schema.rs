@@ -197,6 +197,7 @@ allow_tables_to_appear_in_same_query!(
     invoice_line,
     user_account,
     name_store_join,
+    master_list,
     master_list_line,
     master_list_name_join
 );

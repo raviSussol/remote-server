@@ -4,6 +4,7 @@ use crate::{
 
 mod central_sync_buffer;
 mod central_sync_cursor;
+mod generics;
 mod invoice;
 mod invoice_line;
 mod invoice_line_query;
@@ -17,7 +18,6 @@ mod name;
 mod name_query;
 mod requisition;
 mod requisition_line;
-mod sort_filter_types;
 mod stock_line;
 mod store;
 mod sync;
@@ -27,22 +27,20 @@ use actix_rt::blocking::BlockingError;
 use async_graphql::dataloader::DataLoader;
 pub use central_sync_buffer::CentralSyncBufferRepository;
 pub use central_sync_cursor::CentralSyncCursorRepository;
+pub use generics::*;
 pub use invoice::{CustomerInvoiceRepository, InvoiceRepository};
 pub use invoice_line::InvoiceLineRepository;
 pub use invoice_line_query::{InvoiceLineQueryJoin, InvoiceLineQueryRepository, InvoiceLineStats};
-pub use invoice_query::{
-    InvoiceFilter, InvoiceQueryJoin, InvoiceQueryRepository, InvoiceSort, InvoiceSortField,
-};
+pub use invoice_query::InvoiceQueryRepository;
 pub use item::ItemRepository;
-pub use item_query::{ItemAndMasterList, ItemFilter, ItemQueryRepository, ItemSort, ItemSortField};
+pub use item_query::ItemQueryRepository;
 pub use master_list::MasterListRepository;
 pub use master_list_line::MasterListLineRepository;
 pub use master_list_name_join::MasterListNameJoinRepository;
 pub use name::NameRepository;
-pub use name_query::{NameQueryFilter, NameQueryRepository, NameQuerySort, NameQuerySortField};
+pub use name_query::NameQueryRepository;
 pub use requisition::RequisitionRepository;
 pub use requisition_line::RequisitionLineRepository;
-pub use sort_filter_types::*;
 pub use stock_line::StockLineRepository;
 pub use store::StoreRepository;
 pub use sync::{IntegrationRecord, IntegrationUpsertRecord, SyncRepository};
@@ -55,10 +53,18 @@ use diesel::{
 };
 
 #[cfg(feature = "sqlite")]
+pub type DBType = diesel::sqlite::Sqlite;
+
+#[cfg(not(feature = "sqlite"))]
+pub type DBType = diesel::pg::Pg;
+
+#[cfg(feature = "sqlite")]
 pub type DBBackendConnection = SqliteConnection;
 
 #[cfg(not(feature = "sqlite"))]
 pub type DBBackendConnection = PgConnection;
+
+pub type DBConnectionPool = Pool<ConnectionManager<DBBackendConnection>>;
 
 pub type DBConnection = PooledConnection<ConnectionManager<DBBackendConnection>>;
 
