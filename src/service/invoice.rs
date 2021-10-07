@@ -2,11 +2,11 @@ use crate::{
     database::repository::{DBConnectionPool, InvoiceQueryRepository},
     domain::{
         invoice::{Invoice, InvoiceFilter, InvoiceSort},
-        PaginationOption,
+        Pagination, PaginationOption,
     },
 };
 
-use super::{get_default_pagination, i64_to_u32, ListError, ListResult};
+use super::{get_default_pagination, i64_to_u32, ListError, ListResult, SingleRecordError};
 
 pub const MAX_LIMIT: u32 = 1000;
 pub const MIN_LIMIT: u32 = 1;
@@ -21,7 +21,26 @@ pub fn get_invoices(
     let repository = InvoiceQueryRepository::new(connection_pool.clone());
 
     Ok(ListResult {
-        rows: repository.query(pagination, &filter, sort)?,
-        count: i64_to_u32(repository.count(&filter)?),
+        rows: repository.query(pagination, filter.clone(), sort)?,
+        count: i64_to_u32(repository.count(filter)?),
     })
+}
+
+pub fn get_invoice(
+    connection_pool: &DBConnectionPool,
+    id: String,
+) -> Result<Invoice, SingleRecordError> {
+    let repository = InvoiceQueryRepository::new(connection_pool.clone());
+
+    let mut result = repository.query(
+        Pagination::one(),
+        Some(InvoiceFilter::new().match_id(&id)),
+        None,
+    )?;
+
+    if let Some(record) = result.pop() {
+        Ok(record)
+    } else {
+        Err(SingleRecordError::NotFound(id))
+    }
 }

@@ -1,4 +1,4 @@
-use super::{get_connection, DBBackendConnection, LeftJoinBoxedStatement};
+use super::{get_connection, DBBackendConnection, DBType};
 
 use crate::{
     database::{
@@ -18,6 +18,7 @@ use crate::{
 };
 
 use diesel::{
+    dsl::{IntoBoxed, LeftJoin},
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
@@ -53,7 +54,7 @@ impl NameQueryRepository {
         NameQueryRepository { pool }
     }
 
-    pub fn count(&self, filter: &Option<NameFilter>) -> Result<i64, RepositoryError> {
+    pub fn count(&self, filter: Option<NameFilter>) -> Result<i64, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
         let connection = get_connection(&self.pool)?;
 
@@ -65,7 +66,7 @@ impl NameQueryRepository {
     pub fn query(
         &self,
         pagination: Pagination,
-        filter: &Option<NameFilter>,
+        filter: Option<NameFilter>,
         sort: Option<NameSort>,
     ) -> Result<Vec<Name>, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
@@ -103,23 +104,24 @@ impl NameQueryRepository {
     }
 }
 
-pub fn create_filtered_query<'a, 'b: 'a>(
-    filter: &'b Option<NameFilter>,
-) -> LeftJoinBoxedStatement<'a, name_table::table, name_store_join::table> {
+type BoxedNameQuery =
+    IntoBoxed<'static, LeftJoin<name_table::table, name_store_join::table>, DBType>;
+
+pub fn create_filtered_query(filter: Option<NameFilter>) -> BoxedNameQuery {
     let mut query = name_table_dsl::name_table
         .left_join(name_store_join_dsl::name_store_join)
         .into_boxed();
 
     if let Some(f) = filter {
-        if let Some(code) = &f.code {
-            if let Some(eq) = &code.equal_to {
+        if let Some(code) = f.code {
+            if let Some(eq) = code.equal_to {
                 query = query.filter(name_table_dsl::code.eq(eq));
-            } else if let Some(like) = &code.like {
+            } else if let Some(like) = code.like {
                 query = query.filter(name_table_dsl::code.like(format!("%{}%", like)));
             }
         }
-        if let Some(name) = &f.name {
-            if let Some(eq) = &name.equal_to {
+        if let Some(name) = f.name {
+            if let Some(eq) = name.equal_to {
                 query = query.filter(name_table_dsl::name.eq(eq));
             } else if let Some(like) = &name.like {
                 query = query.filter(name_table_dsl::name.like(format!("%{}%", like)));
@@ -143,11 +145,12 @@ mod tests {
             repository::{NameQueryRepository, NameRepository},
             schema::NameRow,
         },
+        domain::{name::Name, Pagination, DEFAULT_LIMIT},
         util::test_db,
     };
     use std::convert::TryFrom;
 
-    fn data() -> (Vec<NameRow>, Vec<NameQuery>) {
+    fn data() -> (Vec<NameRow>, Vec<Name>) {
         let mut rows = Vec::new();
         let mut queries = Vec::new();
         for index in 0..200 {
@@ -159,7 +162,7 @@ mod tests {
                 is_supplier: true,
             });
 
-            queries.push(NameQuery {
+            queries.push(Name {
                 id: format!("id{:05}", index),
                 name: format!("name{}", index),
                 code: format!("code{}", index),
@@ -173,7 +176,8 @@ mod tests {
     #[actix_rt::test]
     async fn test_name_query_repository() {
         // Prepare
-        let (pool, _, connection) = test_db::setup_all("test_name_query_repository", false).await;
+        let (pool, connection, ..) =
+            test_db::setup_all("test_name_query_repository", false, false).await;
         let repository = NameQueryRepository::new(pool.clone());
 
         let (rows, queries) = data();
@@ -181,7 +185,7 @@ mod tests {
             NameRepository::upsert_one_tx(&connection, &row).unwrap();
         }
 
-        let default_page_size = usize::try_from(DEFAULT_PAGE_SIZE).unwrap();
+        let default_page_size = usize::try_from(DEFAULT_LIMIT).unwrap();
 
         // Test
 
@@ -191,21 +195,24 @@ mod tests {
             queries.len()
         );
 
-        // .all, no pagenation (default)
+        // .query, no pagenation (default)
         assert_eq!(
-            repository.all(&None, &None, &None).unwrap().len(),
+            repository
+                .query(Pagination::new(), None, None)
+                .unwrap()
+                .len(),
             default_page_size
         );
 
-        // .all, pagenation (offset 10)
+        // .query, pagenation (offset 10)
         let result = repository
-            .all(
-                &Some(Pagination {
-                    offset: Some(10),
-                    first: None,
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 10,
+                    limit: DEFAULT_LIMIT,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), default_page_size);
@@ -215,29 +222,29 @@ mod tests {
             queries[10 + default_page_size - 1]
         );
 
-        // .all, pagenation (first 10)
+        // .query, pagenation (first 10)
         let result = repository
-            .all(
-                &Some(Pagination {
-                    offset: None,
-                    first: Some(10),
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 0,
+                    limit: 10,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), 10);
         assert_eq!(*result.last().unwrap(), queries[9]);
 
-        // .all, pagenation (offset 150, first 90) <- more then records in table
+        // .query, pagenation (offset 150, first 90) <- more then records in table
         let result = repository
-            .all(
-                &Some(Pagination {
-                    offset: Some(150),
-                    first: Some(90),
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 150,
+                    limit: 90,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), queries.len() - 150);

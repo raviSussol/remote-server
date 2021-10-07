@@ -8,7 +8,7 @@ pub struct Item {
     // Is visible is from master list join
     pub is_visible: bool,
 }
-
+#[derive(Clone)]
 pub struct ItemFilter {
     pub name: Option<SimpleStringFilter>,
     pub code: Option<SimpleStringFilter>,

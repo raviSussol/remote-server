@@ -8,7 +8,7 @@ pub struct Name {
     pub is_customer: bool,
     pub is_supplier: bool,
 }
-
+#[derive(Clone)]
 pub struct NameFilter {
     pub name: Option<SimpleStringFilter>,
     pub code: Option<SimpleStringFilter>,

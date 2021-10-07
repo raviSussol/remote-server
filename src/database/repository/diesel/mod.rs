@@ -4,7 +4,6 @@ use crate::{
 
 mod central_sync_buffer;
 mod central_sync_cursor;
-mod generics;
 mod invoice;
 mod invoice_line;
 mod invoice_line_query;
@@ -27,7 +26,6 @@ use actix_rt::blocking::BlockingError;
 use async_graphql::dataloader::DataLoader;
 pub use central_sync_buffer::CentralSyncBufferRepository;
 pub use central_sync_cursor::CentralSyncCursorRepository;
-pub use generics::*;
 pub use invoice::{CustomerInvoiceRepository, InvoiceRepository};
 pub use invoice_line::InvoiceLineRepository;
 pub use invoice_line_query::{InvoiceLineQueryJoin, InvoiceLineQueryRepository, InvoiceLineStats};

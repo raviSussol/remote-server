@@ -1,6 +1,9 @@
 use crate::{
-    database::repository::{get_repositories, DBBackendConnection},
-    server::data::RepositoryMap,
+    database::{
+        loader::get_loaders,
+        repository::{get_repositories, DBBackendConnection},
+    },
+    server::data::{LoaderMap, RepositoryMap},
 };
 
 use super::settings::{DatabaseSettings, ServerSettings, Settings, SyncSettings};
@@ -123,10 +126,12 @@ pub fn get_test_settings(db_name: &str) -> Settings {
 pub async fn setup_all(
     db_name: &str,
     all_repositories: bool,
+    all_loaders: bool,
 ) -> (
     Pool<ConnectionManager<DBBackendConnection>>,
-    RepositoryMap,
     PooledConnection<ConnectionManager<DBBackendConnection>>,
+    RepositoryMap,
+    LoaderMap,
 ) {
     let settings = get_test_settings(db_name);
 
@@ -139,10 +144,14 @@ pub async fn setup_all(
 
     (
         pool.clone(),
+        pool.get().unwrap(),
         match all_repositories {
             true => get_repositories(&settings).await,
             false => RepositoryMap::new(),
         },
-        pool.get().unwrap(),
+        match all_loaders {
+            true => get_loaders(&settings).await,
+            false => LoaderMap::new(),
+        },
     )
 }

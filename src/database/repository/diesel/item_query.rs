@@ -1,14 +1,14 @@
-use super::{get_connection, DBBackendConnection, LeftJoinBoxedStatementFourWay};
+use super::{get_connection, DBBackendConnection, DBType};
 use crate::{
     database::{
         repository::RepositoryError,
         schema::{
             diesel_schema::{
-                item, item::dsl as item_dsl, master_list, master_list::dsl as master_list_dsl,
-                master_list_line, master_list_line::dsl as master_list_line_dsl,
-                master_list_name_join, master_list_name_join::dsl as master_list_name_join_dsl,
+                item, item::dsl as item_dsl, master_list_line,
+                master_list_line::dsl as master_list_line_dsl, master_list_name_join,
+                master_list_name_join::dsl as master_list_name_join_dsl,
             },
-            ItemRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow,
+            ItemRow, MasterListLineRow, MasterListNameJoinRow,
         },
     },
     domain::{
@@ -18,33 +18,25 @@ use crate::{
 };
 
 use diesel::{
+    dsl::{Eq, IntoBoxed, LeftJoin},
     prelude::*,
+    query_source::joins::OnClauseWrapper,
     r2d2::{ConnectionManager, Pool},
 };
 
-pub type ItemQuery = (
+type ItemAndMasterList = (
     ItemRow,
-    Option<(
-        MasterListLineRow,
-        Option<(MasterListRow, Option<MasterListNameJoinRow>)>,
-    )>,
+    Option<MasterListLineRow>,
+    Option<MasterListNameJoinRow>,
 );
 
-impl From<ItemQuery> for Item {
-    fn from((item_row, master_list_line_option): ItemQuery) -> Self {
-        let mut is_visible = false;
-        if let Some((_, master_list_option)) = master_list_line_option {
-            if let Some((_, master_list_name_join_option)) = master_list_line_option {
-                if let Some(_) = master_list_name_join_option {
-                    is_visible = true;
-                }
-            }
-        }
+impl From<ItemAndMasterList> for Item {
+    fn from((item_row, _, master_list_name_join_option): ItemAndMasterList) -> Self {
         Item {
             id: item_row.id,
             name: item_row.name,
             code: item_row.code,
-            is_visible,
+            is_visible: master_list_name_join_option.is_some(),
         }
     }
 }
@@ -58,7 +50,7 @@ impl ItemQueryRepository {
         ItemQueryRepository { pool }
     }
 
-    pub fn count(&self, filter: &Option<ItemFilter>) -> Result<i64, RepositoryError> {
+    pub fn count(&self, filter: Option<ItemFilter>) -> Result<i64, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
         let connection = get_connection(&self.pool)?;
 
@@ -69,7 +61,7 @@ impl ItemQueryRepository {
     pub fn query(
         &self,
         pagination: Pagination,
-        filter: &Option<ItemFilter>,
+        filter: Option<ItemFilter>,
         sort: Option<ItemSort>,
     ) -> Result<Vec<Item>, RepositoryError> {
         let connection = get_connection(&self.pool)?;
@@ -100,42 +92,51 @@ impl ItemQueryRepository {
         let result = query
             .offset(pagination.offset as i64)
             .limit(pagination.limit as i64)
-            .load::<ItemQuery>(&*connection)?;
+            .load::<ItemAndMasterList>(&*connection)?;
 
         Ok(result.into_iter().map(Item::from).collect())
     }
 }
 
-pub fn create_filtered_query<'a, 'b: 'a>(
-    filter: &'b Option<ItemFilter>,
-) -> LeftJoinBoxedStatementFourWay<
-    'a,
-    item::table,
-    master_list_line::table,
-    master_list::table,
-    master_list_name_join::table,
-> {
-    let mut query = item_dsl::item
-        .left_join(
-            master_list_line_dsl::master_list_line.left_join(
-                master_list_dsl::master_list
-                    .left_join(master_list_name_join_dsl::master_list_name_join),
-            ),
-        )
-        .into_boxed();
+type BoxedItemQuery = IntoBoxed<
+    'static,
+    LeftJoin<
+        LeftJoin<item::table, master_list_line::table>,
+        OnClauseWrapper<
+            master_list_name_join::table,
+            Eq<
+                master_list_line::columns::master_list_id,
+                master_list_name_join::columns::master_list_id,
+            >,
+        >,
+    >,
+    DBType,
+>;
+pub fn create_filtered_query(filter: Option<ItemFilter>) -> BoxedItemQuery {
+    // Join master_list_line
+    let item_and_master_list_line =
+        item_dsl::item.left_join(master_list_line_dsl::master_list_line);
+    // Join master_list_line_join (can only use primary key in joinable!)
+    // and trying to reduce joins (instead of going to master_list then to master_list_name_join)
+    let mut query =
+        item_and_master_list_line
+            .left_join(master_list_name_join_dsl::master_list_name_join.on(
+                master_list_line_dsl::master_list_id.eq(master_list_name_join_dsl::master_list_id),
+            ))
+            .into_boxed();
 
     if let Some(f) = filter {
-        if let Some(code) = &f.code {
-            if let Some(eq) = &code.equal_to {
+        if let Some(code) = f.code {
+            if let Some(eq) = code.equal_to {
                 query = query.filter(item_dsl::code.eq(eq));
-            } else if let Some(like) = &code.like {
+            } else if let Some(like) = code.like {
                 query = query.filter(item_dsl::code.like(format!("%{}%", like)));
             }
         }
-        if let Some(name) = &f.name {
-            if let Some(eq) = &name.equal_to {
+        if let Some(name) = f.name {
+            if let Some(eq) = name.equal_to {
                 query = query.filter(item_dsl::name.eq(eq));
-            } else if let Some(like) = &name.like {
+            } else if let Some(like) = name.like {
                 query = query.filter(item_dsl::name.like(format!("%{}%", like)));
             }
         }
@@ -164,8 +165,19 @@ mod tests {
             },
             schema::{ItemRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow, NameRow},
         },
+        domain::{
+            item::{Item, ItemFilter},
+            EqualFilter, Pagination, DEFAULT_LIMIT,
+        },
         util::test_db,
     };
+
+    impl PartialEq<ItemRow> for Item {
+        fn eq(&self, other: &ItemRow) -> bool {
+            self.id == other.id && self.name == other.name && self.code == other.code
+        }
+    }
+
     // TODO this is very repetitive, although it's ok for tests to be 'wet' I think we can do better (and still have readable tests)
     fn data() -> Vec<ItemRow> {
         let mut rows = Vec::new();
@@ -182,7 +194,8 @@ mod tests {
     #[actix_rt::test]
     async fn test_item_query_repository() {
         // Prepare
-        let (pool, _, connection) = test_db::setup_all("test_item_query_repository", false).await;
+        let (pool, connection, ..) =
+            test_db::setup_all("test_item_query_repository", false, false).await;
         let item_query_repository = ItemQueryRepository::new(pool.clone());
 
         let rows = data();
@@ -190,7 +203,7 @@ mod tests {
             ItemRepository::upsert_one_tx(&connection, &row).unwrap();
         }
 
-        let default_page_size = usize::try_from(DEFAULT_PAGE_SIZE).unwrap();
+        let default_page_size = usize::try_from(DEFAULT_LIMIT).unwrap();
 
         // Test
         // .count()
@@ -199,60 +212,60 @@ mod tests {
             rows.len()
         );
 
-        // .all, no pagenation (default)
+        // .query, no pagenation (default)
         assert_eq!(
             item_query_repository
-                .all(&None, &None, &None)
+                .query(Pagination::new(), None, None)
                 .unwrap()
                 .len(),
             default_page_size
         );
 
-        // .all, pagenation (offset 10)
+        // .query, pagenation (offset 10)
         let result = item_query_repository
-            .all(
-                &Some(Pagination {
-                    offset: Some(10),
-                    first: None,
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 10,
+                    limit: DEFAULT_LIMIT,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), default_page_size);
-        assert_eq!(result[0].0, rows[10]);
+        assert_eq!(result[0], rows[10]);
         assert_eq!(
-            result[default_page_size - 1].0,
+            result[default_page_size - 1],
             rows[10 + default_page_size - 1]
         );
 
-        // .all, pagenation (first 10)
+        // .query, pagenation (first 10)
         let result = item_query_repository
-            .all(
-                &Some(Pagination {
-                    offset: None,
-                    first: Some(10),
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 0,
+                    limit: 10,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), 10);
-        assert_eq!((*result.last().unwrap()).0, rows[9]);
+        assert_eq!((*result.last().unwrap()), rows[9]);
 
-        // .all, pagenation (offset 150, first 90) <- more then records in table
+        // .query, pagenation (offset 150, first 90) <- more then records in table
         let result = item_query_repository
-            .all(
-                &Some(Pagination {
-                    offset: Some(150),
-                    first: Some(90),
-                }),
-                &None,
-                &None,
+            .query(
+                Pagination {
+                    offset: 150,
+                    limit: 90,
+                },
+                None,
+                None,
             )
             .unwrap();
         assert_eq!(result.len(), rows.len() - 150);
-        assert_eq!((*result.last().unwrap()).0, (*rows.last().unwrap()));
+        assert_eq!((*result.last().unwrap()), (*rows.last().unwrap()));
     }
 
     // TODO not sure where this fits, seems like this unit test has a lot of dependencies
@@ -263,8 +276,8 @@ mod tests {
     #[actix_rt::test]
     async fn test_item_query_repository_visibility() {
         // Prepare
-        let (pool, _, connection) =
-            test_db::setup_all("test_item_query_repository_visibility", false).await;
+        let (pool, connection, ..) =
+            test_db::setup_all("test_item_query_repository_visibility", false, false).await;
         let item_query_repository = ItemQueryRepository::new(pool.clone());
 
         let item_rows = vec![
@@ -369,31 +382,33 @@ mod tests {
         // Test
 
         // Before adding any joins
-        let results0: Vec<ItemRow> = item_query_repository
-            .all(&None, &None, &None)
-            .unwrap()
-            .into_iter()
-            .map(|v| v.0)
-            .collect();
+        let results0 = item_query_repository
+            .query(Pagination::new(), None, None)
+            .unwrap();
+
         assert_eq!(results0, item_rows);
 
         // After adding first join (item1 and item2 visible)
         MasterListNameJoinRepository::upsert_one_tx(&connection, &master_list_name_join_1).unwrap();
-        let results = item_query_repository.all(&None, &None, &None).unwrap();
-        assert!(results[0].2.is_some());
-        assert!(results[1].2.is_some());
+        let results = item_query_repository
+            .query(Pagination::new(), None, None)
+            .unwrap();
+        assert!(results[0].is_visible);
+        assert!(results[1].is_visible);
 
         // After adding second join (item3 and item4 visible)
         MasterListNameJoinRepository::upsert_one_tx(&connection, &master_list_name_join_2).unwrap();
-        let results = item_query_repository.all(&None, &None, &None).unwrap();
-        assert!(results[2].2.is_some());
-        assert!(results[3].2.is_some());
+        let results = item_query_repository
+            .query(Pagination::new(), None, None)
+            .unwrap();
+        assert!(results[2].is_visible);
+        assert!(results[3].is_visible);
 
         // test is_visible filter:
         let results = item_query_repository
-            .all(
-                &None,
-                &Some(ItemFilter {
+            .query(
+                Pagination::new(),
+                Some(ItemFilter {
                     name: None,
                     code: None,
                     // query invisible rows
@@ -401,15 +416,15 @@ mod tests {
                         equal_to: Some(false),
                     }),
                 }),
-                &None,
+                None,
             )
             .unwrap();
-        assert_eq!(results[0].0, item_rows[4]);
+        assert_eq!(results[0], item_rows[4]);
         // get visible rows
         let results = item_query_repository
-            .all(
-                &None,
-                &Some(ItemFilter {
+            .query(
+                Pagination::new(),
+                Some(ItemFilter {
                     name: None,
                     code: None,
                     // query invisible rows
@@ -417,7 +432,7 @@ mod tests {
                         equal_to: Some(true),
                     }),
                 }),
-                &None,
+                None,
             )
             .unwrap();
         assert_eq!(results.len(), 4);

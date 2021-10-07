@@ -21,7 +21,7 @@ pub fn get_names(
     let repository = NameQueryRepository::new(connection_pool.clone());
 
     Ok(ListResult {
-        rows: repository.query(pagination, &filter, sort)?,
-        count: i64_to_u32(repository.count(&filter)?),
+        rows: repository.query(pagination, filter.clone(), sort)?,
+        count: i64_to_u32(repository.count(filter)?),
     })
 }

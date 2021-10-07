@@ -1,4 +1,4 @@
-use super::{get_connection, DBBackendConnection, InnerJoinBoxedStatementThreeWay};
+use super::{get_connection, DBBackendConnection, DBType};
 
 use crate::{
     database::{
@@ -20,6 +20,7 @@ use crate::{
 };
 
 use diesel::{
+    dsl::{InnerJoin, IntoBoxed},
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
@@ -95,75 +96,74 @@ impl InvoiceQueryRepository {
         InvoiceQueryRepository { pool }
     }
 
-    pub fn count(&self, filter: &Option<InvoiceFilter>) -> Result<i64, RepositoryError> {
+    pub fn count(&self, filter: Option<InvoiceFilter>) -> Result<i64, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
-        todo!();
-        // let connection = get_connection(&self.pool)?;
+        let connection = get_connection(&self.pool)?;
 
-        // let query = create_filtered_query(filter);
+        let query = create_filtered_query(filter);
 
-        // Ok(query.count().get_result(&*connection)?)
+        Ok(query.count().get_result(&*connection)?)
     }
+
     /// Gets all invoices
     pub fn query(
         &self,
         pagination: Pagination,
-        filter: &Option<InvoiceFilter>,
+        filter: Option<InvoiceFilter>,
         sort: Option<InvoiceSort>,
     ) -> Result<Vec<Invoice>, RepositoryError> {
-        // let connection = get_connection(&self.pool)?;
+        let connection = get_connection(&self.pool)?;
 
-        // let mut query = create_filtered_query(filter);
+        let mut query = create_filtered_query(filter);
 
-        // if let Some(sort) = sort {
-        //     match sort.key {
-        //         InvoiceSortField::Type => {
-        //             if sort.desc.unwrap_or(false) {
-        //                 query = query.order(invoice_dsl::type_.desc());
-        //             } else {
-        //                 query = query.order(invoice_dsl::type_.asc());
-        //             }
-        //         }
-        //         InvoiceSortField::Status => {
-        //             if sort.desc.unwrap_or(false) {
-        //                 query = query.order(invoice_dsl::status.desc());
-        //             } else {
-        //                 query = query.order(invoice_dsl::status.asc());
-        //             }
-        //         }
-        //         InvoiceSortField::EntryDatetime => {
-        //             if sort.desc.unwrap_or(false) {
-        //                 query = query.order(invoice_dsl::entry_datetime.desc());
-        //             } else {
-        //                 query = query.order(invoice_dsl::entry_datetime.asc());
-        //             }
-        //         }
-        //         InvoiceSortField::ConfirmDatetime => {
-        //             if sort.desc.unwrap_or(false) {
-        //                 query = query.order(invoice_dsl::confirm_datetime.desc());
-        //             } else {
-        //                 query = query.order(invoice_dsl::confirm_datetime.asc());
-        //             }
-        //         }
-        //         InvoiceSortField::FinalisedDateTime => {
-        //             if sort.desc.unwrap_or(false) {
-        //                 query = query.order(invoice_dsl::finalised_datetime.desc());
-        //             } else {
-        //                 query = query.order(invoice_dsl::finalised_datetime.asc());
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     query = query.order(invoice_dsl::id.asc())
-        // }
+        if let Some(sort) = sort {
+            match sort.key {
+                InvoiceSortField::Type => {
+                    if sort.desc.unwrap_or(false) {
+                        query = query.order(invoice_dsl::type_.desc());
+                    } else {
+                        query = query.order(invoice_dsl::type_.asc());
+                    }
+                }
+                InvoiceSortField::Status => {
+                    if sort.desc.unwrap_or(false) {
+                        query = query.order(invoice_dsl::status.desc());
+                    } else {
+                        query = query.order(invoice_dsl::status.asc());
+                    }
+                }
+                InvoiceSortField::EntryDatetime => {
+                    if sort.desc.unwrap_or(false) {
+                        query = query.order(invoice_dsl::entry_datetime.desc());
+                    } else {
+                        query = query.order(invoice_dsl::entry_datetime.asc());
+                    }
+                }
+                InvoiceSortField::ConfirmDatetime => {
+                    if sort.desc.unwrap_or(false) {
+                        query = query.order(invoice_dsl::confirm_datetime.desc());
+                    } else {
+                        query = query.order(invoice_dsl::confirm_datetime.asc());
+                    }
+                }
+                InvoiceSortField::FinalisedDateTime => {
+                    if sort.desc.unwrap_or(false) {
+                        query = query.order(invoice_dsl::finalised_datetime.desc());
+                    } else {
+                        query = query.order(invoice_dsl::finalised_datetime.asc());
+                    }
+                }
+            }
+        } else {
+            query = query.order(invoice_dsl::id.asc())
+        }
 
-        // let result = query
-        //     .offset(pagination.offset as i64)
-        //     .limit(pagination.limit as i64)
-        //     .load::<InvoiceQueryJoin>(&*connection)?;
+        let result = query
+            .offset(pagination.offset as i64)
+            .limit(pagination.limit as i64)
+            .load::<InvoiceQueryJoin>(&*connection)?;
 
-        // Ok(result.into_iter().map(Invoice::from).collect())
-        todo!()
+        Ok(result.into_iter().map(Invoice::from).collect())
     }
 
     pub async fn find_one_by_id(&self, row_id: &str) -> Result<InvoiceQueryJoin, RepositoryError> {
@@ -176,79 +176,89 @@ impl InvoiceQueryRepository {
     }
 }
 
-pub fn create_filtered_query<'a, 'b: 'a>(
-    filter: &'a Option<InvoiceFilter>,
-) -> InnerJoinBoxedStatementThreeWay<'b, invoice::table, name_table::table, store::table> {
+type BoxedInvoiceQuery = IntoBoxed<
+    'static,
+    InnerJoin<InnerJoin<invoice::table, name_table::table>, store::table>,
+    DBType,
+>;
+
+pub fn create_filtered_query<'a>(filter: Option<InvoiceFilter>) -> BoxedInvoiceQuery {
     let mut query = invoice_dsl::invoice
         .inner_join(name_dsl::name_table)
         .inner_join(store_dsl::store)
         .into_boxed();
 
     if let Some(f) = filter {
-        if let Some(value) = &f.name_id {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.id {
+            if let Some(eq) = value.equal_to {
+                query = query.filter(invoice_dsl::id.eq(eq));
+            }
+        }
+
+        if let Some(value) = f.name_id {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::name_id.eq(eq));
             }
         }
-        if let Some(value) = &f.store_id {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.store_id {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::store_id.eq(eq));
             }
         }
-        if let Some(value) = &f.r#type {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.r#type {
+            if let Some(eq) = value.equal_to {
                 let eq = InvoiceRowType::from(eq.clone());
                 query = query.filter(invoice_dsl::type_.eq(eq));
             }
         }
-        if let Some(value) = &f.status {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.status {
+            if let Some(eq) = value.equal_to {
                 let eq = InvoiceRowStatus::from(eq.clone());
                 query = query.filter(invoice_dsl::status.eq(eq));
             }
         }
-        if let Some(value) = &f.comment {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.comment {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::comment.eq(eq));
-            } else if let Some(like) = &value.like {
+            } else if let Some(like) = value.like {
                 query = query.filter(invoice_dsl::comment.like(like));
             }
         }
-        if let Some(value) = &f.their_reference {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.their_reference {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::their_reference.eq(eq));
             }
         }
-        if let Some(value) = &f.entry_datetime {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.entry_datetime {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::entry_datetime.eq(eq));
             }
-            if let Some(before_or_equal) = &value.before_or_equal_to {
+            if let Some(before_or_equal) = value.before_or_equal_to {
                 query = query.filter(invoice_dsl::entry_datetime.le(before_or_equal));
             }
-            if let Some(after_or_equal) = &value.after_or_equal_to {
+            if let Some(after_or_equal) = value.after_or_equal_to {
                 query = query.filter(invoice_dsl::entry_datetime.ge(after_or_equal));
             }
         }
-        if let Some(value) = &f.confirm_datetime {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.confirm_datetime {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::confirm_datetime.eq(eq));
             }
-            if let Some(before_or_equal) = &value.before_or_equal_to {
+            if let Some(before_or_equal) = value.before_or_equal_to {
                 query = query.filter(invoice_dsl::confirm_datetime.le(before_or_equal));
             }
-            if let Some(after_or_equal) = &value.after_or_equal_to {
+            if let Some(after_or_equal) = value.after_or_equal_to {
                 query = query.filter(invoice_dsl::confirm_datetime.ge(after_or_equal));
             }
         }
-        if let Some(value) = &f.finalised_datetime {
-            if let Some(eq) = &value.equal_to {
+        if let Some(value) = f.finalised_datetime {
+            if let Some(eq) = value.equal_to {
                 query = query.filter(invoice_dsl::finalised_datetime.eq(eq));
             }
-            if let Some(before_or_equal) = &value.before_or_equal_to {
+            if let Some(before_or_equal) = value.before_or_equal_to {
                 query = query.filter(invoice_dsl::finalised_datetime.le(before_or_equal));
             }
-            if let Some(after_or_equal) = &value.after_or_equal_to {
+            if let Some(after_or_equal) = value.after_or_equal_to {
                 query = query.filter(invoice_dsl::finalised_datetime.ge(after_or_equal));
             }
         }

@@ -28,8 +28,9 @@ pub struct Invoice {
     pub confirm_datetime: Option<NaiveDateTime>,
     pub finalised_datetime: Option<NaiveDateTime>,
 }
-
+#[derive(Clone)]
 pub struct InvoiceFilter {
+    pub id: Option<EqualFilter<String>>,
     pub name_id: Option<EqualFilter<String>>,
     pub store_id: Option<EqualFilter<String>>,
     pub r#type: Option<EqualFilter<InvoiceType>>,
@@ -39,6 +40,31 @@ pub struct InvoiceFilter {
     pub entry_datetime: Option<DatetimeFilter>,
     pub confirm_datetime: Option<DatetimeFilter>,
     pub finalised_datetime: Option<DatetimeFilter>,
+}
+
+impl InvoiceFilter {
+    pub fn new() -> InvoiceFilter {
+        InvoiceFilter {
+            id: None,
+            name_id: None,
+            store_id: None,
+            r#type: None,
+            status: None,
+            comment: None,
+            their_reference: None,
+            entry_datetime: None,
+            confirm_datetime: None,
+            finalised_datetime: None,
+        }
+    }
+
+    pub fn match_id(mut self, id: &str) -> Self {
+        self.id = Some(EqualFilter {
+            equal_to: Some(id.to_owned()),
+        });
+
+        self
+    }
 }
 
 pub enum InvoiceSortField {

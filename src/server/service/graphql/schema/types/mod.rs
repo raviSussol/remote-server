@@ -1,7 +1,7 @@
 use crate::{
     database::repository::RepositoryError,
     domain::PaginationOption,
-    service::{ListError, ListResult},
+    service::{ListError, ListResult, SingleRecordError},
 };
 
 use async_graphql::*;
@@ -68,6 +68,7 @@ impl From<PaginationInput> for PaginationOption {
 /// Generic Error Wrapper
 #[derive(SimpleObject)]
 #[graphql(concrete(name = "ConnectorError", params(ConnectorErrorInterface)))]
+#[graphql(concrete(name = "NodeError", params(NodeErrorInterface)))]
 pub struct ErrorWrapper<T: OutputType> {
     error: T,
 }
@@ -80,12 +81,18 @@ pub enum ConnectorErrorInterface {
     PaginationError(PaginationError),
 }
 
+// Generic Error Interface
+#[derive(Interface)]
+#[graphql(field(name = "description", type = "&str"))]
+pub enum NodeErrorInterface {
+    DBError(DBError),
+    RecordNotFound(RecordNotFound),
+}
+
 impl From<ListError> for ErrorWrapper<ConnectorErrorInterface> {
     fn from(error: ListError) -> Self {
         let error = match error {
-            ListError::DBError(RepositoryError) => {
-                ConnectorErrorInterface::DBError(DBError(RepositoryError))
-            }
+            ListError::DBError(error) => ConnectorErrorInterface::DBError(DBError(error)),
             ListError::LimitBelowMin { limit, min } => {
                 ConnectorErrorInterface::PaginationError(PaginationError {
                     out_of_range: FirstOutOfRange::Min(min),
@@ -104,6 +111,19 @@ impl From<ListError> for ErrorWrapper<ConnectorErrorInterface> {
     }
 }
 
+impl From<SingleRecordError> for ErrorWrapper<NodeErrorInterface> {
+    fn from(error: SingleRecordError) -> Self {
+        let error = match error {
+            SingleRecordError::DBError(error) => NodeErrorInterface::DBError(DBError(error)),
+            SingleRecordError::NotFound(id) => {
+                NodeErrorInterface::RecordNotFound(RecordNotFound(id))
+            }
+        };
+
+        ErrorWrapper { error }
+    }
+}
+
 // Generic Errors
 pub struct DBError(pub RepositoryError);
 
@@ -115,6 +135,19 @@ impl DBError {
 
     pub async fn full_error(&self) -> String {
         format!("{:#}", self.0)
+    }
+}
+
+pub struct RecordNotFound(pub String);
+
+#[Object]
+impl RecordNotFound {
+    pub async fn description(&self) -> &'static str {
+        "Record with id not found"
+    }
+
+    pub async fn id(&self) -> &str {
+        &self.0
     }
 }
 

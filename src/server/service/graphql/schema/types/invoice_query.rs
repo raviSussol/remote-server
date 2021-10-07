@@ -8,7 +8,7 @@ use crate::{
         DatetimeFilter, EqualFilter, SimpleStringFilter,
     },
     server::service::graphql::ContextExt,
-    service::{ListError, ListResult},
+    service::{ListError, ListResult, SingleRecordError},
 };
 
 use async_graphql::*;
@@ -17,7 +17,8 @@ use dataloader::DataLoader;
 
 use super::{
     Connector, ConnectorErrorInterface, DatetimeFilterInput, EqualFilterInput,
-    EqualFilterStringInput, ErrorWrapper, InvoiceLineNode, SimpleStringFilterInput, SortInput,
+    EqualFilterStringInput, ErrorWrapper, InvoiceLineNode, NodeErrorInterface,
+    SimpleStringFilterInput, SortInput,
 };
 
 #[derive(Enum, Copy, Clone, PartialEq, Eq)]
@@ -48,6 +49,7 @@ pub struct InvoiceFilterInput {
 impl From<InvoiceFilterInput> for InvoiceFilter {
     fn from(f: InvoiceFilterInput) -> Self {
         InvoiceFilter {
+            id: None,
             name_id: f.name_id.map(EqualFilter::from),
             store_id: f.store_id.map(EqualFilter::from),
             r#type: f.r#type.map(EqualFilter::from),
@@ -164,7 +166,7 @@ impl InvoiceNode {
     }
 }
 
-struct InvoiceLines {
+pub struct InvoiceLines {
     invoice_id: String,
 }
 
@@ -190,11 +192,26 @@ pub enum InvoicesResponse {
     Response(Connector<InvoiceNode>),
 }
 
+#[derive(Union)]
+pub enum InvoiceResponse {
+    Error(ErrorWrapper<NodeErrorInterface>),
+    Response(InvoiceNode),
+}
+
 impl From<Result<ListResult<Invoice>, ListError>> for InvoicesResponse {
     fn from(result: Result<ListResult<Invoice>, ListError>) -> Self {
         match result {
             Ok(response) => InvoicesResponse::Response(response.into()),
             Err(error) => InvoicesResponse::Error(error.into()),
+        }
+    }
+}
+
+impl From<Result<Invoice, SingleRecordError>> for InvoiceResponse {
+    fn from(result: Result<Invoice, SingleRecordError>) -> Self {
+        match result {
+            Ok(response) => InvoiceResponse::Response(response.into()),
+            Err(error) => InvoiceResponse::Error(error.into()),
         }
     }
 }

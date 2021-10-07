@@ -41,7 +41,7 @@ where
     Sort<ToField>: From<SortInput<FromField>>,
 {
     // Currently only one sort option is supported, use the first from the list.
-    from.map(|sort_list| sort_list.pop())
+    from.map(|mut sort_list| sort_list.pop())
         .flatten()
         .map(Sort::from)
 }

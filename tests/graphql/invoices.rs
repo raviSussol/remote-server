@@ -3,14 +3,13 @@
 mod graphql {
     use remote_server::{
         database::{
-            loader::get_loaders,
             mock::{
                 mock_invoice_lines, mock_invoices, mock_items, mock_names, mock_stock_lines,
                 mock_stores,
             },
             repository::{
-                get_repositories, InvoiceLineRepository, InvoiceRepository, ItemRepository,
-                NameRepository, StockLineRepository, StoreRepository,
+                InvoiceLineRepository, InvoiceRepository, ItemRepository, NameRepository,
+                StockLineRepository, StoreRepository,
             },
             schema::{InvoiceLineRow, InvoiceRow, ItemRow, NameRow, StockLineRow, StoreRow},
         },
@@ -23,10 +22,8 @@ mod graphql {
 
     #[actix_rt::test]
     async fn test_graphql_invoices_query() {
-        let settings = test_db::get_test_settings("omsupply-database-gql-invoices-query");
-        test_db::setup(&settings.database).await;
-        let repositories = get_repositories(&settings).await;
-        let loaders = get_loaders(&settings).await;
+        let (pool, _, repositories, loaders) =
+            test_db::setup_all("omsupply-database-gql-invoices-query", true, true).await;
 
         // setup
         let name_repository = repositories.get::<NameRepository>().unwrap();
@@ -73,12 +70,12 @@ mod graphql {
             actix_web::App::new()
                 .data(repository_registry.clone())
                 .data(loader_registry.clone())
-                .configure(graphql_config(repository_registry, loader_registry)),
+                .configure(graphql_config(repository_registry, loader_registry, pool)),
         )
         .await;
 
         // Test query:
-        let payload = r#"{"query":"{invoices{nodes{id,pricing{totalAfterTax}}}}"}"#.as_bytes();
+        let payload = r#"{"query":"{invoices{ ... on InvoiceConnector { nodes{id,pricing{totalAfterTax}}}}}"}"#.as_bytes();
         let req = actix_web::test::TestRequest::post()
             .header("content-type", "application/json")
             .set_payload(payload)

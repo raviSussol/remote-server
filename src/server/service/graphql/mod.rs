@@ -33,7 +33,7 @@ impl<'a> ContextExt for Context<'a> {
 pub fn config(
     repository_registry: Data<RepositoryRegistry>,
     loader_registry: Data<LoaderRegistry>,
-    connection_pool: Data<DBConnectionPool>,
+    connection_pool: DBConnectionPool,
 ) -> impl FnOnce(&mut actix_web::web::ServiceConfig) {
     |cfg| {
         let schema = Schema::build(
@@ -43,7 +43,7 @@ pub fn config(
         )
         .data(repository_registry)
         .data(loader_registry)
-        .data(connection_pool)
+        .data(Data::new(connection_pool))
         .finish();
         cfg.service(
             actix_web::web::scope("/graphql")

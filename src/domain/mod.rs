@@ -3,21 +3,21 @@ pub mod item;
 pub mod name;
 use chrono::NaiveDateTime;
 
+#[derive(Clone)]
 pub struct SimpleStringFilter {
     pub equal_to: Option<String>,
     pub like: Option<String>,
 }
-
+#[derive(Clone)]
 pub struct EqualFilter<T> {
     pub equal_to: Option<T>,
 }
-
+#[derive(Clone)]
 pub struct DatetimeFilter {
     pub equal_to: Option<NaiveDateTime>,
     pub before_or_equal_to: Option<NaiveDateTime>,
     pub after_or_equal_to: Option<NaiveDateTime>,
 }
-
 pub struct Sort<T> {
     pub key: T,
     pub desc: Option<bool>,
@@ -33,4 +33,20 @@ pub struct PaginationOption {
 pub struct Pagination {
     pub limit: u32,
     pub offset: u32,
+}
+
+impl Pagination {
+    pub fn new() -> Pagination {
+        Pagination {
+            offset: 0,
+            limit: DEFAULT_LIMIT,
+        }
+    }
+
+    pub fn one() -> Pagination {
+        Pagination {
+            offset: 0,
+            limit: 1,
+        }
+    }
 }

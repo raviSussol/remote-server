@@ -1,7 +1,11 @@
 #![allow(where_clauses_object_safety)]
 
+use diesel::r2d2::{ConnectionManager, Pool};
 use remote_server::{
-    database::{loader::get_loaders, repository::get_repositories},
+    database::{
+        loader::get_loaders,
+        repository::{get_repositories, DBBackendConnection},
+    },
     server::{
         data::{ActorRegistry, LoaderMap, LoaderRegistry, RepositoryMap, RepositoryRegistry},
         middleware::{compress as compress_middleware, logger as logger_middleware},
@@ -29,7 +33,9 @@ async fn main() -> std::io::Result<()> {
 
     let settings: Settings =
         configuration::get_configuration().expect("Failed to parse configuration settings");
-
+    let connection_manager =
+        ConnectionManager::<DBBackendConnection>::new(&settings.database.connection_string());
+    let pool = Pool::new(connection_manager).expect("Failed to connect to database");
     let repositories: RepositoryMap = get_repositories(&settings).await;
     let loaders: LoaderMap = get_loaders(&settings).await;
     let (mut sync_sender, mut sync_receiver): (SyncSenderActor, SyncReceiverActor) =
@@ -59,6 +65,7 @@ async fn main() -> std::io::Result<()> {
             .configure(graphql_config(
                 repository_registry_data_app.clone(),
                 loader_registry_data.clone(),
+                pool.clone(),
             ))
             .configure(rest_config)
     })

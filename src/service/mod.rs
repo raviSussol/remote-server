@@ -9,8 +9,8 @@ pub mod item;
 pub mod name;
 
 pub struct ListResult<T> {
-    rows: Vec<T>,
-    count: u32,
+    pub rows: Vec<T>,
+    pub count: u32,
 }
 
 pub enum ListError {
@@ -19,9 +19,20 @@ pub enum ListError {
     LimitAboveMax { limit: u32, max: u32 },
 }
 
+pub enum SingleRecordError {
+    DBError(RepositoryError),
+    NotFound(String),
+}
+
 impl From<RepositoryError> for ListError {
     fn from(error: RepositoryError) -> Self {
         ListError::DBError(error)
+    }
+}
+
+impl From<RepositoryError> for SingleRecordError {
+    fn from(error: RepositoryError) -> Self {
+        SingleRecordError::DBError(error)
     }
 }
 

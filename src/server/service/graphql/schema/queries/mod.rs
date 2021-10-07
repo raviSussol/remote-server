@@ -1,4 +1,3 @@
-use crate::domain::invoice::InvoiceFilter;
 use crate::domain::item::ItemFilter;
 use crate::domain::name::NameFilter;
 use crate::domain::PaginationOption;
@@ -6,10 +5,12 @@ use crate::server::service::graphql::ContextExt;
 use crate::service::invoice::get_invoices;
 use crate::service::item::get_items;
 use crate::service::name::get_names;
+use crate::{domain::invoice::InvoiceFilter, service::invoice::get_invoice};
 
 use super::types::{
-    convert_sort, InvoiceFilterInput, InvoiceSortInput, InvoicesResponse, ItemFilterInput,
-    ItemSortInput, ItemsResponse, NameFilterInput, NameSortInput, NamesResponse, PaginationInput,
+    convert_sort, InvoiceFilterInput, InvoiceResponse, InvoiceSortInput, InvoicesResponse,
+    ItemFilterInput, ItemSortInput, ItemsResponse, NameFilterInput, NameSortInput, NamesResponse,
+    PaginationInput,
 };
 use async_graphql::*;
 
@@ -58,16 +59,14 @@ impl Queries {
         .into()
     }
 
-    // TODO return better error
-    // pub async fn invoice(
-    //     &self,
-    //     ctx: &Context<'_>,
-    //     #[graphql(desc = "id of the invoice")] id: String,
-    // ) -> Result<InvoiceNode, RepositoryError> {
-    //     let repository = ctx.get_repository::<InvoiceQueryRepository>();
-    //     let invoice = repository.find_one_by_id(id.as_str()).await?;
-    //     Ok(InvoiceNode::from(invoice))
-    // }
+    pub async fn invoice(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "id of the invoice")] id: String,
+    ) -> InvoiceResponse {
+        let connection_pool = ctx.get_connection_pool();
+        get_invoice(connection_pool, id).into()
+    }
 
     pub async fn invoices(
         &self,
