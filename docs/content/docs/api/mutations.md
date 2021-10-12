@@ -99,6 +99,7 @@ On status change the datetime fields are set:
 - `finalised_datetime` is set when the status is changed to `finalised`
 
 </details>
+&nbsp;
 
 ## Customer Invoice Line
 
@@ -140,7 +141,7 @@ Base table: `invoice_line`
 
 All fields are translated directly to snake case equivalent.
 
-`invoice_id` set as id of parent
+`invoice_id` set as id of parent 
 
 `stock_line` links on `stock_line.id` -> `invoice_line.stock_line_id`
 
@@ -157,6 +158,7 @@ Validation of reduction to be checked against each `stock_line`, and reduction a
 `clientId` is only used in error responses
 
 </details>
+&nbsp;
 
 ## Supplier Invoice
 
@@ -230,7 +232,7 @@ type UpsertSupplierInvoiceLineInput {
 [InsertSupplierInvoiceLineInput](/docs/api/mutations/#supplier-invoice-line-insert)
 [UpdateSupplierInvoiceLineInput](/docs/api/mutations/#supplier-invoice-line-update)
 
-{TODO we can expand this query to also have `deletedInvoiceLines`, `partialInvoiceLines`, if and when needed}                  
+_{TODO we can expand this query to also have `deletedInvoiceLines`, `partialInvoiceLines`, if and when needed}_           
 
 <details>
 <summary>IMPLEMENTATION DETAILS</summary>
@@ -243,7 +245,7 @@ Base table: `invoice`
 All other fields are translated directly to snake case equivalent.
 
 `type` to be set as: `SUPPLIER_INVOICE`
-`store_id` to be set as current logged in store in session
+`store_id` to be set as current logged in store in session _{TODO can this be broken, if user is switched, and goes to an existing tab and looks at another invoice?}_
 
 On status change the datetime fields are set:
 - `confirm_datetime` is set when the status is changed to `confirmed`
@@ -314,6 +316,8 @@ All fields are translated directly to snake case equivalent.
 `item_name` to be populated from related item when item changes
 
 Stock line is created when invoice changes to `CONFIRMED` as per [InvoiceStatus implementation details](/docs/api/types/#enum-invoicestatus)
+
+`stock_line`.`store_id` is set to currently logged in store 
 
 During confirmation and any further subsequent change will result in:
 

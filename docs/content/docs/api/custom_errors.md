@@ -14,7 +14,7 @@ toc = true
 
 [Error pattern section](/docs/api/patterns/#errors) describe the full shape of a custom error, errors listed here are all possible extensions of `CustomError`
 
-{TODO can we export custom error shapes in GraphQL schema ?}
+_{TODO can we export custom error shapes in GraphQL schema ?}_
 
 
 ## Custom Error Codes
@@ -37,6 +37,7 @@ enum CustomErrorCodes {
   IdPresentInInsertInvoiceLine = "ID_PRESENT_IN_INSERT_INVOICE_LINE",
   FinalisedInvoiceIsNotEditable = "FINALISED_INVOICE_IS_NOT_EDITABLE",
   CannotChangeStatusBackToDraft = "CANNOT_CHANGE_STATUS_BACK_TO_DRAFT",
+  CanOnlyEditInvoicesInLoggedInStore = "CAN_ONLY_EDIT_INVOICE_IN_LOGGED_IN_STORE",
   InvoiceNotFound = "INVOICE_NOT_FOUND",
   InvoiceLineError = "INVOICE_LINE_ERROR",
   // Customer Invoice Mutation
@@ -109,6 +110,14 @@ interface OtherPartyIdNotFound extends CustomError {
 interface OtherPartyCannotBeThisStore extends CustomError {
   code: CustomErrorCodes.OtherPartyCannotBeThisStore,
   otherPartyId: string,
+}
+```
+
+```TypeScript
+interface CanOnlyEditInvoicesInLoggedInStore extends CustomError {
+  code: CustomErrorCodes.CanOnlyEditInvoicesInLoggedInStore,
+  invoiceStoreId: string,
+  sessionStoreId: string
 }
 ```
 
