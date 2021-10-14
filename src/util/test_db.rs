@@ -120,14 +120,10 @@ pub fn get_test_settings(db_name: &str) -> Settings {
     }
 }
 
-/// Generic setup method to help setup test enviroment
+/// Generic setup method to help setup database for test environment
 /// - sets up database (create one and initilises schema), drops existing database
-/// - creates connectuion
-/// - inserts mock data
-pub async fn setup_all(
-    db_name: &str,
-    inserts: MockDataInserts,
-) -> (MockData, StorageConnection, Settings) {
+/// - creates connection
+pub async fn setup_server(db_name: &str) -> (StorageConnection, Settings) {
     let settings = get_test_settings(db_name);
 
     setup(&settings.database).await;
@@ -139,6 +135,19 @@ pub async fn setup_all(
     let storage_connection_manager = StorageConnectionManager::new(pool.clone());
 
     let connection = storage_connection_manager.connection().unwrap();
+
+    (connection, settings)
+}
+
+/// Generic setup method to help setup test enviroment
+/// - sets up database (create one and initilises schema), drops existing database
+/// - creates connection
+/// - inserts mock data
+pub async fn setup_all(
+    db_name: &str,
+    inserts: MockDataInserts,
+) -> (MockData, StorageConnection, Settings) {
+    let (connection, settings) = setup_server(db_name).await;
 
     (
         insert_mock_data(&connection, inserts).await,
