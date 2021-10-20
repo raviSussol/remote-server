@@ -58,7 +58,7 @@ impl From<TransactionError<UpdateCustomerInvoiceError>> for UpdateCustomerInvoic
     fn from(error: TransactionError<UpdateCustomerInvoiceError>) -> Self {
         match error {
             TransactionError::Transaction { msg } => {
-                UpdateCustomerInvoiceError::DatabaseError(RepositoryError::DBError { msg })
+                UpdateCustomerInvoiceError::DatabaseError(RepositoryError::as_db_error(&msg, ""))
             }
             TransactionError::Inner(e) => e,
         }

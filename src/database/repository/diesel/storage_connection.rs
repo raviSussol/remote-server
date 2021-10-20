@@ -24,7 +24,7 @@ pub enum TransactionError<E> {
 impl From<TransactionError<RepositoryError>> for RepositoryError {
     fn from(error: TransactionError<RepositoryError>) -> Self {
         match error {
-            TransactionError::Transaction { msg } => RepositoryError::DBError { msg },
+            TransactionError::Transaction { msg } => RepositoryError::as_db_error(&msg, ""),
             TransactionError::Inner(e) => e,
         }
     }
