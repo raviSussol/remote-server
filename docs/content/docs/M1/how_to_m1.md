@@ -14,13 +14,16 @@ toc = true
 
 ## Setup
 
-[readme](https://github.com/openmsupply/remote-server#remote-server) 
+[readme](https://github.com/openmsupply/remote-server#remote-server)
 
 ##### Pull Main
+
 ##### Get Diesel
+
 ```bash
 cargo install diesel_cli --no-default-features --features "sqlite-bundled postgres"
 ```
+
 ##### Setup Database
 
 Don't need to start sqlite, migration scripts should do that for you, but if you are using postgres
@@ -70,13 +73,14 @@ Worlds your oyster as they say ?
 
 `http://localhost:8000/graphql` -> there is a built in playground
 
-I personally like `https://graphiql-online.com/`, with voyage and pretty easy query builder 
+I personally like `https://graphiql-online.com/`, with voyage and pretty easy query builder
 
 For all queries you can check out `src/graphql_schema/queries.graphql` (for all queries and mutation, can copy paste into your graphql gui and run one at a time, sorry not all yet will add remainder), in the same folder you'll find `schema.graphl`.
 
-We've also made add_and_issue_stock.graphql, use first query `namesAndItems` to get ids, and second query `addStock` to add stock, and `issueStock` to issue stock. 
+We've also made add_and_issue_stock.graphql, use first query `namesAndItems` to get ids, and second query `addStock` to add stock, and `issueStock` to issue stock.
 
 ###### Add stock variables:
+
 ```JSON
  {
     "invoiceId": "new_inoice_id",
@@ -89,7 +93,9 @@ We've also made add_and_issue_stock.graphql, use first query `namesAndItems` to 
     "sellPricePerPack": 20
  }
 ```
+
 ###### Issue stock variables:
+
 ```JSON
 {
   "invoiceId": "new_inoice_id2",
@@ -115,13 +121,14 @@ It's also quite good to have postgres log file, if you running `local` version p
 
 For `docker postgres`, first find out the current log file:`docker exec postgres_docker cat /var/lib/postgresql/data/current_logfiles`, then to tail `tail -f /var/lib/postgresql/data/log/postgresql-2021-10-20_130619.log` or to cp `docker cp postgres_docker:/var/lib/postgresql/data/log/postgresql-2021-10-20_130619.log log.log`. The exec script should automatically log all statments.
 
-
 ## Known problems and Limitations
 
 ##### Sync
 
-Back end schema is pretty strict, pretty much all fk relations are not nullable. This caused a few sync problems, since these constraints are not enforced on mSupply end. You should see a pretty clear warning in postgres if sync fails, when using sqlite this problem is skipped (we were trying to skip records in transaction in postgres too, but had an issue). 
-Anyways, one record that we've noticed that can be problematic in master_list_name_join, where name_ID is actually of a name that doens't exists (this happens in other records, like store, but for concrete system records). To metigate this you can run this sql in record browser:
+- Ensure you're on the mSupply branch: `feature/sync-v5`.
+- Ensure your data file has run the migration code in the mSupply method `centralChangeLogGenerateRecords()`. It is possible the `feature/sync-v5` method is behind `main` which may result in your data file being upgraded without the sync-v5 code having being run.
+- Back end schema is pretty strict, pretty much all fk relations are not nullable. This caused a few sync problems, since these constraints are not enforced on mSupply end. You should see a pretty clear warning in postgres if sync fails, when using sqlite this problem is skipped (we were trying to skip records in transaction in postgres too, but had an issue).
+  Anyways, one record that we've noticed that can be problematic in master_list_name_join, where name_ID is actually of a name that doens't exists (this happens in other records, like store, but for concrete system records). To metigate this you can run this sql in record browser:
 
 ```SQL
 select * from list_master_name_join limit 1;
@@ -130,18 +137,16 @@ select list_master_name_join.id as name_id from list_master_name_join left join 
 select * from list_master_name_join limit 1
 ```
 
-* Central data delete do not sync (no indication on incoming central record that it's a delete)
+- Central data delete do not sync (no indication on incoming central record that it's a delete)
 
 #### Other
 
-* The following graphql errors are not handled, yet
-  * `InvoiceDoesNotBelongToCurrentStore`
-  * `StockLineDoesNotBelongToCurrentStore`
-  * `InvoiceDoesNotBelongToCurrentStore`
-  * `OtherPartyCannotBeThisStoreError`
-  * `CannotChangeInvoiceBackToDraft` 
-  * `CannotChangeStatusBackToDraftError` (oops those should be one)
-* Optional nullable inputs (on update mutations) (thierReference, comment, expiryDate and batch), wont' be set to null if null is provided
-* Can't set expiryDate to null. This also included if stock line is change on invoice line (to a stock line with null expiryDate, invoice line will still show previous stock line expiry date)
-
-
+- The following graphql errors are not handled, yet
+  - `InvoiceDoesNotBelongToCurrentStore`
+  - `StockLineDoesNotBelongToCurrentStore`
+  - `InvoiceDoesNotBelongToCurrentStore`
+  - `OtherPartyCannotBeThisStoreError`
+  - `CannotChangeInvoiceBackToDraft`
+  - `CannotChangeStatusBackToDraftError` (oops those should be one)
+- Optional nullable inputs (on update mutations) (thierReference, comment, expiryDate and batch), wont' be set to null if null is provided
+- Can't set expiryDate to null. This also included if stock line is change on invoice line (to a stock line with null expiryDate, invoice line will still show previous stock line expiry date)
