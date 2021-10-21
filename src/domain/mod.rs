@@ -1,4 +1,6 @@
 pub mod customer_invoice;
+pub mod document_common_ancestor;
+pub mod document_merge;
 pub mod invoice;
 pub mod invoice_line;
 pub mod item;
