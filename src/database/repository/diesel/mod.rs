@@ -27,6 +27,7 @@ mod user_account;
 use actix_rt::blocking::BlockingError;
 pub use central_sync_buffer::CentralSyncBufferRepository;
 pub use central_sync_cursor::CentralSyncCursorRepository;
+pub use document::DocumentRepository;
 pub use invoice::{CustomerInvoiceRepository, InvoiceRepository};
 pub use invoice_line::InvoiceLineRepository;
 pub use invoice_line_query::{InvoiceLineQueryRepository, InvoiceLineStats};
