@@ -4,6 +4,7 @@ use crate::{
 };
 use std::convert::TryInto;
 
+pub mod document;
 pub mod invoice;
 pub mod invoice_line;
 pub mod item;
