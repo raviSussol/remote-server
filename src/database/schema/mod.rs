@@ -1,5 +1,7 @@
 mod central_sync_buffer;
 mod central_sync_cursor;
+mod document;
+mod document_head;
 mod invoice;
 mod invoice_line;
 mod item;
@@ -34,6 +36,8 @@ pub enum DatabaseRow {
 
 pub use central_sync_buffer::CentralSyncBufferRow;
 pub use central_sync_cursor::CentralSyncCursorRow;
+pub use document::DocumentRow;
+pub use document_head::DocumentHeadRow;
 pub use invoice::{InvoiceRow, InvoiceRowStatus, InvoiceRowType};
 pub use invoice_line::InvoiceLineRow;
 pub use item::ItemRow;

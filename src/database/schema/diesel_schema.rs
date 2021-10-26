@@ -171,6 +171,29 @@ table! {
     }
 }
 
+table! {
+    document (id) {
+        /// The document hash
+        id -> Text,
+        /// Document path and name
+        name -> Text,
+        /// Stringified array of parents
+        parents -> Text,
+        timestamp -> Timestamp,
+        #[sql_name = "type"] type_ -> Text,
+        data -> Text,
+    }
+}
+
+table! {
+    document_head (id) {
+        // The document name
+        id -> Text,
+        /// The current document version (hash)
+        document_id -> Text,
+    }
+}
+
 joinable!(stock_line -> item (item_id));
 joinable!(stock_line -> store (store_id));
 joinable!(requisition -> name_table (name_id));

@@ -4,6 +4,7 @@ use crate::{
 
 mod central_sync_buffer;
 mod central_sync_cursor;
+mod document;
 mod invoice;
 mod invoice_line;
 mod invoice_line_query;
