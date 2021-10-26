@@ -173,12 +173,10 @@ table! {
 
 table! {
     document (id) {
-        /// The document hash
         id -> Text,
-        /// Document path and name
         name -> Text,
-        /// Stringified array of parents
         parents -> Text,
+        author -> Text,
         timestamp -> Timestamp,
         #[sql_name = "type"] type_ -> Text,
         data -> Text,
@@ -187,10 +185,10 @@ table! {
 
 table! {
     document_head (id) {
-        // The document name
         id -> Text,
-        /// The current document version (hash)
-        document_id -> Text,
+        store -> Text,
+        name -> Text,
+        head -> Text,
     }
 }
 

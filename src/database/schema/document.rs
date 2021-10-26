@@ -11,6 +11,8 @@ pub struct DocumentRow {
     pub name: String,
     /// Stringified array of parents
     pub parents: String,
+    /// Id of the author who edited this document version
+    pub author: String,
     /// The timestamp of this document version
     pub timestamp: NaiveDateTime,
     /// Type of the containing data
