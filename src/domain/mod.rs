@@ -1,4 +1,5 @@
 pub mod customer_invoice;
+pub mod document_canonical_json;
 pub mod document_common_ancestor;
 pub mod document_merge;
 pub mod invoice;
