@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde_json::Value;
 
 type MergeObject = serde_json::Map<String, serde_json::Value>;
@@ -6,11 +7,32 @@ pub trait ConflictSolver {
     fn solve(&self, our: &Value, their: &Value, base: Option<&Value>) -> Value;
 }
 
-struct TakeOurConflictSolver {}
+pub struct TakeOurConflictSolver {}
 
 impl ConflictSolver for TakeOurConflictSolver {
     fn solve(&self, our: &Value, _: &Value, _: Option<&Value>) -> Value {
         our.clone()
+    }
+}
+
+pub struct TakeLatestConflictSolver {
+    our: DateTime<Utc>,
+    their: DateTime<Utc>,
+}
+
+impl TakeLatestConflictSolver {
+    pub fn new(our: DateTime<Utc>, their: DateTime<Utc>) -> Self {
+        TakeLatestConflictSolver { our, their }
+    }
+}
+
+impl ConflictSolver for TakeLatestConflictSolver {
+    fn solve(&self, our: &Value, their: &Value, _: Option<&Value>) -> Value {
+        if self.our > self.their {
+            our.clone()
+        } else {
+            their.clone()
+        }
     }
 }
 

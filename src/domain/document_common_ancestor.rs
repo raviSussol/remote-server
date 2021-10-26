@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use chrono::NaiveDateTime;
 
 #[derive(Debug)]
-enum CommonAncestorError {
+pub enum CommonAncestorError {
     NoCommonAncestorFound,
     /// History data is corrupted and ids couldn't be found
     InvalidAncestorData,
@@ -11,19 +11,33 @@ enum CommonAncestorError {
 
 #[derive(Clone)]
 pub struct AncestorDetail {
-    id: String,
-    parents: Vec<String>,
-    timestamp: NaiveDateTime,
+    pub id: String,
+    pub parents: Vec<String>,
+    pub timestamp: NaiveDateTime,
 }
 
 /// Abstract away how details are retrieved from the underlying storage
-trait AncestorDB {
+pub trait AncestorDB {
     fn get_details(&self, id: &str) -> Option<AncestorDetail>;
 }
 
 /// Keep all ancestors loaded in memory
-struct InMemoryAncestorDB {
+pub struct InMemoryAncestorDB {
     map: HashMap<String, AncestorDetail>,
+}
+
+impl InMemoryAncestorDB {
+    pub fn new() -> Self {
+        InMemoryAncestorDB {
+            map: HashMap::new(),
+        }
+    }
+
+    pub fn insert(&mut self, items: &Vec<AncestorDetail>) {
+        for item in items {
+            self.map.insert(item.id.clone(), item.clone());
+        }
+    }
 }
 
 impl AncestorDB for InMemoryAncestorDB {
@@ -32,7 +46,7 @@ impl AncestorDB for InMemoryAncestorDB {
     }
 }
 
-fn common_ancestors<T: AncestorDB>(
+pub fn common_ancestors<T: AncestorDB>(
     db: &T,
     v1: &str,
     v2: &str,
@@ -86,19 +100,11 @@ fn common_ancestors<T: AncestorDB>(
 
 #[cfg(test)]
 mod common_ancestor_test {
-    use std::collections::HashMap;
-
     use chrono::NaiveDateTime;
 
     use crate::domain::document_common_ancestor::{
         common_ancestors, AncestorDetail, InMemoryAncestorDB,
     };
-
-    fn import(list: &Vec<AncestorDetail>, map: &mut HashMap<String, AncestorDetail>) {
-        for item in list {
-            map.insert(item.id.clone(), item.clone());
-        }
-    }
 
     #[test]
     fn test_simple() {
@@ -132,11 +138,9 @@ mod common_ancestor_test {
             },
         ];
 
-        let mut db = InMemoryAncestorDB {
-            map: HashMap::new(),
-        };
-        import(&local, &mut db.map);
-        import(&remote, &mut db.map);
+        let mut db = InMemoryAncestorDB::new();
+        db.insert(&local);
+        db.insert(&remote);
 
         let result = common_ancestors(&db, "b1", "a1");
         assert_eq!(result.unwrap(), "a0");
@@ -245,11 +249,9 @@ mod common_ancestor_test {
             },
         ];
 
-        let mut db = InMemoryAncestorDB {
-            map: HashMap::new(),
-        };
-        import(&local, &mut db.map);
-        import(&remote, &mut db.map);
+        let mut db = InMemoryAncestorDB::new();
+        db.insert(&local);
+        db.insert(&remote);
 
         let result = common_ancestors(&db, "b3", "a7");
         assert_eq!(result.unwrap(), "a4");
