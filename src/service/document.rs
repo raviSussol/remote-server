@@ -269,5 +269,32 @@ mod document_service_test {
             })
         );
         assert_eq!(result.parents, vec![v0.id.to_owned(), v1.id.to_owned()]);
+
+        // add new doc with a merge as parent
+        let mut next_doc = template.clone();
+        next_doc.parents = vec![result.id.to_owned()];
+        next_doc.timestamp = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(5500, 0), Utc);
+        next_doc.data = json!({
+          "value1": "next change",
+          "map": {
+            "entry_their": 1,
+            "entry_our": 2
+          },
+          "conflict": "our change wins because we are more recent"
+        });
+        let v4 = service.insert_document(store, next_doc).unwrap();
+        let result = service.get_document(&template.name, store).unwrap();
+        assert_eq!(result.id, v4.id);
+        assert_json_eq!(
+            result.data,
+            json!({
+              "value1": "next change",
+              "map": {
+                "entry_their": 1,
+                "entry_our": 2
+              },
+              "conflict": "our change wins because we are more recent"
+            })
+        );
     }
 }
