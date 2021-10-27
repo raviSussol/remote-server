@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Mutations | Open mSupply</title>
+<meta name="description" content="Description of all GraphQL mutations available">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/api/mutations/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Api",
+            "item": "https://dev.msupply.foundation/docs/api/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Mutations",
+            "item": "https://dev.msupply.foundation/docs/api/mutations/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/mutations/#customer-invoice">Customer Invoice</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/mutations/#customer-invoice-line">Customer Invoice Line</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/mutations/#supplier-invoice">Supplier Invoice</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/api/mutations/#supplier-invoice-insert">Supplier Invoice Insert</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/api/mutations/#supplier-invoice-update">Supplier Invoice Update</a></li>
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/mutations/#supplier-invoice-line">Supplier Invoice Line</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Mutations</h1>
+        
+        <p>Multiple mutations in a single request are supported and each mutation will be run sequentially, in the order they were specified. If any mutation results in an error, previous mutations will not rollback and any remaining mutations will not be run. Only a single error will be returned.</p>
+<p>For full list of errors see <a href="/docs/api/custom_errors">custom error section</a></p>
+<h2 id="customer-invoice">Customer Invoice</h2>
+<h4 id="customer-invoice-insert">Customer Invoice Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+    insertCustomerInvoice(</span><span style="color:#bf616a;">input</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">InsertCustomerInvoiceInput</span><span style="color:#c0c5ce;">): Invoice
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertCustomerInvoiceInput {
+    otherPartyId: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">status: </span><span style="color:#bf616a;">InvoiceStatus</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">theirReference: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">lines: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">InsertCustomerInvoiceLineInput</span><span style="color:#b48ead;">]
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertCustomerInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">id: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">stockLineId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p><a href="/docs/api/mutations/#customer-invoice-line-insert">InsertCustomerInvoiceLineInput</a></p>
+<h4 id="customer-invoice-update">Customer Invoice Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+    updateCustomerInvoice(</span><span style="color:#bf616a;">input</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">UpdateCustomerInvoiceInput</span><span style="color:#c0c5ce;">): Invoice
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpdateCustomerInvoiceInput {
+    id: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">otherPartyId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">status: </span><span style="color:#bf616a;">InvoiceStatus
+    </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">theirReference: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">lines: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">UpsertCustomerInvoiceLineInput</span><span style="color:#b48ead;">]
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#65737e;"># Intersection of InsertCustomerInvoiceLineInput or UpdateCustomerInvoiceLineInput
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpsertCustomerInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">id: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">stockLineId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p><a href="/docs/api/mutations/#customer-invoice-line-insert">InsertCustomerInvoiceLineInput</a>
+<a href="/docs/api/mutations/#customer-invoice-line-update">UpdateCustomerInvoiceLineInput</a></p>
+<p>Invoice lines that previously existed but are missing in <code>lines</code> list will be deleted. </p>
+<p>{TODO we can expand this query to also have <code>deletedLines</code>, <code>partialLines</code>, if and when needed}</p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base table: <code>invoice</code></p>
+<p><ins>otherPartyId</ins>: <code>name_id</code>
+<ins>lines</ins>: <code>id</code> -&gt; <code>invoice_line.invoice_id</code></p>
+<p>All other fields are translated directly to snake case equivalent.</p>
+<p><code>type</code> to be set as: <code>CUSTOMER_INVOICE</code>
+<code>store_id</code> to be set as current logged in store in session</p>
+<p>On Insertion <code>entry_datetime</code> is set.</p>
+<p>On status change the datetime fields are set:</p>
+<ul>
+<li><code>confirm_datetime</code> is set when the status is changed to <code>confirmed</code></li>
+<li><code>finalised_datetime</code> is set when the status is changed to <code>finalised</code></li>
+</ul>
+</details>
+&nbsp;
+<h2 id="customer-invoice-line">Customer Invoice Line</h2>
+<p>Customer invoice lines are always linked to an invoice, and are mutated via <a href="/docs/api/mutations/#customer-invoice">Custom Invoice</a> mutations.</p>
+<h4 id="customer-invoice-line-insert">Customer Invoice Line Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-GraphQL" data-lang="GraphQL"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertCustomerInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">stockLineId: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#b48ead;">!
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h4 id="customer-invoice-line-update">Customer Invoice Line Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-GraphQL" data-lang="GraphQL"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpdateCustomerInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">id: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">stockLineId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#b48ead;">!
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h4 id="customer-invoice-line-upsert">Customer Invoice Line Upsert</h4>
+<p><code>UpsertCustomerInvoiceLineInput</code> is an intersection of <code>InsertCustomerInvoiceLineInput</code> and <code>UpdateCustomerInvoiceLineInput</code>, the type is narrowed down by checking presence of value in <strong>id</strong> field</p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base table: <code>invoice_line</code></p>
+<p>All fields are translated directly to snake case equivalent.</p>
+<p><code>invoice_id</code> set as id of parent </p>
+<p><code>stock_line</code> links on <code>stock_line.id</code> -&gt; <code>invoice_line.stock_line_id</code></p>
+<p><code>item</code> links on <code>item.id</code> -&gt; <code>invoice_line.item_id</code></p>
+<p><code>item_name</code> to be populated from related item when item changes</p>
+<p><code>pack_size</code>, <code>cost_price_per_pack</code>, <code>sell_price_per_pack</code>, <code>batch</code>, <code>expiry_date</code> to be populated from <code>stock_line</code>, when <code>stock_line_id</code> changes</p>
+<p>Invoice lines are delete if they are missing in mutation but are present in database, in which case we have to make sure to adjust <code>stock_line</code> accordingly.</p>
+<p>Validation of reduction to be checked against each <code>stock_line</code>, and reduction applied to <code>stock_line</code>. As per <a href="/docs/api/types/#enum-invoicestatus">InvoiceStatus implementation details</a></p>
+<p><code>clientId</code> is only used in error responses</p>
+</details>
+&nbsp;
+<h2 id="supplier-invoice">Supplier Invoice</h2>
+<h3 id="supplier-invoice-insert">Supplier Invoice Insert</h3>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+    insertSupplierInvoice(</span><span style="color:#bf616a;">input</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">InsertSupplierInvoiceInput</span><span style="color:#c0c5ce;">): Invoice
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertSupplierInvoiceInput {
+    otherPartyId: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">status: </span><span style="color:#bf616a;">InvoiceStatus</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">theirReference: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">lines: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">InsertSupplierInvoiceLineInput</span><span style="color:#b48ead;">]
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertSupplierInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String</span><span style="color:#b48ead;">!
+    </span><span style="color:#65737e;"># GraphQL Validation &gt; 0
+    </span><span style="color:#c0c5ce;">packSize: </span><span style="color:#bf616a;">Number</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">batch: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">sellPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#b48ead;">!
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">costPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#b48ead;">!
+    </span><span style="color:#c0c5ce;">expiryDate: </span><span style="color:#bf616a;">Date 
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#b48ead;">!
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p><a href="/docs/api/mutations/#supplier-invoice-line-insert">InsertSupplierInvoiceLineInput</a></p>
+<h3 id="supplier-invoice-update">Supplier Invoice Update</h3>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+    updateSupplierInvoice(</span><span style="color:#bf616a;">input</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">UpdateSupplierInvoiceInput</span><span style="color:#c0c5ce;">): Invoice
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpdateSupplierInvoiceInput {
+    id: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">otherPartyId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">status: </span><span style="color:#bf616a;">InvoiceStatus
+    </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">theirReference: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">lines: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">UpsertSupplierInvoiceLineInput</span><span style="color:#b48ead;">]
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#65737e;"># Intersection of InsertSupplierInvoiceLineInput or UpdateSupplierInvoiceLineInput
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpsertSupplierInvoiceLineInput {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">id: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt; 0
+    </span><span style="color:#c0c5ce;">packSize: </span><span style="color:#bf616a;">Number
+    </span><span style="color:#c0c5ce;">batch: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">sellPricePerPack: </span><span style="color:#bf616a;">Float
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">costPricePerPack: </span><span style="color:#bf616a;">Float
+    </span><span style="color:#c0c5ce;">expiryDate: </span><span style="color:#bf616a;">Date 
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p><a href="/docs/api/mutations/#supplier-invoice-line-insert">InsertSupplierInvoiceLineInput</a>
+<a href="/docs/api/mutations/#supplier-invoice-line-update">UpdateSupplierInvoiceLineInput</a></p>
+<p><em>{TODO we can expand this query to also have <code>deletedInvoiceLines</code>, <code>partialInvoiceLines</code>, if and when needed}</em></p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base table: <code>invoice</code></p>
+<p><ins>otherPartyId</ins>: <code>name_id</code>
+<ins>allInvoiceLines</ins>: <code>id</code> -&gt; <code>invoice_line.invoice_id</code></p>
+<p>All other fields are translated directly to snake case equivalent.</p>
+<p><code>type</code> to be set as: <code>SUPPLIER_INVOICE</code>
+<code>store_id</code> to be set as current logged in store in session <em>{TODO can this be broken, if user is switched, and goes to an existing tab and looks at another invoice?}</em></p>
+<p>On status change the datetime fields are set:</p>
+<ul>
+<li><code>confirm_datetime</code> is set when the status is changed to <code>confirmed</code></li>
+<li><code>finalised_datetime</code> is set when the status is changed to <code>finalised</code></li>
+</ul>
+</details>
+<h2 id="supplier-invoice-line">Supplier Invoice Line</h2>
+<p>Supplier invoice lines are always linked to an invoice, and are mutated via <a href="/docs/api/mutations/#supplier-invoice">Supplier Invoice</a> mutations.</p>
+<h4 id="supplier-invoice-line-insert">Supplier Invoice Line Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-GraphQL" data-lang="GraphQL"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InsertSupplierInvoiceLineInput = {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">itemId: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+    </span><span style="color:#65737e;"># GraphQL Validation &gt; 0
+    </span><span style="color:#c0c5ce;">packSize: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+    batch: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">,
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">sellPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">costPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+    expiryDate: </span><span style="color:#bf616a;">Date 
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+}
+</span></code></pre><h4 id="supplier-invoice-line-update">Supplier Invoice Line Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-GraphQL" data-lang="GraphQL"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">UpdateSupplierInvoiceLineInput = {
+    clientId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+    itemId: </span><span style="color:#bf616a;">String
+    </span><span style="color:#65737e;"># GraphQL Validation &gt; 0
+    </span><span style="color:#c0c5ce;">packSize: </span><span style="color:#bf616a;">Number
+    </span><span style="color:#c0c5ce;">batch: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">,
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">sellPricePerPack: </span><span style="color:#bf616a;">Float
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">costPricePerPack: </span><span style="color:#bf616a;">Float
+    </span><span style="color:#c0c5ce;">expiryDate: </span><span style="color:#bf616a;">Date
+    </span><span style="color:#65737e;"># GraphQL Validation &gt;= 0
+    </span><span style="color:#c0c5ce;">numberOfPacks: </span><span style="color:#bf616a;">Number
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h4 id="supplier-invoice-line-upsert">Supplier Invoice Line Upsert</h4>
+<p><code>UpsertSupplierInvoiceLineInput</code> is an intersection of <code>InsertSupplierInvoiceLineInput</code> and <code>UpdateSupplierInvoiceLineInput</code>, the type is narrowed down by checking presence of value in <strong>id</strong> field</p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base table: <code>invoice_line</code></p>
+<p>All fields are translated directly to snake case equivalent.</p>
+<p><code>invoice_id</code> set as id of parent</p>
+<p><code>stock_line</code> links on <code>stock_line.id</code> -&gt; <code>invoice_line.stock_line_id</code></p>
+<p><code>item</code> links on <code>item.id</code> -&gt; <code>invoice_line.item_id</code></p>
+<p><code>item_name</code> to be populated from related item when item changes</p>
+<p>Stock line is created when invoice changes to <code>CONFIRMED</code> as per <a href="/docs/api/types/#enum-invoicestatus">InvoiceStatus implementation details</a></p>
+<p><code>stock_line</code>.<code>store_id</code> is set to currently logged in store </p>
+<p>During confirmation and any further subsequent change will result in:</p>
+<ul>
+<li>invoice_line.<code>number_of_pack</code> -&gt; stock_line.<code>available_number_of_packs</code>, <code>total_number_of_packs</code></li>
+<li>invoice_line.<code>pack_size</code>, <code>batch</code>, <code>expiry</code>, <code>sell_price_per_pack</code>, <code>cost_price_per_pack</code>, <code>item_id</code> -&gt; to stock_line fields with the same name</li>
+</ul>
+<p>When stock in supplier invoice is reserved by another invoice, <code>invoice_line</code> becomes not editable.</p>
+<p>Invoice lines are delete if they are missing in mutation but are present in database, in which case we have to make sure to delete associated <code>stock_line</code></p>
+<p><code>clientId</code> is only used in error responses</p>
+</details>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;queries&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Queries
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;custom-errors&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Custom Errors &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Queries | Open mSupply</title>
+<meta name="description" content="Description of all GraphQL queries available">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/api/queries/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Api",
+            "item": "https://dev.msupply.foundation/docs/api/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Queries",
+            "item": "https://dev.msupply.foundation/docs/api/queries/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/queries/#invoices">Invoices</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/queries/#invoice">Invoice</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/queries/#items">ITEMS</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/queries/#names">NAMES</a></li>
+								
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Queries</h1>
+        
+        <p>GraphQL exposes introspection queries, and in dev version of omSupply you can explore the full api by going to /graphiql end point.</p>
+<p>Full list of GraphQL queries is provided here is for:</p>
+<ul>
+<li>development specs</li>
+<li>version history</li>
+<li>further description for api devs and consumers</li>
+</ul>
+<h3 id="invoices">Invoices</h3>
+<p>Invoices <a href="/docs/api/patterns/#lists">list</a></p>
+<p><ins>Full Shape</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoices {
+    nodes {
+      id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      </span><span style="color:#65737e;"># &#39;destination&#39; or &#39;source&#39; of invoice
+      </span><span style="color:#c0c5ce;">otherPartyName: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      otherPartyId: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      status: </span><span style="color:#bf616a;">InvoiceStatus</span><span style="color:#c0c5ce;">!
+      type: </span><span style="color:#bf616a;">InvoiceType</span><span style="color:#c0c5ce;">!
+      invoiceNumber: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+      theirReference: </span><span style="color:#bf616a;">String
+      </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+      </span><span style="color:#c0c5ce;">entryDatetime: </span><span style="color:#bf616a;">Datetime</span><span style="color:#c0c5ce;">!
+      confirmDatetime: </span><span style="color:#bf616a;">DateTime
+      </span><span style="color:#c0c5ce;">finalisedDatetime: </span><span style="color:#bf616a;">DateTime
+      </span><span style="color:#c0c5ce;">pricing {
+        totalAfterTax: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+      }
+    }
+  }
+}
+</span></code></pre>
+<p><code>destination</code> if type is <code>CUSTOMER_INVOICE</code>, linked name record represents destination of stock movement</p>
+<p><code>source</code> if type is <code>SUPPLIER_INVOICE</code>, linked name record represents source of stock movement</p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base Table: <code>invoice</code></p>
+<p>Field mapping is 1 to 1 converted to snake case, apart from:</p>
+<p><strong>otherPartyId</strong> -&gt; name(<code>invoice</code>.<code>name_id</code> -&gt; name.id).<code>id</code></p>
+<p><strong>otherPartyName</strong> -&gt; name(<code>invoice</code>.<code>name_id</code> -&gt; name.id).<code>name</code></p>
+<p><code>pricing</code>.<code>totalAfterTax</code> -&gt; this is an aggregate of invoice_lines (sum of <code>total_after_tax</code>), linked by <code>invoice</code>.<code>id</code> -&gt; <code>invoice_line</code>.<code>invoice_id</code></p>
+<p><em>{TODO: do we need totalBeforeTax and serviceFee ? }</em></p>
+</details>
+&nbsp;
+<p><ins> <a href="/docs/api/patterns/#pagination">Pagination</a> </ins></p>
+<p><code>MAX_PAGE_SIZE</code>: 1000</p>
+<p><code>DEFAULT_PAGE_SIZE</code>: 100</p>
+<p><ins>Session and Permissions</ins></p>
+<p>Invoices in this query are automatically filtered by permission system so that only invoices associated with current logged in <code>store</code> are visible <em>{TODO link to session info}</em> (will output invoice where <code>store_id = logged in store</code>)</p>
+<h3 id="invoice">Invoice</h3>
+<p>Single Invoice entity</p>
+<p><ins>Full Shape</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoice(</span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">String</span><span style="color:#c0c5ce;">!) {
+    id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+    </span><span style="color:#65737e;"># &#39;destination&#39; or &#39;source&#39; of invoice
+    </span><span style="color:#c0c5ce;">otherPartyName: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+    otherPartyId: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+    status: </span><span style="color:#bf616a;">InvoiceStatus</span><span style="color:#c0c5ce;">!
+    type: </span><span style="color:#bf616a;">InvoiceType</span><span style="color:#c0c5ce;">!
+    invoiceNumber: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+    theirReference: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">comment: </span><span style="color:#bf616a;">String
+    </span><span style="color:#c0c5ce;">entryDatetime: </span><span style="color:#bf616a;">Datetime</span><span style="color:#c0c5ce;">!
+    confirmDatetime: </span><span style="color:#bf616a;">DateTime
+    </span><span style="color:#c0c5ce;">finalisedDatetime: </span><span style="color:#bf616a;">DateTime
+    </span><span style="color:#c0c5ce;">lines {
+      nodes {
+        id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+        itemId: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+        itemName: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+        itemCode: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+        packSize: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+        numberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+        costPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+        sellPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+        </span><span style="color:#65737e;"># name of batch
+        </span><span style="color:#c0c5ce;">batch: </span><span style="color:#bf616a;">String
+        </span><span style="color:#c0c5ce;">expiryDate: </span><span style="color:#bf616a;">Date
+        </span><span style="color:#c0c5ce;">stockLine: {
+          </span><span style="color:#65737e;"># number of pack available for a batch (&quot;includes&quot; numberOfPacks in this line)
+          </span><span style="color:#c0c5ce;">availableNumberOfPacks: </span><span style="color:#bf616a;">Number
+        </span><span style="color:#c0c5ce;">}
+      }
+    }
+  }
+}
+</span></code></pre>
+<p><em>{TODO do we need stockLine here ? What happen in UI ? Is it a new window to edit quantity (and we show available nubmer of packs there) ?}</em></p>
+<p><code>destination</code> if type is <code>CUSTOMER_INVOICE</code>, linked name record represents destination of stock movement</p>
+<p><code>source</code> if type is <code>SUPPLIER_INVOICE</code>, linked name record represents source of stock movement</p>
+<details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base Table: <code>invoice</code></p>
+<p>Field mapping is 1 to 1 converted to snake case, apart from:</p>
+<p><strong>otherPartyId</strong> -&gt; name(<code>invoice</code>.<code>name_id</code> -&gt; name.id).<code>id</code>: <em>destination</em>* or <em>source</em>** of invoice</p>
+<p><strong>otherPartyName</strong> -&gt; name(<code>invoice</code>.<code>name_id</code> -&gt; name.id).<code>name</code>: <em>destination</em>* or <em>source</em>** of invoice</p>
+<h4 id="lines">lines</h4>
+<p>Base Table: <code>invoice_lines</code></p>
+<p>Linked by <code>invoice</code>.<code>id</code> -&gt; <code>invoice_line</code>.<code>invoice_id</code></p>
+<p>Field mapping is 1 to 1 converted to snake case, apart from:</p>
+<p><code>stockLine</code> -&gt; <code>invoice_line</code>.<code>invoice_line</code>.<code>id</code></p>
+<p>Field mapping is 1 to 1 converted to snake case</p>
+</details>
+&nbsp;
+<p><ins>Session and Permissions</ins></p>
+<p>Additional filter is applied to invoice by permission system to filter invoice by store associated with current session <em>{TODO link to session info}</em> (where <code>store_id = logged in store</code>)</p>
+<h3 id="items">ITEMS</h3>
+<p>Item <a href="/docs/api/patterns/#lists">list</a></p>
+<p><ins>Full Shape</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  items {
+    nodes {
+      id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      code: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      name: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      </span><span style="color:#65737e;"># item visibility in current logged in store
+      </span><span style="color:#c0c5ce;">isVisible: </span><span style="color:#bf616a;">Boolean</span><span style="color:#c0c5ce;">!
+      </span><span style="color:#65737e;"># batches available in current logged in store
+      </span><span style="color:#c0c5ce;">availableBatches {
+        nodes {
+          packSize: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+          costPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+          sellPricePerPack: </span><span style="color:#bf616a;">Float</span><span style="color:#c0c5ce;">!
+          availableNumberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+          totalNumberOfPacks: </span><span style="color:#bf616a;">Number</span><span style="color:#c0c5ce;">!
+          batch: </span><span style="color:#bf616a;">String
+          </span><span style="color:#c0c5ce;">expiryDate: </span><span style="color:#bf616a;">Date
+        </span><span style="color:#c0c5ce;">}
+      }
+    }
+  }
+}
+</span></code></pre><details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base Table: <code>item</code></p>
+<p>Field mapping is 1 to 1 converted to snake case, apart from:</p>
+<p><code>isVisible</code> -&gt; this is deduce by current logged in store (in session) link to the item via master lists, <code>item</code>.<code>id</code> -&gt; <code>master_list_line</code>.<code>item_id</code> -&gt; <code>master_list_line</code>.<code>master_list_id</code> -&gt; <code>master_list_name_join</code>.<code>master_list_id</code> -&gt; <code>master_list_name_join</code>.<code>name_id</code> -&gt; (session logged in store name_id)</p>
+<h4 id="availablebatches">availableBatches</h4>
+<p>Base Table: <code>stock_line</code></p>
+<p>Linked by <code>item</code>.<code>id</code> -&gt; <code>stock_line</code>.<code>item_id</code> </p>
+<p>Stock lines are further filtered by <code>store_id</code> of currently logged in store. And where available quantity &gt; 0</p>
+<p>Field mapping is 1 to 1 converted to snake case</p>
+</details>
+&nbsp;
+<p><ins> <a href="/docs/api/patterns/#pagination">Pagination</a> </ins></p>
+<p><code>MAX_PAGE_SIZE</code>: 3000</p>
+<p><code>DEFAULT_PAGE_SIZE</code>: 2000</p>
+<p><ins>Session and Permissions</ins></p>
+<p><code>availableBatches</code> are filterd by permission system to only show batches available in current logged in store</p>
+<h3 id="names">NAMES</h3>
+<p>Names <a href="/docs/api/patterns/#lists">list</a></p>
+<p><ins>Full Shape</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  names {
+    nodes {
+      id: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      code: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      name: </span><span style="color:#bf616a;">String</span><span style="color:#c0c5ce;">!
+      isCustomer: </span><span style="color:#bf616a;">Boolean</span><span style="color:#c0c5ce;">!
+      isSupplier: </span><span style="color:#bf616a;">Boolean</span><span style="color:#c0c5ce;">!
+    }
+  }
+}
+</span></code></pre><details>
+<summary>IMPLEMENTATION DETAILS</summary>
+<p>Base Table: <code>name</code></p>
+<p>Field mapping is 1 to 1 converted to snake case, apart from:</p>
+<p><code>isCustomer</code> and <code>isSupplier</code>, both come from <code>name_store_join</code>, linked by <code>name</code>.<code>id</code> -&gt; <code>name_store_join</code>.<code>name_id</code> and <code>name_store_join</code>.<code>store_id</code> is current logged in store</p>
+</details>
+&nbsp;
+<p><ins> <a href="/docs/api/patterns/#pagination">Pagination</a> </ins></p>
+<p><code>MAX_PAGE_SIZE</code>: 3000</p>
+<p><code>DEFAULT_PAGE_SIZE</code>: 2000</p>
+<p><ins>Session and Permissions</ins></p>
+<p>Names in this query are filtered by permission system to only show names visible in current <code>logged in store</code> <em>{TODO link to session info}</em> (will output names where <code>name_store_join.store_id = logged in store</code>)in discussion}</p>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;patterns&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Patterns
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;mutations&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Mutations &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

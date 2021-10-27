@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Sync API | Open mSupply</title>
+<meta name="description" content="Sync API">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/sync/api/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Sync",
+            "item": "https://dev.msupply.foundation/docs/sync/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Api",
+            "item": "https://dev.msupply.foundation/docs/sync/api/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/api/#authentication">Authentication</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/api/#pulling-updates">&quot;Pulling&quot; updates</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/api/#consuming-the-sync-queue">Consuming the sync queue</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/api/#consuming-the-change-log">Consuming the change log</a></li>
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/api/#acknowledgement">Acknowledgement</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/api/#pushing-updates">&quot;Pushing&quot; updates</a></li>
+								
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Sync API</h1>
+        
+        <h2 id="authentication">Authentication</h2>
+<p>Authenticate with central server.</p>
+<!-- TODO: split into table for request and response, and add example for both -->
+<table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>method</td><td><code>POST</code></td></tr>
+<tr><td>headers</td><td><code>Authorization</code></td></tr>
+<tr><td>endpoint</td><td><code>sync/v5/auth</code></td></tr>
+<tr><td>response</td><td><code>200 OK</code> + JWT</td></tr>
+</tbody></table>
+<p>Username and password credentials are entered and used to authorise against the central server.</p>
+<!-- TODO: specify auth protocol, basic or digest -->
+<!-- TODO: add details on authentication, when is it needed, when is it done, how frequently, etc. -->
+<!-- TODO: add JWT details, token fields, how is it signed, when does it expire, etc. -->
+<!-- TODO: specify response details, JWT in body or `Set-Cookie` header etc. -->
+<!-- TODO: add any fail responses -->
+<!--
+
+## Get the users of a store
+
+|          |                      |
+|----------|----------------------|
+| method   | `GET`                |
+| headers  | `Authorization`      |
+| endpoint | `/sync/v5/user`      |
+| query    | `?store`             |
+| response | `200 OK`+ JSON array |
+
+-->
+<!-- TODO: is this sync-specific? -->
+<!-- TODO: specify auth header value, JWT or username:password -->
+<!-- TODO: add any fail responses -->
+<h2 id="pulling-updates">&quot;Pulling&quot; updates</h2>
+<p>&quot;Pull&quot; sync updates from the central server.</p>
+<p>As with previous versions of mSupply sync, the central server maintains and exposes a queue containing sync out records.</p>
+<p>As of mSupply sync v5, changes to system data are no longer added to the sync out queue, and are instead recorded as entries
+in a centrally managed change log. The change log is exposed as a read-only data structure to consumers, who are responsible
+for maintaining their own cursor.</p>
+<h3 id="consuming-the-sync-queue">Consuming the sync queue</h3>
+<!-- TODO: split into table for request and response, and add example for both -->
+<table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>method</td><td><code>GET</code></td></tr>
+<tr><td>headers</td><td><code>Authorization</code></td></tr>
+<tr><td>endpoint</td><td><code>/sync/v5/queued_records</code></td></tr>
+<tr><td>query</td><td><code>?limit</code></td></tr>
+<tr><td>response</td><td><code>200 OK</code> + JSON array of <code>sync_out</code> records</td></tr>
+</tbody></table>
+<!-- TODO: specify how JWT is encoded -->
+<!-- TODO: specify auth header value, JWT or username:password -->
+<!-- TODO: add any fail responses -->
+<!-- TODO: add explanation of sync queue synchronisation -->
+<h3 id="consuming-the-change-log">Consuming the change log</h3>
+<!-- TODO: split into table for request and response, and add example for both -->
+<table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>method</td><td><code>GET</code></td></tr>
+<tr><td>headers</td><td><code>Authorization</code></td></tr>
+<tr><td>endpoint</td><td><code>/sync/v5/central_records</code></td></tr>
+<tr><td>query</td><td><code>?cursor&amp;limit</code></td></tr>
+<tr><td>response</td><td><code>200 OK</code> + JSON array of <code>change_log</code> objects</td></tr>
+</tbody></table>
+<!-- TODO: specify auth header value, JWT or username:password -->
+<!-- TODO: add any fail responses -->
+<p>When reading from the change log, the <code>cursor</code> is the <code>sequence</code> of the last retrieved record, and <code>limit</code> is number of
+requested objects to read.</p>
+<!-- TODO: specify if limit is inclusive, e.g. response starts at sequence=cursor or sequence=++cursor -->
+<p>Each change log object matches the following schema:</p>
+<pre style="background-color:#2b303b;">
+<code class="language-JS" data-lang="JS"><span style="color:#c0c5ce;">{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;site_id&quot;: {
+	  &quot;description&quot;: &quot;The ID of the remote site&quot;,
+	  &quot;type&quot;: &quot;string&quot;
+    },
+	&quot;table&quot;: {
+	  &quot;description&quot;: &quot;The table of the updated record&quot;,
+	  &quot;type&quot;: &quot;string&quot;
+	},
+	&quot;recordID&quot;: {
+	  &quot;description&quot;: &quot;The UUID of the updated record&quot;,
+	  &quot;type&quot;: &quot;string&quot;
+	},
+	&quot;action&quot;: {
+	  &quot;description&quot;: &quot;The operation performed on the updated record&quot;,
+	  &quot;type&quot;: { &quot;enum&quot;: [&quot;insert&quot;, &quot;delete&quot;, &quot;update&quot;] }
+    },
+	&quot;sequence&quot;: {
+	  &quot;description&quot;: &quot;A unique sequence number for this log&quot;,
+	  &quot;type&quot;: &quot;string&quot;,
+	},
+	&quot;data&quot;: {
+  	  &quot;description&quot;: &quot;The changes made to the updated record, represented as key/value pairs&quot;,
+	  &quot;type&quot;: object
+	}
+  },
+  &quot;required&quot;: [&quot;site_id&quot;, &quot;sequence&quot;, &quot;data&quot;]
+}
+</span></code></pre>
+<p>For example:</p>
+<pre style="background-color:#2b303b;">
+<code class="language-JS" data-lang="JS"><span style="color:#c0c5ce;">{
+  &quot;site_id&quot;: &quot;1&quot;,
+  &quot;table&quot;: &quot;trans_line&quot;,
+  &quot;recordID&quot;: &quot;a1b2c3d4-e5f6-...&quot;,
+  &quot;action: &quot;insert&quot;,
+  &quot;sequence&quot;: &quot;123456&quot;,
+  &quot;data&quot;: {
+    &quot;item_name&quot;: &quot;amoxymoxylyn&quot;,
+	&quot;quantity&quot;: 123,
+	&quot;cost_price&quot;: 123.45
+  }
+}
+</span></code></pre>
+<p>Binary data (e.g. blobs, pictures etc.) are <code>base64</code> encoded. Object fields (i.e. <code>JSONB</code>) are serialized in normal fashion.</p>
+<p>In the instance where the change log is missing records, the server will return a minimal &quot;placeholder&quot; object consisting
+only of the required fields, with <code>{ &quot;data&quot;: &quot;none&quot; }</code>.`</p>
+<!-- TODO: add explanation of change log synchronisation -->
+<h2 id="acknowledgement">Acknowledgement</h2>
+<!-- TODO: split into table for request and response, and add example for both -->
+<table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>method</td><td><code>POST</code></td></tr>
+<tr><td>headers</td><td><code>Authorization</code></td></tr>
+<tr><td>endpoint</td><td><code>sync/v5/acknowledge_records</code></td></tr>
+<tr><td>body</td><td>JSON array of record IDs</td></tr>
+<tr><td>response</td><td><code>200 OK</code></td></tr>
+</tbody></table>
+<!-- TODO: specify auth header value, JWT or username:password -->
+<!-- TODO: add query details -->
+<!-- TODO: add any fail responses -->
+<p>Acknowledge records which have been successfully synchronised.</p>
+<p>This endpoint is used by the remote server to notify the central server of successful synchronisation and integration of records. On notification, the central server can then safely delete the integrated records from the sync queue.</p>
+<p>The central server sync queue is designed for eventual consistency, meaning that there is no guarantee that the sync queue will not contain already integrated records. Acknowledgement requests will not be retried in situations where the central server does not respond; it is the responsibility of the remote server to handle instances where <code>queued_records</code> response contains previously integrated records.</p>
+<p>Note that acknowledgment is uni-directional and acknowledgement requests are only made from remote servers to the central server. The central server will never send acknowledgement requests to remote servers.</p>
+<h2 id="pushing-updates">&quot;Pushing&quot; updates</h2>
+<!-- TODO: split into table for request and response, and add example for both -->
+<table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>method</td><td><code>POST</code></td></tr>
+<tr><td>headers</td><td><code>Authorization</code></td></tr>
+<tr><td>endpoint</td><td><code>/sync/v5/queued_records</code></td></tr>
+<tr><td>body</td><td>JSON array of <code>sync_out</code> records</td></tr>
+<tr><td>response</td><td><code>200 OK</code></td></tr>
+</tbody></table>
+<!-- TODO: specify auth header value, JWT or username:password -->
+<!-- TODO: add any fail responses -->
+<p>&quot;Push&quot; records from the remote site to the central server.</p>
+<p>If the server returns <code>200 OK</code>, the remote site deletes the pushed <code>sync_out</code> records from its queue.</p>
+<!-- TODO: add examples -->
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;basics&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Sync Basics
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;sync-queue&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Sync Queue &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

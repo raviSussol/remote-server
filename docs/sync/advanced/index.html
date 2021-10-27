@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Advanced Sync | Open mSupply</title>
+<meta name="description" content="Advanced Sync">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/sync/advanced/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Sync",
+            "item": "https://dev.msupply.foundation/docs/sync/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Advanced",
+            "item": "https://dev.msupply.foundation/docs/sync/advanced/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#transfers">Transfers</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#local-transfers">Local transfers</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#central-transfers">Central transfers</a></li>
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#merging">Merging</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#what-records-can-be-merged">What records can be merged?</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#when-a-merge-is-initiated-on-a-site">When a merge is initiated on a site</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#when-the-central-server-receives-the-merged-record">When the central server receives the merged record</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#when-the-remote-site-receives-the-merged-record">When the remote site receives the merged record</a></li>
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#delegated-rights">Delegated Rights</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#on-the-remote-site">On the remote site</a></li>
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+												<li><a href="https://dev.msupply.foundation/docs/sync/advanced/#on-the-central-server">On the central server</a></li>
+											
+										
+									</ul>
+							
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Advanced Sync</h1>
+        
+        <h2 id="transfers">Transfers</h2>
+<p>One of the reposibilities of the sync system is to effect &quot;transfers&quot; between stores.</p>
+<p>Some examples of transfers:</p>
+<ul>
+<li>Customer invoices, where the customer is an mSupply store.</li>
+<li>Supplier credits, where the supplier is  an mSupply store.</li>
+<li>Supplier requisitions or purchase orders, where the supplier is an mSupply store.</li>
+</ul>
+<p>For a transfer to be effected, the status of the initiating invoice or requisition must be <code>finalised</code> (or <code>confirmed</code>, in the case of purchase orders):</p>
+<ul>
+<li>When <code>Store A</code> finalises a customer invoice for <code>Store B</code>, a new supplier invoice is created for <code>Store B</code>.</li>
+<li>When <code>Store A</code> finalises a supplier credit for <code>Store B</code>, a new customer credit is created for <code>Store B</code>.</li>
+<li>When <code>Store A</code> finalises a supplier requisition for <code>Store B</code>, a new customer requisition is created for <code>Store B</code>.</li>
+<li>When <code>Store A</code> confirms a purchase order for <code>Store B</code>, a new customer requisition is created for <code>Store B</code>.</li>
+<li>When <code>Store B</code> finalises a customer invoice generated from the customer requisition, a new goods received record is created for <code>Store A</code>.</li>
+</ul>
+<h3 id="local-transfers">Local transfers</h3>
+<ul>
+<li>If the other party store is on the same site, the transfer is &quot;local&quot;.</li>
+<li>When the transfer is effected, the remote site creates the mirror transfer record in the destination store.</li>
+<li>That's it, no synchronisation needed.</li>
+</ul>
+<h3 id="central-transfers">Central transfers</h3>
+<ul>
+<li>When the other party store is not on the same site, this transfer is &quot;central&quot;.</li>
+<li>When the originating transfer record synchronises to the central server, the central server creates a <code>sync_out</code> record to forward the record and its related children to the destination site.</li>
+<li>When the destination site receives the record, it creates the mirror transfer record in the destination store (in the same way as if it were a local transfer).</li>
+<li>The mirror record <code>originating_id</code> field is set to the <code>id</code> of the originating record in the originating store.</li>
+<li>It is the responsibility of remote sites to handle (i.e. ignore) duplicate records from the central server.</li>
+</ul>
+<h2 id="merging">Merging</h2>
+<p>Description of merging goes here.</p>
+<h3 id="what-records-can-be-merged">What records can be merged?</h3>
+<p>Records of the following types may be merged on the primary site:</p>
+<ul>
+<li>Customer names</li>
+<li>Supplier names</li>
+<li>Items</li>
+<li>Units</li>
+</ul>
+<p>Records of the following types may only be merged on the site which is the home site for <ins>both</ins> records:</p>
+<ul>
+<li>Patient</li>
+<li>Prescriber</li>
+</ul>
+<p>Records of the following types may be merged on the site where the related store is active:</p>
+<ul>
+<li>Location</li>
+</ul>
+<h3 id="when-a-merge-is-initiated-on-a-site">When a merge is initiated on a site</h3>
+<ul>
+<li>The record to be merged has its <code>status</code> field updated from <code>active</code> to <code>merged</code>.</li>
+<li>The record to be merged has its <code>merged_into</code> field updated with the <code>id</code> of the record to keep.</li>
+<li>All child records which are linked to the merged record <code>id</code>, and which are editable on the site, have their parent table <code>id</code> field (e.g. <code>invoice_id</code>) changed to the new <code>id</code>.</li>
+<li>Normal code in a trigger sends it to the central server.</li>
+</ul>
+<h3 id="when-the-central-server-receives-the-merged-record">When the central server receives the merged record</h3>
+<ul>
+<li>It applies the normal sync rules:
+<ul>
+<li>If it's central data, it adds it to the <code>central_change_log</code>.</li>
+<li>If it's patient data, it forwards it to each site where the record is visible.</li>
+</ul>
+</li>
+</ul>
+<h3 id="when-the-remote-site-receives-the-merged-record">When the remote site receives the merged record</h3>
+<ul>
+<li>Before saving it checks for a change in value of the status field from the saved value.</li>
+<li>If the status has changed to <code>merged</code>:
+<ul>
+<li>The record's <code>merged_into</code> field determines the new <code>id</code> to be used for child records.</li>
+<li>All child records which are linked to the merged record <code>id</code>, and which are editable on the site, have their <code>&lt;some_table&gt;_id</code> (e.g. <code>invoice.id</code>) field changed to <code>merged_into</code>.</li>
+<li>Sync triggers create <code>sync_out</code> records to be pushed to the central server.</li>
+</ul>
+</li>
+</ul>
+<h2 id="delegated-rights">Delegated Rights</h2>
+<p>By default, central data is editable only on the central server. However, the ability to manage central data can be delegated to a remote site.</p>
+<p>The remote site is defined by the <code>&quot;delegated_rights&quot;</code> preference (<code>preference.description = &quot;delegated_rights&quot;</code>).</p>
+<p>All <code>store_preference</code> records for this preference have <code>preference.centrally_controlled = false</code>, except for the store that is delegated, where <code>preference.centrally_controlled = true</code>.</p>
+<p>Note that users on the site will only be able to edit records with the correct user permissions.</p>
+<h3 id="on-the-remote-site">On the remote site</h3>
+<ul>
+<li>Allow editing when <code>preference.centrally_controlled = true</code>.</li>
+<li>On editing, <code>sync_out</code> records are created as per usual procedure.</li>
+</ul>
+<h3 id="on-the-central-server">On the central server</h3>
+<ul>
+<li>On receiving a sync record for data that is normally centrally controlled, check the site <code>&quot;delegated_rights</code>&quot; preference.</li>
+<li>If <code>delegated_rights.centrally_controlled = true</code>, update the central record (triggers on this record will then update the central_change_log as per usual procedure), otherwise ignore the record.</li>
+</ul>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;change-log&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Change Log
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+          
+          
+          <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;this_doc&#x2F;info&#x2F;">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                Info About These Docs &rarr;
+              </div>
+            </div>
+          </a>
+          
+          
+          
+        
+      
+    
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

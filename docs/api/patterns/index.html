@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Patterns | Open mSupply</title>
+<meta name="description" content="Description of all API sorting">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/api/patterns/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Api",
+            "item": "https://dev.msupply.foundation/docs/api/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Patterns",
+            "item": "https://dev.msupply.foundation/docs/api/patterns/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/patterns/#lists">Lists</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/patterns/#sorting">Sorting</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/patterns/#filtering">Filtering</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/patterns/#pagination">Pagination</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/patterns/#errors">Errors</a></li>
+								
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Patterns</h1>
+        
+        <h1 id="lists">Lists</h1>
+<p>All list queries contain metadata and share three generic arguments:</p>
+<ul>
+<li><a href="/docs/api/patterns/#sorting">Sort</a></li>
+<li><a href="/docs/api/patterns/#filtering">Filter</a></li>
+<li><a href="/docs/api/patterns/#pagination">Page</a></li>
+</ul>
+<p><strong>Metadata</strong></p>
+<ul>
+<li>totalCount: A count of the total number of entities, ignoring any <a href="/docs/api/patterns/#pagination">pagination</a>. This allows a client to fetch the first five objects by passing &quot;5&quot; as the argument to &quot;first&quot;, then fetch the total count so it could display &quot;5 of 83&quot;, for example.</li>
+</ul>
+<p><ins>Example</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">Query {
+  invoices(</span><span style="color:#bf616a;">sort</span><span style="color:#c0c5ce;">: </span><span style="color:#bf616a;">InvoiceSort</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">filter</span><span style="color:#c0c5ce;">: </span><span style="color:#bf616a;">InvoiceFilter</span><span style="color:#c0c5ce;">, </span><span style="color:#bf616a;">page</span><span style="color:#c0c5ce;">: </span><span style="color:#bf616a;">Page</span><span style="color:#c0c5ce;">): {
+      totalCount: </span><span style="color:#bf616a;">Int</span><span style="color:#c0c5ce;">,
+      nodes: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">Invoice</span><span style="color:#b48ead;">]
+  </span><span style="color:#c0c5ce;">}
+}
+</span></code></pre>
+<p><em>An example query for a list of <code>invoice</code> entities and some metadata: <code>totalCount</code></em></p>
+<h1 id="sorting">Sorting</h1>
+<p>This API exposes a parameter on each <a href="/docs/api/patterns/#lists">list</a> query accepting an array of sort objects.</p>
+<p><strong>The sort object</strong></p>
+<p>The sort object is two Key:Value pairs defining which field the result set is sorted by and an indicator of ascending or descending. Each entity is sortable by any of the fields of that entity.</p>
+<ul>
+<li>key: Any scalar field on the entity in standard graphQL enum value case (capital snake).</li>
+<li>desc: Boolean indicator whether the sort should be descending.</li>
+</ul>
+<p><ins>Example GraphQL schema</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InvoiceSort: [InvoiceSortOption]
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InvoiceSortOption {
+   key: </span><span style="color:#bf616a;">InvoiceSortField
+   </span><span style="color:#c0c5ce;">desc: </span><span style="color:#bf616a;">Boolean
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#b48ead;">enum </span><span style="color:#c0c5ce;">InvoiceSortField {
+  CODE
+  OTHER_PARTY_NAME
+  ...otherSortOptions
+}
+</span></code></pre>
+<p><em>Example shapes for sorting a query for <code>invoice</code> entities</em></p>
+<p><ins>Example GraphQL query</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoices(</span><span style="color:#bf616a;">sort</span><span style="color:#c0c5ce;">: [{ key: </span><span style="color:#d08770;">CONFIRM_DATE</span><span style="color:#c0c5ce;">, desc: </span><span style="color:#d08770;">true </span><span style="color:#c0c5ce;">}]) {
+    id
+    status
+  }
+}
+</span></code></pre>
+<p><em>Example query for sorting <code>invoice</code> entities by their confirm date in descending order</em></p>
+<p><strong>Limitations</strong></p>
+<p>The API currently supports an array of a single sort object. (will apply only one element from sort array and discard the rest <em>{TODO update when changed to do multi sort}</em>)</p>
+<p><strong>Error handling</strong></p>
+<p>Empty/undefined sort fields will result in no filtering and will not return an error.</p>
+<p>However, when a field does not exist, or the key value is null, a <a href="/docs/api/patterns/#errors">type mismatch</a> error will be returned.</p>
+<h1 id="filtering">Filtering</h1>
+<p>This API exposes a parameter on each <a href="/docs/api/patterns/#lists">list</a> query accepting a Filter object.</p>
+<p><strong>The filter object</strong></p>
+<p>The filter object is a set of Key:Value pairs, where each key is a field of the node returned by the query, and the value is an object with a <a href="https://dev.msupply.foundation/docs/api/patterns/#comparison-operators">comparison operator</a> and value to filter by.</p>
+<ul>
+<li>Field: Any scalar field that query exposes</li>
+<li>Comparison operator: See below for available operators.</li>
+<li>Value: A value to filter the result set by.</li>
+</ul>
+<p>The filter object can accept more than one field to filter by. Each additional field will filter the result set as if it were an <code>AND</code>.</p>
+<p><ins>Example</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">InvoiceFilter {
+  id: </span><span style="color:#bf616a;">IntFilter
+  </span><span style="color:#c0c5ce;">code: </span><span style="color:#bf616a;">StringFilter
+</span><span style="color:#c0c5ce;">  ...otherFilterTypes
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">IntFilter {
+  isNull: </span><span style="color:#bf616a;">Boolean
+  </span><span style="color:#c0c5ce;">equalTo: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">notEqualTo: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">distinctFrom: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">notDistinctFrom: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">in: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">Int</span><span style="color:#b48ead;">]
+  </span><span style="color:#c0c5ce;">notIn: </span><span style="color:#b48ead;">[</span><span style="color:#bf616a;">Int</span><span style="color:#b48ead;">]
+  </span><span style="color:#c0c5ce;">lessThan: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">greaterThan: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">greaterThanOrQualTo: </span><span style="color:#bf616a;">Int
+</span><span style="color:#c0c5ce;">}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">StringFilter {
+  isNull: </span><span style="color:#bf616a;">Boolean
+  </span><span style="color:#c0c5ce;">equalTo: </span><span style="color:#bf616a;">String
+</span><span style="color:#c0c5ce;">  ...otherStringFilters
+}
+</span></code></pre>
+<p><em>Example shapes for filtering a query for <code>invoice</code> entities</em></p>
+<p><strong>Comparison operators</strong></p>
+<table><thead><tr><th>SQL</th><th>GraphQL</th><th>Description</th></tr></thead><tbody>
+<tr><td>IS [NOT] NULL</td><td>isNull: <code>Boolean</code></td><td>Is null (if <code>true</code> is specified) or is not null (if <code>false</code> is specified).</td></tr>
+<tr><td>=</td><td>equalTo: <code>T</code></td><td>Equal to the specified value.</td></tr>
+<tr><td>&lt;&gt;</td><td>notEqualTo: <code>T</code></td><td>Not equal to the specified value.</td></tr>
+<tr><td>IS DISTINCT FROM</td><td>distinctFrom: <code>T</code></td><td>Not equal to the specified value, treating null like an ordinary value.</td></tr>
+<tr><td>IS NOT DISTINCT FROM</td><td>notDistinctFrom: <code>T</code></td><td>Equal to the specified value, treating null like an ordinary value.</td></tr>
+<tr><td>IN (...)</td><td>in: <code>[T]</code></td><td>Included in the specified list.</td></tr>
+<tr><td>NOT IN (...)</td><td>notIn: <code>[T]</code></td><td>Not included in the specified list.</td></tr>
+<tr><td>&lt;</td><td>lessThan: <code>T</code></td><td>Less than the specified value.</td></tr>
+<tr><td>&lt;=</td><td>lessThanOrEqualTo: <code>T</code></td><td>Less than or equal to the specified value.</td></tr>
+<tr><td>&gt;</td><td>greaterThan: <code>T</code></td><td>Greater than the specified value.</td></tr>
+<tr><td>&gt;=</td><td>greaterThanOrEqualTo: <code>T</code></td><td>Greater than or equal to the specified value.</td></tr>
+</tbody></table>
+<p>SOURCE: https://github.com/graphile-contrib/postgraphile-plugin-connection-filter</p>
+<p><strong>Limitations</strong></p>
+<p>The API currently does not support:</p>
+<ul>
+<li>Data type specific filtering (i.e. String LIKE)</li>
+<li>Filtering on related entities/nodes within the graph.</li>
+<li>Logic (i.e. AND/OR's)</li>
+</ul>
+<p><ins>Example</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoices(</span><span style="color:#bf616a;">filter</span><span style="color:#c0c5ce;">: { status: { equalTo: &quot;</span><span style="color:#a3be8c;">cn</span><span style="color:#c0c5ce;">&quot; } }) {
+    id
+    status
+  }
+}
+</span></code></pre>
+<p><em>Example of a query for <code>invoice</code> entities being filtered by their status being equal to &quot;cn&quot;</em></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  transaction(
+    </span><span style="color:#bf616a;">filter</span><span style="color:#c0c5ce;">: {
+      status: { equalTo: &quot;</span><span style="color:#a3be8c;">cn</span><span style="color:#c0c5ce;">&quot; }
+      confirm_date: { greaterThan: &quot;</span><span style="color:#a3be8c;">2021-09-03T11:42:53.569Z</span><span style="color:#c0c5ce;">&quot; }
+    }
+  ) {
+    id
+    status
+  }
+}
+</span></code></pre>
+<p><em>Example of a query for <code>invoice</code> entities being filtered by their status being equal to &quot;cn&quot; and the confirm date being greater than the 3rd of September, 2021, 11:42am!</em></p>
+<p><strong>Error handling</strong></p>
+<p>Empty/undefined filter objects will result in no filtering and will not return an error.</p>
+<p>However, when a field does not exist, or the field or comparator value is null, or comparator doesn't exist or comparator value type is incorrect, a <a href="/docs/api/patterns/#errors">type mismatch</a> will be returned.</p>
+<h1 id="pagination">Pagination</h1>
+<p>This API exposes a parameter on each <a href="/docs/api/patterns/#lists">list</a> query accepting a Page object.</p>
+<p><strong>The Page Object</strong></p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">PageObject {
+  first: </span><span style="color:#bf616a;">Int
+  </span><span style="color:#c0c5ce;">offset: </span><span style="color:#bf616a;">Int
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p><em>Shape of the Page object</em></p>
+<table><thead><tr><th>Key</th><th>Restrictions</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td>offset</td><td>offset =&gt; 0</td><td>0</td><td>Zero indexed page number</td></tr>
+<tr><td>first</td><td>first &gt; 0 and first &lt;= <code>MAX_PAGE_SIZE</code> (<em>exception</em>*)</td><td><code>DEFAULT_PAGE_SIZE</code></td><td>Number of records per page</td></tr>
+</tbody></table>
+<p><em>exception</em>* limit is NOT set for inner lists (like lines in a transaction) <em>{TODO or should it be ? or should each list just have a pagination limit ?}</em></p>
+<ul>
+<li>Each list query defines the value of <code>MAX_PAGE_SIZE</code> and <code>DEFAULT_PAGE_SIZE</code> (see pagination section of <a href="/docs/api/queries">queries</a>).</li>
+<li>A value for <code>offset</code> above <code>totalCount</code> will return an empty array.
+<ins>Example</ins></li>
+</ul>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoices(</span><span style="color:#bf616a;">page</span><span style="color:#c0c5ce;">: { first: </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">, offset: </span><span style="color:#d08770;">0 </span><span style="color:#c0c5ce;">}) {
+    totalCount
+    nodes {
+      id
+      comment
+    }
+  }
+}
+</span></code></pre>
+<p><em>An example query for <code>invoice</code> entities, where the first 1 entity is returned</em></p>
+<p><ins>Result</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;">{
+  &quot;</span><span style="color:#a3be8c;">invoices</span><span style="color:#c0c5ce;">&quot;: {
+    &quot;</span><span style="color:#a3be8c;">totalCount</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">,
+    &quot;</span><span style="color:#a3be8c;">nodes</span><span style="color:#c0c5ce;">&quot;: [
+      {
+        &quot;</span><span style="color:#a3be8c;">id</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">ABC</span><span style="color:#c0c5ce;">&quot;,
+        &quot;</span><span style="color:#a3be8c;">comment</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">123</span><span style="color:#c0c5ce;">&quot;
+      }
+    ]
+  }
+}
+</span></code></pre>
+<p><strong>Error handling</strong></p>
+<p>If restrictions are not met <a href="/docs/api/custom_error/#pagination">pagination error</a> will be returned</p>
+<pre style="background-color:#2b303b;">
+<code class="language-JS" data-lang="JS"><span style="color:#c0c5ce;">// error when restrictions are not met
+// no error if too far (just return last page)
+</span></code></pre><h1 id="errors">Errors</h1>
+<p>Three types of errors:</p>
+<p><strong>Critical</strong></p>
+<p>These are unhandled errors, they will result in connection close.</p>
+<details>
+<summary>Further Info</summary>
+If there is a rust `panic` in web request process, it seems the connection just closes, we can probably handle this better _{TODO}_, would assume we can catch these panics in actix-web. Ofcourse we will try to eliminate them, but it's possible that some panics will sneak in (i.e. if we use panic vs return result method from external 
+crates)
+</details>
+&nbsp;
+<p><strong>GraphQL</strong></p>
+<p>These errors are handled by <code>async-graphql</code>:</p>
+<ul>
+<li>GraphQL syntax</li>
+<li>Type mismatch</li>
+</ul>
+<p>They have the following shape:</p>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">CoreGraphqlErrorResult = {
+  </span><span style="color:#bf616a;">data</span><span style="color:#c0c5ce;">: null,
+  </span><span style="color:#bf616a;">errors</span><span style="color:#c0c5ce;">: {
+    </span><span style="color:#bf616a;">message</span><span style="color:#c0c5ce;">: string,
+    </span><span style="color:#bf616a;">locations</span><span style="color:#c0c5ce;">: {
+      </span><span style="color:#bf616a;">line</span><span style="color:#c0c5ce;">: number,
+      </span><span style="color:#bf616a;">column</span><span style="color:#c0c5ce;">: number
+    }
+  }[]
+}
+</span></code></pre>
+<p><ins>Example Response: GraphQL syntax</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;">{
+    &quot;</span><span style="color:#a3be8c;">data</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">,
+    &quot;</span><span style="color:#a3be8c;">errors</span><span style="color:#c0c5ce;">&quot;: [
+        {
+            &quot;</span><span style="color:#a3be8c;">message</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;"> --&gt; 2:3</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">  |</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">2 |   name(␊</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">  |   ^---</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">  |</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">  = expected variable_definitions, selection_set, or directive</span><span style="color:#c0c5ce;">&quot;,
+            &quot;</span><span style="color:#a3be8c;">locations</span><span style="color:#c0c5ce;">&quot;: [
+                {
+                    &quot;</span><span style="color:#a3be8c;">line</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">,
+                    &quot;</span><span style="color:#a3be8c;">column</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">3
+                </span><span style="color:#c0c5ce;">}
+            ]
+        }
+    ]
+}
+</span></code></pre>
+<p><ins>Example Response: Type mismatch</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;">{
+  &quot;</span><span style="color:#a3be8c;">data</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">,
+  &quot;</span><span style="color:#a3be8c;">errors</span><span style="color:#c0c5ce;">&quot;: [
+    {
+      &quot;</span><span style="color:#a3be8c;">message</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">Invalid value for argument </span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">structuredInput.1.type</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">, enumeration type </span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">ExampleInputVariants</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;"> does not contain the value </span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">FOUR</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#c0c5ce;">&quot;,
+      &quot;</span><span style="color:#a3be8c;">locations</span><span style="color:#c0c5ce;">&quot;: [
+        {
+          &quot;</span><span style="color:#a3be8c;">line</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">74</span><span style="color:#c0c5ce;">,
+          &quot;</span><span style="color:#a3be8c;">column</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">16
+        </span><span style="color:#c0c5ce;">}
+      ]
+    }
+  ]
+}
+</span></code></pre>
+<p><strong>Custom Error</strong></p>
+<p>These are errors that we handle explicitly, they have the following shape</p>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#65737e;">// TypeScript
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">CustomGraphqlErrorResult = {
+  </span><span style="color:#bf616a;">data</span><span style="color:#c0c5ce;">: null,
+  </span><span style="color:#bf616a;">errors</span><span style="color:#c0c5ce;">: {
+    </span><span style="color:#bf616a;">message</span><span style="color:#c0c5ce;">: &#39;</span><span style="color:#a3be8c;">CUSTOM_ERROR</span><span style="color:#c0c5ce;">&#39;,
+    </span><span style="color:#bf616a;">locations</span><span style="color:#c0c5ce;">: {
+      </span><span style="color:#bf616a;">line</span><span style="color:#c0c5ce;">: number,
+      </span><span style="color:#bf616a;">column</span><span style="color:#c0c5ce;">: number
+    },
+    </span><span style="color:#bf616a;">path</span><span style="color:#c0c5ce;">: string[],
+    </span><span style="color:#bf616a;">extensions</span><span style="color:#c0c5ce;">: {
+      </span><span style="color:#bf616a;">customErrors</span><span style="color:#c0c5ce;">: CustomError[]
+    } 
+  }[]
+}
+
+</span><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">CustomError {
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes
+}
+
+</span><span style="color:#65737e;">// Examples only
+</span><span style="color:#b48ead;">enum </span><span style="color:#c0c5ce;">CustomErrorCodes {
+  </span><span style="color:#bf616a;">RecordNotFound </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">RECORD_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">BatchReductionBelowZero </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">BATCH_REDUCTION_BELOW_ZERO</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Other errors codes
+</span><span style="color:#c0c5ce;">}
+
+</span></code></pre>
+<p>Custom error instances extend CustomError interface, and their shape is different based on error type.</p>
+<p><a href="/docs/api/custom_errors">Full list of errors</a></p>
+<p><ins>Example RecordNotFoundError error</ins></p>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">RecordNotFoundError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.RecordNotFound,
+  </span><span style="color:#bf616a;">specifiedField</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;">{
+  &quot;</span><span style="color:#a3be8c;">data</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">,
+  &quot;</span><span style="color:#a3be8c;">errors</span><span style="color:#c0c5ce;">&quot;: [
+    {
+      &quot;</span><span style="color:#a3be8c;">message</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">CUSTOM_ERROR</span><span style="color:#c0c5ce;">&quot;,
+      &quot;</span><span style="color:#a3be8c;">locations</span><span style="color:#c0c5ce;">&quot;: [
+        {
+          &quot;</span><span style="color:#a3be8c;">line</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">60</span><span style="color:#c0c5ce;">,
+          &quot;</span><span style="color:#a3be8c;">column</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">3
+        </span><span style="color:#c0c5ce;">},
+      ],
+      &quot;</span><span style="color:#a3be8c;">path</span><span style="color:#c0c5ce;">&quot;: [ &quot;</span><span style="color:#a3be8c;">invoice</span><span style="color:#c0c5ce;">&quot; ],
+      &quot;</span><span style="color:#a3be8c;">extensions</span><span style="color:#c0c5ce;">&quot;: {
+        &quot;</span><span style="color:#a3be8c;">customErrors</span><span style="color:#c0c5ce;">&quot;: [
+          {
+          &quot;</span><span style="color:#a3be8c;">code</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">RECORD_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+          &quot;</span><span style="color:#a3be8c;">specifiedField</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">id</span><span style="color:#c0c5ce;">&quot;,
+          }
+        ]
+      }
+    }
+  ]
+}
+</span></code></pre>
+<p><strong>Batched Queries</strong></p>
+<p>Batched query is where more then one root query is listed in GraphQL query, i.e:</p>
+<pre style="background-color:#2b303b;">
+<code class="language-graphql" data-lang="graphql"><span style="color:#b48ead;">query </span><span style="color:#c0c5ce;">{
+  invoice(</span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">10</span><span style="color:#c0c5ce;">) {
+    id
+    comment
+  }
+  items {
+    id
+    code
+    name
+  }
+}
+</span></code></pre>
+<p>In error handling context, errors for individual root query would typically appear as a separate <code>errors</code> element, it looks like <code>async-graphql</code> doesn't do this and only one error is returned in the array (the first one that's triggered).</p>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;types&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Scalar Types
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;queries&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Queries &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

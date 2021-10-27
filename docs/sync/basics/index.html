@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Sync Basics | Open mSupply</title>
+<meta name="description" content="Sync Basics">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/sync/basics/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Sync",
+            "item": "https://dev.msupply.foundation/docs/sync/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Basics",
+            "item": "https://dev.msupply.foundation/docs/sync/basics/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/basics/#basic-principles">Basic principles</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/basics/#terminology">Terminology</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/basics/#types-of-sync">Types of sync</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/basics/#changes-from-previous-versions">Changes from previous versions</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/basics/#faq">FAQ</a></li>
+								
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Sync Basics</h1>
+        
+        <h2 id="basic-principles">Basic principles</h2>
+<ul>
+<li>Every record in the system maintains a unique UUID.</li>
+<li>Any given record is only editable on a <ins>single</ins> site.</li>
+<li>Data is defined as either central or remote, with some exceptions.</li>
+<li>All sync operations are initiated by the remote site. The central server waits to be polled.</li>
+<li>Remote sites push updated data before they pull from the central server.</li>
+<li>All synchronisation requests are secured by TLS (clients can choose whether to accept self signed certs).</li>
+<li>All HTTP bodies are JSON.</li>
+<li>Endpoints are RESTful, with the base route being <code>api/sync/v5/</code>.</li>
+<li>Authentication is done via basic HTTP auth, which returns a JWT token. That JWT must be submitted with any future requests. The JWT encodes:
+<ul>
+<li>The site id (represented as <code>u32</code>).</li>
+<li>A UUID for the active database.</li>
+</ul>
+</li>
+</ul>
+<h2 id="terminology">Terminology</h2>
+<ul>
+<li><code>Central server</code>: the server which all remote servers synchronise with. An mSupply installation can only have a single central server.</li>
+<li><code>Remote server</code>: a server which hosts a remote site.</li>
+<li><code>Site</code> - a single instance of mSupply. Sites are categorised as either <code>remote</code> or <code>primary</code>.</li>
+<li><code>Remote site</code> - a site where at least one store is active. A remote site may be running mSupply <code>single user</code>, <code>multi-user</code>, or <code>mobile</code>.</li>
+<li><code>Primary site</code> - a remote site which can edit central data. An mSupply installation can only have a single primary site.</li>
+<li><code>Store</code> - a site can have multiple stores. Stores share central data, but maintain their own remote data. For a given site, a store can be cateorised as <code>active</code>or <code>collector</code>.</li>
+<li><code>Active store</code> - if an instance of a store is <code>active</code> on a given site, that site has permission to edit remote data for that store. To ensure data integrity, a store can be active on no more than a single remote site at any given time.</li>
+<li><code>Collector store</code> - if an instance of a store is marked as a <code>collector</code> on a given site, that site has permission to read but not edit remote data for that store. Every store has a collector instance on the central server.</li>
+<li><code>Store visibility</code> - for a store to send or recieve stock to or from another store, the stores must be visible to each other. The concept of visibility is symmetrical i.e. if store A is visible in store B, then store B is also visible in store A.</li>
+<li><code>Central data</code> data which is only editable on the primary site. Central data is synchronised to all sites via the central server. The main types of central data are items, facilities and categories.</li>
+<li><code>Central store data</code>: data which is only editable on the central server. Central store data is synchronised with the site where the store is active. The main types of central store data are store records themselves, stores preferences and store visibility records.</li>
+<li><code>Remote data</code>: also known as <code>store data</code>, remote data is data which is only editable on a single remote site. Store data is synchronised with the central server. The main types of remote data are invoices, requisitions and stocktakes (and their related child tables, such as invoice_lines, requisition_lines etc.).</li>
+<li><code>Patient data</code>: patient- or prescriber-related remote data. As with all remote data, this data is only editable on a single remote site (referred to as the <code>home site</code>). Patient data is synchronised via the central server to all sites where the related record is visible. The main types of patient data are patient name records themselves, prescribers, patient medication records and insurance policies.</li>
+</ul>
+<h2 id="types-of-sync">Types of sync</h2>
+<ul>
+<li>There are two types of sync on the central server:
+<ul>
+<li>Queue based (see <a href="../sync-queue">Sync Queue</a>):
+<ul>
+<li>When a record is modified (or needs to be sent to a remote site for some other reason, e.g. it is part of a transfer or related to a patient), a record is inserted into the <code>sync_out</code> table (for details, see <a href="../sync-queue">Sync Queue</a>).</li>
+<li>When a remote site connects and requests records, the central server queries the <code>sync_out</code> table for records for that site. It fetches and sends the requested number of records to the client (for details, see <a href="../api">Sync API</a>).</li>
+<li>The client responds when it has successfully saved all records, and the central server deletes the records from the queue.</li>
+</ul>
+</li>
+<li>Change log based (see <a href="../change-log">Change Log</a>):
+<ul>
+<li>The <code>central_change_log</code> table has a single record for each record of central data. This record has a <code>u64</code> serial number*.</li>
+<li>When a record is modified or inserted, the serial number is incremented.</li>
+<li>Each remote site maintains a cursor recording its position in the change log. The remote site retrieves records sequentially, incrementing its cursor as it progresses.</li>
+<li>Remote sites are responsible for maintaining their own cursor (remote sites are not responsibile for confirming receipt of records).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>*Hello Postgres, with your <code>u32</code> vacuum cleaning ;-).</p>
+<h2 id="changes-from-previous-versions">Changes from previous versions</h2>
+<ul>
+<li>The <code>central_change_log</code> is new.</li>
+<li>Stores on the central server can only be <code>collector</code>. Previously they could also be <code>active</code>. This ensures that each store is active on no more than one remote site (the central server has read-only instances of all stores, assuming data is fully synchronised).</li>
+<li>Stores on a remote site can only be <code>active</code>. Previously they could also be <code>collector</code> or <code>transfer</code>. This ensures that remote sites can no longer have full read-only instances of stores which are active on other sites (transfers are governed by the visibility of the &quot;other&quot; store name in the initiating store).</li>
+<li>Previously, most central servers were also the primary site. That functionality is now separated out (c.f. mirrored systems), meaning that the primary site is just a special instance of a remote site.</li>
+<li>Stores and visibility are controlled on the central server. Previously they were controlled on the primary site for mirrored systems. This means the primary site no longer needs to have instances of any other stores, apart from those which are active.</li>
+<li>All store data is now synchronised back to the central server. Previously there was a store preference to control whether or not dispensary data was synchronised (done in order to reduce sync traffic from busy dispensary stores).</li>
+<li>Transfers and merges are done on the remote site. Previously they were done on the central server.</li>
+<li>Soft delete is implemented for <code>item</code> and <code>name</code> tables via a <code>status</code> field, which is used for statuses such as <code>merged</code>, a type of delete, and <code>draft</code>, used for new unapproved items and names. The default status of records is <code>active</code>.</li>
+</ul>
+<h2 id="faq">FAQ</h2>
+<ul>
+<li>What is a <code>invoice</code>?</li>
+</ul>
+<p><code>invoice</code> is a table in mSupply (not to be confused with the concept of a SQL invoice). It mainly stores what are commonly thought of as invoices.</p>
+<ul>
+<li>Why do databases have ids?</li>
+</ul>
+<p>Previously we have had problems with restoration of backup data or having two sites trying to initialise and claiming to be the same site. Having unique identifiers for each databases prevents this occuring. The central server stores the active database id on initialisation, and will not allow connections from a database with a different identifier (remote site data restoration should always ensure that the stored identifier is deleted).</p>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+          
+        
+      
+        
+        
+          
+        
+      
+        
+        
+          
+            
+              
+              <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;M1&#x2F;how-to-m1&#x2F;">
+                <div class="card my-1">
+                  <div class="card-body py-2">
+                    &larr; How to M1
+                  </div>
+                </div>
+              </a>
+            
+            
+            
+          
+        
+      
+        
+        
+          
+        
+      
+        
+        
+          
+        
+      
+    
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;api&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Sync API &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

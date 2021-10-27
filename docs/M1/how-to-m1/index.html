@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>How to M1 | Open mSupply</title>
+<meta name="description" content="How to M1">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "M1",
+            "item": "https://dev.msupply.foundation/docs/M1/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "How To M1",
+            "item": "https://dev.msupply.foundation/docs/M1/how-to-m1/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/M1/how-to-m1/#setup">Setup</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/M1/how-to-m1/#api">API</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/M1/how-to-m1/#how-to-report-problems">How to report problems</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/M1/how-to-m1/#known-problems-and-limitations">Known problems and Limitations</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>How to M1</h1>
+        
+        <h2 id="setup">Setup</h2>
+<p><a href="https://github.com/openmsupply/remote-server#remote-server">readme</a></p>
+<h5 id="pull-main">Pull Main</h5>
+<h5 id="get-diesel">Get Diesel</h5>
+<pre style="background-color:#2b303b;">
+<code class="language-bash" data-lang="bash"><span style="color:#bf616a;">cargo</span><span style="color:#c0c5ce;"> install diesel_cli</span><span style="color:#bf616a;"> --no-default-features --features </span><span style="color:#c0c5ce;">&quot;</span><span style="color:#a3be8c;">sqlite-bundled postgres</span><span style="color:#c0c5ce;">&quot;
+</span></code></pre><h5 id="setup-database">Setup Database</h5>
+<p>Don't need to start sqlite, migration scripts should do that for you, but if you are using postgres</p>
+<p><code>docker</code> -&gt; <code>./scripts/init_db.sh</code>, note, init_db.sh might not be executable if it was commited prior to be made executable. You would need to <code>chmod +x ./scripts/init_db.sh</code> to make it exectuable</p>
+<p><code>local</code> -&gt; make sure to create database matching name in configurations</p>
+<h5 id="migrate-create-tables">Migrate (Create tables)</h5>
+<pre style="background-color:#2b303b;">
+<code class="language-bash" data-lang="bash"><span style="color:#65737e;"># postgres
+</span><span style="color:#bf616a;">diesel</span><span style="color:#c0c5ce;"> migration run</span><span style="color:#bf616a;"> --database-url</span><span style="color:#c0c5ce;">=&#39;</span><span style="color:#a3be8c;">postgres://postgres:password@localhost:5432/omsupply-database</span><span style="color:#c0c5ce;">&#39;</span><span style="color:#bf616a;"> --migration-dir</span><span style="color:#c0c5ce;"> ./migrations/postgres
+
+</span><span style="color:#65737e;"># sqlite
+</span><span style="color:#c0c5ce;">diesel migration run</span><span style="color:#bf616a;"> --database-url</span><span style="color:#c0c5ce;"> ./omsupply-database.sqlite</span><span style="color:#bf616a;"> --migration-dir</span><span style="color:#c0c5ce;"> ./migrations/sqlite/
+</span></code></pre><h5 id="configure">Configure</h5>
+<p>edit <code>src/configurations/base.yaml</code>, btw sync.interval is in seconds.</p>
+<h5 id="reset">Reset ?</h5>
+<p>if you need to re-initilise etc..</p>
+<p><code>postgres</code> -&gt; delete and the create database, run migrations again
+<code>sqlite</code> -&gt; just remove sqlite file in root of repo</p>
+<h5 id="run">Run</h5>
+<p>Make sure you have a task to do, like make a coffee, or read news before running those</p>
+<pre style="background-color:#2b303b;">
+<code class="language-bash" data-lang="bash"><span style="color:#65737e;"># postgres
+</span><span style="color:#bf616a;">cargo</span><span style="color:#c0c5ce;"> run</span><span style="color:#bf616a;"> --features</span><span style="color:#c0c5ce;"> postgres
+
+</span><span style="color:#65737e;"># sqlite
+</span><span style="color:#c0c5ce;">cargo run</span><span style="color:#bf616a;"> --features</span><span style="color:#c0c5ce;"> sqlite
+</span></code></pre>
+<p>(see below about possible sync problem)</p>
+<h2 id="api">API</h2>
+<p>Worlds your oyster as they say ?</p>
+<p><code>http://localhost:8000/graphql</code> -&gt; there is a built in playground</p>
+<p>I personally like <code>https://graphiql-online.com/</code>, with voyage and pretty easy query builder</p>
+<p>For all queries you can check out <code>src/graphql_schema/queries.graphql</code> (for all queries and mutation, can copy paste into your graphql gui and run one at a time, sorry not all yet will add remainder), in the same folder you'll find <code>schema.graphl</code>.</p>
+<p>We've also made add_and_issue_stock.graphql, use first query <code>namesAndItems</code> to get ids, and second query <code>addStock</code> to add stock, and <code>issueStock</code> to issue stock.</p>
+<h6 id="add-stock-variables">Add stock variables:</h6>
+<pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;"> {
+    &quot;</span><span style="color:#a3be8c;">invoiceId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">new_inoice_id</span><span style="color:#c0c5ce;">&quot;,
+    &quot;</span><span style="color:#a3be8c;">otherPartyId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">23B1BFF14620469AAE50B79C7164E135</span><span style="color:#c0c5ce;">&quot;,
+    &quot;</span><span style="color:#a3be8c;">costPricePerPack</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">10</span><span style="color:#c0c5ce;">,
+    &quot;</span><span style="color:#a3be8c;">lineId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">new_line_id</span><span style="color:#c0c5ce;">&quot;,
+    &quot;</span><span style="color:#a3be8c;">itemId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">FDD23CE7798F4B109CB486A633DBFFFE</span><span style="color:#c0c5ce;">&quot;,
+    &quot;</span><span style="color:#a3be8c;">numberOfPacks</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">200</span><span style="color:#c0c5ce;">,
+    &quot;</span><span style="color:#a3be8c;">packSize</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">10</span><span style="color:#c0c5ce;">,
+    &quot;</span><span style="color:#a3be8c;">sellPricePerPack</span><span style="color:#c0c5ce;">&quot;: </span><span style="color:#d08770;">20
+ </span><span style="color:#c0c5ce;">}
+</span></code></pre><h6 id="issue-stock-variables">Issue stock variables:</h6>
+<pre style="background-color:#2b303b;">
+<code class="language-JSON" data-lang="JSON"><span style="color:#c0c5ce;">{
+  &quot;</span><span style="color:#a3be8c;">invoiceId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">new_inoice_id2</span><span style="color:#c0c5ce;">&quot;,
+  &quot;</span><span style="color:#a3be8c;">otherPartyId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">23B1BFF14620469AAE50B79C7164E135</span><span style="color:#c0c5ce;">&quot;,
+  &quot;</span><span style="color:#a3be8c;">lineId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">new_line_id2</span><span style="color:#c0c5ce;">&quot;,
+  &quot;</span><span style="color:#a3be8c;">itemId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">FDD23CE7798F4B109CB486A633DBFFFE</span><span style="color:#c0c5ce;">&quot;,
+  &quot;</span><span style="color:#a3be8c;">stockLineId</span><span style="color:#c0c5ce;">&quot;: &quot;</span><span style="color:#a3be8c;">69cd01b5-3368-4d8f-8337-3ee708f1ade1</span><span style="color:#c0c5ce;">&quot;,
+  &quot;</span><span style="color:#a3be8c;">numberOfPacks</span><span style="color:#c0c5ce;">&quot;:</span><span style="color:#d08770;">10
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h2 id="how-to-report-problems">How to report problems</h2>
+<p>It would be great if issues are made with some replication instructions, or at the very least with an error message from console.</p>
+<p>You can do <code>cargo run --features postgres 2&gt;&amp;1 | tee log.log</code> to show logs in console and at the same time write them to file, which can be a helpful diagnostic if errors arrive.</p>
+<p>To share <code>sqlite</code> database just share the <code>.sqlite</code> file</p>
+<p>To share <code>postgres</code> database <code>pg_dump -U postgres omsupply-database &gt; out.sql</code></p>
+<p>It's also quite good to have postgres log file, if you running <code>local</code> version please add <code>log_statement = 'all'</code> to <code>postgres.conf</code>, you can then share <code>postgresql.log</code> (btw i quite like <code>tail -f</code> on postgresql.log while deving to see what sql is actually being run).</p>
+<p>For <code>docker postgres</code>, first find out the current log file:<code>docker exec postgres_docker cat /var/lib/postgresql/data/current_logfiles</code>, then to tail <code>tail -f /var/lib/postgresql/data/log/postgresql-2021-10-20_130619.log</code> or to cp <code>docker cp postgres_docker:/var/lib/postgresql/data/log/postgresql-2021-10-20_130619.log log.log</code>. The exec script should automatically log all statments.</p>
+<h2 id="known-problems-and-limitations">Known problems and Limitations</h2>
+<h5 id="sync">Sync</h5>
+<ul>
+<li>Ensure you're on the mSupply branch: <code>feature/sync-v5</code>.</li>
+<li>Ensure your data file has run the migration code in the mSupply method <code>centralChangeLogGenerateRecords()</code>. It is possible the <code>feature/sync-v5</code> method is behind <code>main</code> which may result in your data file being upgraded without the sync-v5 code having being run.</li>
+<li>Back end schema is pretty strict, pretty much all fk relations are not nullable. This caused a few sync problems, since these constraints are not enforced on mSupply end. You should see a pretty clear warning in postgres if sync fails, when using sqlite this problem is skipped (we were trying to skip records in transaction in postgres too, but had an issue).
+Anyways, one record that we've noticed that can be problematic in master_list_name_join, where name_ID is actually of a name that doens't exists (this happens in other records, like store, but for concrete system records). To metigate this you can run this sql in record browser:</li>
+</ul>
+<pre style="background-color:#2b303b;">
+<code class="language-SQL" data-lang="SQL"><span style="color:#b48ead;">select </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">from</span><span style="color:#c0c5ce;"> list_master_name_join </span><span style="color:#b48ead;">limit </span><span style="color:#d08770;">1</span><span style="color:#c0c5ce;">;
+</span><span style="color:#b48ead;">update</span><span style="color:#c0c5ce;"> list_master_name_join </span><span style="color:#b48ead;">set</span><span style="color:#c0c5ce;"> name_id = &#39;&#39; </span><span style="color:#b48ead;">where</span><span style="color:#c0c5ce;"> id not in (
+</span><span style="color:#b48ead;">select </span><span style="color:#d08770;">list_master_name_join</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">id </span><span style="color:#c0c5ce;">as name_id </span><span style="color:#b48ead;">from</span><span style="color:#c0c5ce;"> list_master_name_join </span><span style="color:#b48ead;">left join</span><span style="color:#c0c5ce;"> name on </span><span style="color:#d08770;">list_master_name_join</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">name_ID </span><span style="color:#c0c5ce;">= </span><span style="color:#d08770;">name</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">ID </span><span style="color:#b48ead;">where </span><span style="color:#d08770;">name</span><span style="color:#c0c5ce;">.</span><span style="color:#d08770;">id </span><span style="color:#c0c5ce;">is not </span><span style="color:#d08770;">null</span><span style="color:#c0c5ce;">);
+</span><span style="color:#b48ead;">select </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">from</span><span style="color:#c0c5ce;"> list_master_name_join </span><span style="color:#b48ead;">limit </span><span style="color:#d08770;">1
+</span></code></pre>
+<ul>
+<li>Central data delete do not sync (no indication on incoming central record that it's a delete)</li>
+</ul>
+<h4 id="other">Other</h4>
+<ul>
+<li>The following graphql errors are not handled, yet
+<ul>
+<li><code>InvoiceDoesNotBelongToCurrentStore</code></li>
+<li><code>StockLineDoesNotBelongToCurrentStore</code></li>
+<li><code>InvoiceDoesNotBelongToCurrentStore</code></li>
+<li><code>OtherPartyCannotBeThisStoreError</code></li>
+<li><code>CannotChangeInvoiceBackToDraft</code></li>
+<li><code>CannotChangeStatusBackToDraftError</code> (oops those should be one)</li>
+</ul>
+</li>
+<li>Optional nullable inputs (on update mutations) (thierReference, comment, expiryDate and batch), wont' be set to null if null is provided</li>
+<li>Can't set expiryDate to null. This also included if stock line is change on invoice line (to a stock line with null expiryDate, invoice line will still show previous stock line expiry date)</li>
+</ul>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+          
+        
+      
+        
+        
+          
+        
+      
+        
+        
+          
+        
+      
+        
+        
+          
+            
+              
+              <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;custom-errors&#x2F;">
+                <div class="card my-1">
+                  <div class="card-body py-2">
+                    &larr; Custom Errors
+                  </div>
+                </div>
+              </a>
+            
+            
+            
+          
+        
+      
+        
+        
+          
+        
+      
+    
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+          
+          
+          <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;basics&#x2F;">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                Sync Basics &rarr;
+              </div>
+            </div>
+          </a>
+          
+          
+          
+        
+      
+    
+      
+      
+        
+      
+    
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Custom Errors | Open mSupply</title>
+<meta name="description" content="Full List of Errors">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/api/custom-errors/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Api",
+            "item": "https://dev.msupply.foundation/docs/api/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Custom Errors",
+            "item": "https://dev.msupply.foundation/docs/api/custom-errors/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#custom-error-codes">Custom Error Codes</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#general">General</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#general-mutations">General Mutations</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#pagination">Pagination</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#singular-query">Singular Query</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#customer-and-supplier-invoice-mutation">Customer And Supplier Invoice Mutation</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#customer-invoice-mutation">Customer Invoice Mutation</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#supplier-invoice-mutation">Supplier Invoice Mutation</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#customer-and-supplier-invoice-line-mutation">Customer And Supplier Invoice Line Mutation</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+							<li><a href="https://dev.msupply.foundation/docs/api/custom-errors/#supplier-invoice-line-mutation">Supplier Invoice Line Mutation</a></li>
+								
+									<ul>
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+										<!-- h4 headers (####) to be linkable withouth being in table of content -->
+											
+										
+									</ul>
+							
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Custom Errors</h1>
+        
+        <p><a href="/docs/api/patterns/#errors">Error pattern section</a> describe the full shape of a custom error, errors listed here are all possible extensions of <code>CustomError</code></p>
+<p><em>{TODO can we export custom error shapes in GraphQL schema ?}</em></p>
+<h2 id="custom-error-codes">Custom Error Codes</h2>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">enum </span><span style="color:#c0c5ce;">CustomErrorCodes {
+  </span><span style="color:#65737e;">// General
+  </span><span style="color:#bf616a;">NoDatabaseConnection </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">NO_DATABASE_CONNECTION</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// General Mutations
+  </span><span style="color:#bf616a;">DatabaseTransactionValidationError </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">DATABASE_TRANSACTION_VALIDATION_ERROR</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Pagination
+  </span><span style="color:#bf616a;">OffsetBelowZero </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OFFSET_BELOW_ZERO</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">FirstNotInRange </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">FIRST_NOT_IN_RANGE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Singular query
+  </span><span style="color:#bf616a;">RecordNotFound </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">RECORD_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Customer and Supplier Invoice Mutation
+  </span><span style="color:#bf616a;">OtherPartyIdNotFound </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OTHER_PARTY_ID_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">OtherPartyCannotBeThisStore </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OTHER_PARTY_CANNOT_BE_THIS_STORE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">OtherPartyIdMissing </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OTHER_PARTY_ID_MISSING</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">IdPresentInInsertInvoiceLine </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">ID_PRESENT_IN_INSERT_INVOICE_LINE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">FinalisedInvoiceIsNotEditable </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">FINALISED_INVOICE_IS_NOT_EDITABLE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">CannotChangeStatusBackToDraft </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">CANNOT_CHANGE_STATUS_BACK_TO_DRAFT</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">CanOnlyEditInvoicesInLoggedInStore </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">CAN_ONLY_EDIT_INVOICE_IN_LOGGED_IN_STORE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">InvoiceNotFound </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">INVOICE_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">InvoiceLineError </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">INVOICE_LINE_ERROR</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Customer Invoice Mutation
+  </span><span style="color:#bf616a;">OtherPartyNotACustomerOfThisStore </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OTHER_PARTY_NOT_A_CUSTOMER_OF_THIS_STORE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#65737e;">// Supplier Invoice Mutation
+  </span><span style="color:#bf616a;">OtherPartyNotASupplierOfThisStore </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">OTHER_PARTY_NOT_A_SUPPLIER_OF_THIS_STORE</span><span style="color:#c0c5ce;">&quot;,
+}
+</span></code></pre><h2 id="general">General</h2>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">DatabaseConnectionError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.NoDatabaseConnection,
+}
+</span></code></pre><h2 id="general-mutations">General Mutations</h2>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">DatabaseTransactionValidationError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.DatabaseTransactionValidationError,
+  </span><span style="color:#bf616a;">databaseMessage</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><h2 id="pagination">Pagination</h2>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OffsetError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OffsetBelowZero,
+  </span><span style="color:#65737e;">// Offset in sort argument
+  </span><span style="color:#bf616a;">first</span><span style="color:#c0c5ce;">: number
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">FirstError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.FirstNotInRange,
+  </span><span style="color:#65737e;">// First in sort argument
+  </span><span style="color:#bf616a;">first</span><span style="color:#c0c5ce;">: number
+  </span><span style="color:#bf616a;">min</span><span style="color:#c0c5ce;">: </span><span style="color:#d08770;">1
+  </span><span style="color:#65737e;">// MAX_PAGE_SIZE for list query
+  </span><span style="color:#bf616a;">max</span><span style="color:#c0c5ce;">: number
+}
+</span></code></pre><h2 id="singular-query">Singular Query</h2>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">RecordNotFoundError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.RecordNotFound,
+  </span><span style="color:#bf616a;">specifiedField</span><span style="color:#c0c5ce;">: SingleQueryArguments,
+}
+
+</span><span style="color:#b48ead;">type </span><span style="color:#c0c5ce;">SingleQueryArguments = &quot;</span><span style="color:#a3be8c;">id</span><span style="color:#c0c5ce;">&quot;
+
+</span></code></pre><h2 id="customer-and-supplier-invoice-mutation"><a href="/docs/api/mutations/#mutations">Customer And Supplier Invoice Mutation</a></h2>
+<h4 id="customer-and-supplier-invoice-insert-and-update">Insert And Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OtherPartyIdNotFound </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OtherPartyIdNotFound,
+  </span><span style="color:#bf616a;">otherPartyId</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OtherPartyCannotBeThisStore </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OtherPartyCannotBeThisStore,
+  </span><span style="color:#bf616a;">otherPartyId</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">CanOnlyEditInvoicesInLoggedInStore </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.CanOnlyEditInvoicesInLoggedInStore,
+  </span><span style="color:#bf616a;">invoiceStoreId</span><span style="color:#c0c5ce;">: string,
+  </span><span style="color:#bf616a;">sessionStoreId</span><span style="color:#c0c5ce;">: string
+}
+</span></code></pre><h4 id="customer-and-supplier-invoice-insert">Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OtherPartyIdMissing </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OtherPartyIdMissing,
+}
+</span></code></pre><h4 id="update">Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">FinalisedInvoiceIsNotEditable </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.FinalisedInvoiceIsNotEditable
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">CannotChangeStatusBackToDraft </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.CannotChangeStatusBackToDraft
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">InvoiceNotFound </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.InvoiceNotFound
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: string
+}
+</span></code></pre><h2 id="customer-invoice-mutation"><a href="/docs/api/mutations/#customer-invoice">Customer Invoice Mutation</a></h2>
+<h4 id="insert-and-update">Insert and Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OtherPartyNotACustomerOfThisStore </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OtherPartyNotACustomerOfThisStore,
+  </span><span style="color:#bf616a;">otherPartyId</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><h2 id="supplier-invoice-mutation"><a href="/docs/api/mutations/#SUPPLIER-invoice">Supplier Invoice Mutation</a></h2>
+<p>Also see <a href="/docs/api/custom-errors/#supplier-invoice-line-delete">CannotDeleteReservedBatch</a></p>
+<h4 id="insert-and-update-1">Insert And Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">OtherPartyNotASupplierOfThisStore </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.OtherPartyNotASupplierOfThisStore,
+  </span><span style="color:#bf616a;">otherPartyId</span><span style="color:#c0c5ce;">: string,
+}
+</span></code></pre><h2 id="customer-and-supplier-invoice-line-mutation"><a href="/docs/api/mutations/#mutation">Customer And Supplier Invoice Line Mutation</a></h2>
+<p>There errors are categories under <code>CustomErrorCodes.InvoiceLineError</code></p>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">InvoiceLineError </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">CustomError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: CustomErrorCodes.InvoiceLineError,
+  </span><span style="color:#bf616a;">lines</span><span style="color:#c0c5ce;">: InvoiceErrorLine[]
+}
+
+</span><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">InvoiceLineError {
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes,
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string,
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">?: string
+}
+
+</span><span style="color:#b48ead;">enum </span><span style="color:#c0c5ce;">InvoiceLineErrorCodes {
+  </span><span style="color:#65737e;">// Customer Invoice and Supplier Invoice Line Mutation
+  </span><span style="color:#bf616a;">NumberOfPacksMissingInInvoiceLine </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">NUMBER_OF_PACKS_MISSING_IN_INVOICE_LINE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">ItemIdMissingInInvoiceLine </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">ITEM_ID_MISSING_IN_INVOICE_LINE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">InvoiceLineNotFound </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">INVOICE_LINE_NOT_FOUND</span><span style="color:#c0c5ce;">&quot;,
+    </span><span style="color:#65737e;">// Customer Invoice Line Mutation
+  </span><span style="color:#bf616a;">ItemIdDoesNotMatchStockLineId </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">ITEM_ID_DOES_NOT_MATCH_STOCK_LINE_ID</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">StockLineIdMissingInInvoiceLine </span><span style="color:#c0c5ce;">=  &quot;</span><span style="color:#a3be8c;">STOCK_LINE_ID_MISSING_IN_INVOICE_LINE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">BatchReductionBelowZero </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">BATCH_REDUCTION_BELOW_ZERO</span><span style="color:#c0c5ce;">&quot;,
+    </span><span style="color:#65737e;">// Supplier Invoice Line Mutation
+  </span><span style="color:#bf616a;">CannotDeleteReservedBatch </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">CANNOT_DELETE_RESERVED_BATCH</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">ReservedSupplierInvoiceLineIsNotEditable </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">RESERVED_SUPPLIER_INVOICE_LINE_IS_NOT_EDITABLE</span><span style="color:#c0c5ce;">&quot;,
+  </span><span style="color:#bf616a;">ReservedSupplierInvoiceLineIsNotDeletable </span><span style="color:#c0c5ce;">= &quot;</span><span style="color:#a3be8c;">RESERVED_SUPPLIER_INVOICE_LINE_IS_NOT_DELETABLE</span><span style="color:#c0c5ce;">&quot;
+}
+</span></code></pre><h4 id="insert">Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">NumberOfPacksMissingInInvoiceLine </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.NumberOfPacksMissingInInvoiceLine,
+  </span><span style="color:#65737e;">// this can only happen in insert
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+}
+</span></code></pre><pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">ItemIdMissingInInvoiceLine </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.ItemIdMissingInInvoiceLine,
+  </span><span style="color:#65737e;">// this can only happen in insert
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+}
+</span></code></pre><h4 id="insert-1">Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">InvoiceLineNotFound </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.InvoiceLineNotFound,
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: string
+}
+
+## [</span><span style="color:#bf616a;">Customer Invoice Line Mutation</span><span style="color:#c0c5ce;">](/</span><span style="color:#bf616a;">docs</span><span style="color:#c0c5ce;">/</span><span style="color:#bf616a;">api</span><span style="color:#c0c5ce;">/</span><span style="color:#bf616a;">mutations</span><span style="color:#c0c5ce;">/#</span><span style="color:#bf616a;">customer</span><span style="color:#c0c5ce;">-</span><span style="color:#bf616a;">invoice</span><span style="color:#c0c5ce;">-</span><span style="color:#bf616a;">line</span><span style="color:#c0c5ce;">)
+
+#### </span><span style="color:#bf616a;">Insert and Update
+
+</span><span style="color:#c0c5ce;">```</span><span style="color:#a3be8c;">TypeScript
+interface ItemIdDoesNotMatchStockLineId extends InvoiceLineError {
+  code: InvoiceLineErrorCodes.ItemIdDoesNotMatchStockLineId,
+  clientId?: string 
+  id?: string
+  stockLineItemId: string
+  itemId: string
+}
+</span></code></pre><h4 id="insert-2">Insert</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">StockLineIdMissingInInvoiceLine </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.StockLineIdMissingInInvoiceLine,
+ </span><span style="color:#65737e;">// this can only happen in insert
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+}
+</span></code></pre><h4 id="update-1">Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">BatchReductionBelowZero  </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.BatchReductionBelowZero,
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: string
+  </span><span style="color:#bf616a;">stockLineId</span><span style="color:#c0c5ce;">: string,
+  </span><span style="color:#65737e;">// As specified in mutation
+  </span><span style="color:#bf616a;">currentNumberOfPacks</span><span style="color:#c0c5ce;">: number,
+  </span><span style="color:#65737e;">// stockLine.availableNumberOfPacks (A)
+  </span><span style="color:#bf616a;">availableNumberOfPacks</span><span style="color:#c0c5ce;">: number,
+  </span><span style="color:#65737e;">// before mutation invoiceLine.numberOfPacks (B)
+  </span><span style="color:#bf616a;">previousReductionNumberOfPacks</span><span style="color:#c0c5ce;">: number,
+  </span><span style="color:#65737e;">// B + A
+  </span><span style="color:#bf616a;">maxAllowableNumberOfPacks</span><span style="color:#c0c5ce;">: number
+  </span><span style="color:#65737e;">// TOD add references to invoices/lines the stock is reserved in
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h2 id="supplier-invoice-line-mutation"><a href="/docs/api/mutations/#supplier-invoice-line">Supplier Invoice Line Mutation</a></h2>
+<h4 id="supplier-invoice-line-delete">Delete</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">CannotDeleteReservedBatch  </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.CannotDeleteReservedBatch,
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: string
+  </span><span style="color:#bf616a;">stockLineId</span><span style="color:#c0c5ce;">: string,
+  </span><span style="color:#65737e;">// TODO add references to invoices/lines the stock is reserved in
+</span><span style="color:#c0c5ce;">}
+</span></code></pre><h4 id="update-2">Update</h4>
+<pre style="background-color:#2b303b;">
+<code class="language-TypeScript" data-lang="TypeScript"><span style="color:#b48ead;">interface </span><span style="color:#c0c5ce;">ReservedSupplierInvoiceLineIsNotEditable  </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">InvoiceLineError </span><span style="color:#c0c5ce;">{
+  </span><span style="color:#bf616a;">code</span><span style="color:#c0c5ce;">: InvoiceLineErrorCodes.ReservedSupplierInvoiceLineIsNotEditable,
+  </span><span style="color:#bf616a;">clientId</span><span style="color:#c0c5ce;">?: string 
+  </span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">: string,
+  </span><span style="color:#bf616a;">stockLineId</span><span style="color:#c0c5ce;">: string,
+  </span><span style="color:#65737e;">// TODO add references to invoices/lines the stock is reserved in
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p>When batch is already used, no changes are allowed to the invoice line </p>
+<p>{TODO remember for delete: CannotDeleteSupplierInvoiceWithReservedBatch}</p>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;api&#x2F;mutations&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Mutations
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+          
+          
+          <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;M1&#x2F;how-to-m1&#x2F;">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                How to M1 &rarr;
+              </div>
+            </div>
+          </a>
+          
+          
+          
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+        
+      
+    
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>

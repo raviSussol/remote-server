@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://dev.msupply.foundation/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://dev.msupply.foundation/main.css">
+
+
+
+    
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Sync Queue | Open mSupply</title>
+<meta name="description" content="Sync Quapieue">
+<link rel="canonical" href="https://dev.msupply.foundation/docs/sync/sync-queue/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://dev.msupply.foundation/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://dev.msupply.foundation/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Sync",
+            "item": "https://dev.msupply.foundation/docs/sync/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Sync Queue",
+            "item": "https://dev.msupply.foundation/docs/sync/sync-queue/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <link href="/prism.css" rel="stylesheet" />
+    <link href="/theme_override.css" rel="stylesheet" />
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://dev.msupply.foundation/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://dev.msupply.foundation/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://dev.msupply.foundation/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://dev.msupply.foundation/site.webmanifest">
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://dev.msupply.foundation">Open mSupply</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/openmsupply/remote-server"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="http://msupply.foundation/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg><span class="ms-2 visually-hidden">External link</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://dev.msupply.foundation/docs/getting-started/">Developer Docs</a>
+						</li>
+					
+						<li class="nav-item">
+							<a class="nav-link" href="https://dev.msupply.foundation/blog/">Developer Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+			
+					
+					
+					
+							<h3>Getting Started</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/getting-started/key-concepts/">Key Concepts</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>API</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/types/">Scalar Types</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/patterns/">Patterns</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/queries/">Queries</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/mutations/">Mutations</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/api/custom-errors/">Custom Errors</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>How to M1</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/M1/how-to-m1/">How to M1</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Sync</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/basics/">Sync Basics</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/api/">Sync API</a></li>
+							                           
+									<li><a class="docs-link active" href="https://dev.msupply.foundation/docs/sync/sync-queue/">Sync Queue</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/change-log/">Change Log</a></li>
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/sync/advanced/">Advanced Sync</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>This Doc</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://dev.msupply.foundation/docs/this_doc/info/">Info About These Docs</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/sync-queue/#key-concepts">Key concepts</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/sync-queue/#inserting">Inserting</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/sync-queue/#processing">Processing</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/sync-queue/#pushing">Pushing</a></li>
+								
+  						
+							<li><a href="https://dev.msupply.foundation/docs/sync/sync-queue/#pulling">Pulling</a></li>
+								
+  						
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Sync Queue</h1>
+        
+        <h2 id="key-concepts">Key concepts</h2>
+<p>The sync queue functions as a FIFO (first-in-first-out) queue of <code>sync_out</code> records, each of which represents an insert, update or delete operation performed on remote and a subset of central data.</p>
+<p>Each <code>sync_out</code> record has the following fields:</p>
+<table><thead><tr><th>Field</th><th>Type</th><th>Index</th><th>Notes</th></tr></thead><tbody>
+<tr><td>created_at_timestamp</td><td><code>date</code></td><td></td><td></td></tr>
+<tr><td>id</td><td><code>uuid</code></td><td></td><td></td></tr>
+<tr><td>record_id</td><td><code>varchar</code></td><td>B-tree</td><td></td></tr>
+<tr><td>sequence</td><td><code>integer</code></td><td></td><td></td></tr>
+<tr><td>store_id</td><td><code>varchar</code></td><td></td><td></td></tr>
+<tr><td>table_name</td><td><code>integer</code></td><td></td><td></td></tr>
+<tr><td>site_id</td><td><code>integer</code></td><td></td><td></td></tr>
+<tr><td>action</td><td><code>varchar</code></td><td></td><td>&quot;Update&quot;, &quot;Insert&quot;, &quot;Delete&quot; or &quot;Patch&quot;.</td></tr>
+<tr><td>data</td><td><code>jsonb</code></td><td></td><td>Hashmap of field changes for &quot;Patch&quot; records.</td></tr>
+</tbody></table>
+<h2 id="inserting">Inserting</h2>
+<ul>
+<li>
+<p>Central server</p>
+<ul>
+<li>Most central data tables are handled by central_change_log, with the exception of incoming transfers and site configuration data, e.g.:
+<ul>
+<li>When a <code>invoice</code> representing a finalised customer invoice is pushed from a remote site, a <code>sync_out</code> record is created for the <code>invoice</code>, where <code>sync_out.site_id</code> is the <code>site_id</code> for the store linked to <code>invoice.name_id</code>.</li>
+<li>When a <code>name_store_join</code> record is created, updated or deleted, a corresponding <code>sync_out</code> record is created, where <code>sync_out.site_id</code> is set to the <code>site_id</code> for the <code>store</code> with <code>store.id = name_store_join.store_id</code>.</li>
+<li>When an <code>item_store_join</code> record is created, updated or deleted, a corresponding <code>sync_out</code> record is created, where <code>sync_out.site_id</code> is set to the <code>site_id</code> for the <code>store</code> with <code>store.id = name_store_join.store_id</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Remote servers</p>
+<ul>
+<li>All tables categorised as remote data have a trigger which creates a corresponding <code>sync_out</code> record for every insertion, update and deletion performed on that table.</li>
+<li>Triggers do not update existing <code>sync_out</code> records. This is to prevent race-conditions where a <code>sync_out</code> record is updated after is has already been sent to the server.</li>
+<li>Patient data records (i.e. name records where <code>name.type = patient</code>) are a special case of remote data. In the instance where a patient <code>name</code> record is updated, the <code>sync_out</code>trigger writes out field-level changes to a sync_out.data as a JSON array of key/value pairs.</li>
+</ul>
+</li>
+</ul>
+<h2 id="processing">Processing</h2>
+<ul>
+<li>In the context of remote sync, processing the queue refers to pushing <code>sync_out</code> records to the central server.</li>
+<li>The sync queue is processed on a periodic schedule, with <code>sync_out</code> records pushed in batches.</li>
+<li>Both period frequency and batch size are defined as preferences. If batch size is not specified, it is calculated on-the-fly according to the following formula:</li>
+</ul>
+<p><a href="https://www.codecogs.com/eqnedit.php?latex=\dpi{100}&space;\fn_cm&space;\small&space;\texttt{batch\_size}&space;=&space;\min&space;\left&space;(&space;\max&space;\left&space;(&space;\left&space;\lfloor&space;\frac{\texttt{optimal\_duration\_per\_batch}}{\texttt{actual\_duration\_per\_record}}&space;\right&space;\rfloor,&space;\texttt{min\_batch\_size}&space;\right&space;),&space;\texttt{max\_batch\_size}&space;\right&space;)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\dpi{100}&space;\fn_cm&space;\small&space;\texttt{batch\_size}&space;=&space;\min&space;\left&space;(&space;\max&space;\left&space;(&space;\left&space;\lfloor&space;\frac{\texttt{optimal\_duration\_per\_batch}}{\texttt{actual\_duration\_per\_record}}&space;\right&space;\rfloor,&space;\texttt{min\_batch\_size}&space;\right&space;),&space;\texttt{max\_batch\_size}&space;\right&space;)" title="\small \texttt{batch\_size} = \min \left ( \max \left ( \left \lfloor \frac{\texttt{optimal\_duration\_per\_batch}}{\texttt{actual\_duration\_per\_record}} \right \rfloor, \texttt{min\_batch\_size} \right ), \texttt{max\_batch\_size} \right )" /></a></p>
+<p>where, <code>optimal_duration_per_batch = 5</code>, <code>min_batch_size = 10</code>, <code>max_batch_size = 500</code>.</p>
+<!-- TODO: specify the default period frequency -->
+<!-- TODO: `OPTIMAL_SYNC_DURATION_PER_BATCH` seems arbitrary, should this be configurable? -->
+<h2 id="pushing">Pushing</h2>
+<ul>
+<li>The following psuedo-code describes the algorithm for pushing from the sync queue to the central server:</li>
+</ul>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">Prune duplicate record_ids from sync_queue
+Order sync_out records by created_at_timestamp and table_name*
+For batch_size records:
+  Lookup record in sync_out.table_name with sync_out.record_id
+  Serialise record to JSON**
+  Push serialised record to batch
+Send batch to central server
+</span></code></pre>
+<p>*Secondary ordering by <code>sync_out.table_name</code> ensures that child records are sent before parents (e.g. <code>trans_line</code> records send before <code>invoice</code> records`)
+*See <a href="https://dev.msupply.foundation/docs/sync/sync-queue/&#x27;api&#x27;">Sync API</a> for JSON format.</p>
+<h2 id="pulling">Pulling</h2>
+<ul>
+<li>The following psuedo-code describes the algorithm for pulling from the central server sync queue:</li>
+</ul>
+<pre style="background-color:#2b303b;">
+<code><span style="color:#c0c5ce;">Repeat while sync_queue is not empty:
+  Request n records from the central server
+  Integrate records into persistent storage:
+    Insert, update, delete according to sync_out.action*
+    Process any messages
+  Send acknowledgement to central server
+</span></code></pre>
+<p>*This step may require merging records, see <a href="../advanced/#merging">Advanced Sync</a>.</p>
+<!-- TODO: what happens if sync queue record fails to integrate or does not acknowledge -->
+<!-- TODO: how are messages represented in sync_out records -->
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+  <a href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;api&#x2F;">
+    <div class="card my-1">
+      <div class="card-body py-2">
+        &larr; Sync API
+      </div>
+    </div>
+  </a>
+  
+
+  
+  
+  
+  
+  
+    <a class="ms-auto" href="https:&#x2F;&#x2F;dev.msupply.foundation&#x2F;docs&#x2F;sync&#x2F;change-log&#x2F;">
+      <div class="card my-1">
+        <div class="card-body py-2">
+          Change Log &rarr;
+        </div>
+      </div>
+    </a>
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.netlify.com/">Netlify</a>, <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+    <!-- using prism for code blocks, see documentation THIS DOC section -->
+    <script src="/js/prism.js"></script>
+
+
+  
+<script src="https://dev.msupply.foundation/js/main.js" defer></script>
+
+  <script src="https://dev.msupply.foundation/plugins/elasticlunr.min.js" defer></script>
+  <script src="https://dev.msupply.foundation/search_index.en.js" defer></script>
+  <script src="https://dev.msupply.foundation/js/search.js" defer></script>
+
+  
+</body>
+</html>
