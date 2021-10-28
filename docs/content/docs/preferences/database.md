@@ -41,7 +41,7 @@ Preferences are spread over 5 tables. A Preference table defines the attribute f
 | ------------- | --------- | ----------- | ----------------------------------------------------------------------------------------------- |
 | id            | uuid      | Primary key |                                                                                                 |
 | preference_id | string    | Foreign key | The related [Preference] record                                                                 |
-| default       | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
+| value         | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
 | site_id       | string    | Foreign key | The related [Site] record                                                                       |
 
 ### User Preference
@@ -50,7 +50,7 @@ Preferences are spread over 5 tables. A Preference table defines the attribute f
 | ------------- | --------- | ----------- | ----------------------------------------------------------------------------------------------- |
 | id            | uuid      | Primary key |                                                                                                 |
 | preference_id | string    | Foreign key | The related [Preference] record                                                                 |
-| default       | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
+| value         | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
 | user_id       | string    | Foreign key | The related [User] record                                                                       |
 
 ### Store Preference
@@ -59,5 +59,5 @@ Preferences are spread over 5 tables. A Preference table defines the attribute f
 | ------------- | --------- | ----------- | ----------------------------------------------------------------------------------------------- |
 | id            | uuid      | Primary key |                                                                                                 |
 | preference_id | string    | Foreign key | The related [Preference] record                                                                 |
-| default       | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
+| value         | object    |             | A value for this preference. Note it is always an object { value: number \| string \| boolean } |
 | store_id      | string    | Foreign key | The related [Store] record                                                                      |
