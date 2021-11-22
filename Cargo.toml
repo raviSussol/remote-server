@@ -8,4 +8,7 @@ members = [
     "server",
     "service",
     "util",
+
+    "plugin_api",
+    "plugin_example",
 ]

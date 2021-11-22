@@ -1,9 +1,11 @@
 #![allow(where_clauses_object_safety)]
 
+use plugin_api::MSupplyPlugin;
 use server::{
     actor_registry::ActorRegistry,
     configuration,
     middleware::{compress as compress_middleware, logger as logger_middleware},
+    plugin_host::load_plugins,
     settings::Settings,
     sync::{self, SyncConnection, SyncReceiverActor, SyncSenderActor, Synchroniser},
 };
@@ -17,6 +19,7 @@ use service::{auth_data::AuthData, token_bucket::TokenBucket};
 
 use actix_cors::Cors;
 use actix_web::{web::Data, App, HttpServer};
+use log::error;
 use std::{
     env,
     net::TcpListener,
@@ -26,6 +29,23 @@ use std::{
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // TODO move into an actor
+    {
+        // scope is for testing, i.e. it drops the plugins and causes them to unload
+        match load_plugins() {
+            Ok(plugins) => {
+                let plugin = plugins.first().unwrap();
+                let result = plugin.test(
+                    20,
+                    "Hello".to_string(),
+                    &plugin_api::TestParameter { value: 50 },
+                );
+                println!("Plugin test: {:?}", result);
+            }
+            Err(err) => error!("Failed to load plugins: {}", err),
+        };
+    }
+
     env::set_var("RUST_LOG", "info");
     env_logger::init();
 

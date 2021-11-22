@@ -19,11 +19,14 @@ repository = { path = "../repository" }
 service = { path = "../service" }
 util = { path = "../util" }
 
+plugin_api = { path = "../plugin_api" }
+
 actix-cors = "0.5.4"
 actix-web = "3.3.2" # Versions >=v4 depend on Tokio v1.
 anyhow = "1.0.44"
 config = "0.11.0"
 env_logger = "0.8.3"
+libloading = "0.7.1"
 log = "0.4.14"
 reqwest = { version = "0.10", features = ["json"] } # Versions >=0.11 depend on Tokio v1.
 serde = "1.0.126"
