@@ -29,6 +29,7 @@ mod graphql {
     {
         fn get_locations(
             &self,
+            _: &StorageConnection,
             pagination: Option<PaginationOption>,
             filter: Option<LocationFilter>,
             sort: Option<LocationSort>,
@@ -38,6 +39,7 @@ mod graphql {
 
         fn get_location(
             &self,
+            _: &StorageConnection,
             _: String,
         ) -> Result<domain::location::Location, service::SingleRecordError> {
             todo!()
@@ -160,7 +162,7 @@ mod graphql {
               __typename
             }
           }
-          
+
         "#;
 
         let expected = json!({

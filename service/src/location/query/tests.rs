@@ -6,20 +6,18 @@ mod query {
     };
     use repository::{mock::MockDataInserts, test_db::setup_all};
 
-    use crate::{
-        location::{LocationService, LocationServiceQuery},
-        ListError, SingleRecordError,
-    };
+    use crate::{service_provider::ServicesProvider, ListError, SingleRecordError};
 
     #[actix_rt::test]
     async fn location_service_pagination() {
         let (_, _, connection_manager, _) =
             setup_all("test_location_service_pagination", MockDataInserts::all()).await;
 
-        let service = LocationService::new(connection_manager);
+        let service_provider = ServicesProvider::new(connection_manager);
+        let services = service_provider.services().unwrap();
 
         assert_eq!(
-            service.get_locations(
+            services.get_locations(
                 Some(PaginationOption {
                     limit: Some(2000),
                     offset: None
@@ -31,7 +29,7 @@ mod query {
         );
 
         assert_eq!(
-            service.get_locations(
+            services.get_locations(
                 Some(PaginationOption {
                     limit: Some(0),
                     offset: None,
@@ -48,14 +46,17 @@ mod query {
         let (_, _, connection_manager, _) =
             setup_all("test_location_single_record", MockDataInserts::all()).await;
 
-        let service = LocationService::new(connection_manager);
+        let service_provider = ServicesProvider::new(connection_manager);
+        let services = service_provider.services().unwrap();
 
         assert_eq!(
-            service.get_location("invalid_id".to_owned()),
+            services.get_location("invalid_id".to_owned()),
             Err(SingleRecordError::NotFound("invalid_id".to_owned()))
         );
 
-        let result = service.get_location("location_on_hold".to_owned()).unwrap();
+        let result = services
+            .get_location("location_on_hold".to_owned())
+            .unwrap();
 
         assert_eq!(result.id, "location_on_hold");
         assert_eq!(result.on_hold, true);
@@ -66,9 +67,10 @@ mod query {
         let (_, _, connection_manager, _) =
             setup_all("test_location_filter", MockDataInserts::all()).await;
 
-        let service = LocationService::new(connection_manager);
+        let service_provider = ServicesProvider::new(connection_manager);
+        let services = service_provider.services().unwrap();
 
-        let result = service
+        let result = services
             .get_locations(
                 None,
                 Some(LocationFilter::new().match_id("location_1")),
@@ -79,7 +81,7 @@ mod query {
         assert_eq!(result.count, 1);
         assert_eq!(result.rows[0].id, "location_1");
 
-        let result = service
+        let result = services
             .get_locations(
                 None,
                 Some(
@@ -100,9 +102,10 @@ mod query {
         let (mock_data, _, connection_manager, _) =
             setup_all("test_location_sort", MockDataInserts::all()).await;
 
-        let service = LocationService::new(connection_manager);
+        let service_provider = ServicesProvider::new(connection_manager);
+        let services = service_provider.services().unwrap();
         // Test Name sort with default sort order
-        let result = service
+        let result = services
             .get_locations(
                 None,
                 None,
@@ -129,7 +132,7 @@ mod query {
         assert_eq!(result_names, sorted_names);
 
         // Test Name sort with desc sort
-        let result = service
+        let result = services
             .get_locations(
                 None,
                 None,

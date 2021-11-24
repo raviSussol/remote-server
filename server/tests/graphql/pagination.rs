@@ -4,7 +4,7 @@ mod graphql {
         location::{Location, LocationFilter, LocationSort},
         PaginationOption,
     };
-    use repository::mock::MockDataInserts;
+    use repository::{mock::MockDataInserts, StorageConnection};
     use serde_json::json;
     use server::test_utils::setup_all;
     use service::{location::LocationServiceQuery, ListError, ListResult};
@@ -29,6 +29,7 @@ mod graphql {
     {
         fn get_locations(
             &self,
+            _: &StorageConnection,
             pagination: Option<PaginationOption>,
             filter: Option<LocationFilter>,
             sort: Option<LocationSort>,
@@ -38,6 +39,7 @@ mod graphql {
 
         fn get_location(
             &self,
+            _: &StorageConnection,
             _: String,
         ) -> Result<domain::location::Location, service::SingleRecordError> {
             todo!()

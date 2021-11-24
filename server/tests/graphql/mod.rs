@@ -8,7 +8,7 @@ use repository::{get_storage_connection_manager, StorageConnectionManager};
 use service::{
     auth_data::AuthData,
     location::LocationServiceQuery,
-    service_registry::{get_services, ServiceMap, ServiceRegistry},
+    service_provider::{ServiceInstances, ServicesProvider},
     token_bucket::TokenBucket,
 };
 
@@ -47,11 +47,11 @@ where
 {
     let connection_manager = get_storage_connection_manager(&settings.database);
     let loaders = get_loaders(&connection_manager).await;
-    let services = get_services(&connection_manager).await;
+    let service_provider = ServicesProvider::new(connection_manager.clone());
 
     let connection_manager_data = actix_web::web::Data::new(connection_manager);
     let loader_registry = actix_web::web::Data::new(LoaderRegistry { loaders });
-    let service_registry = actix_web::web::Data::new(ServiceRegistry { services });
+    let service_provider_data = actix_web::web::Data::new(service_provider);
 
     let auth_data = Data::new(AuthData {
         auth_token_secret: settings.auth.token_secret.to_owned(),
@@ -68,7 +68,7 @@ where
             .configure(graphql_config(
                 connection_manager_data,
                 loader_registry,
-                service_registry,
+                service_provider_data,
                 auth_data,
             )),
     )
@@ -99,11 +99,11 @@ async fn run_gql_query(
 ) -> serde_json::Value {
     let connection_manager = get_storage_connection_manager(&settings.database);
     let loaders = get_loaders(&connection_manager).await;
-    let services = get_test_services(&connection_manager, service_override).await;
+    let services_provider = get_test_services(connection_manager.clone(), service_override);
 
     let connection_manager_data = actix_web::web::Data::new(connection_manager);
     let loader_registry = actix_web::web::Data::new(LoaderRegistry { loaders });
-    let service_registry = actix_web::web::Data::new(ServiceRegistry { services });
+    let services_provider_data = actix_web::web::Data::new(services_provider);
 
     let auth_data = Data::new(AuthData {
         auth_token_secret: settings.auth.token_secret.to_owned(),
@@ -120,7 +120,7 @@ async fn run_gql_query(
             .configure(graphql_config(
                 connection_manager_data,
                 loader_registry,
-                service_registry,
+                services_provider_data,
                 auth_data,
             )),
     )
@@ -184,19 +184,17 @@ async fn assert_gql_query(
     actual
 }
 
-async fn get_test_services(
-    connection_manager: &StorageConnectionManager,
+fn get_test_services(
+    connection_manager: StorageConnectionManager,
     service_override: Option<ServicesOverride>,
-) -> ServiceMap {
-    let mut services = get_services(connection_manager).await;
-
+) -> ServicesProvider {
+    let mut service_instances = ServiceInstances::new();
     if let Some(service_override) = service_override {
-        if let Some(location_service) = service_override.location_service {
-            services.insert(location_service);
-        }
+        service_instances.location_service = service_override
+            .location_service
+            .unwrap_or(service_instances.location_service);
     }
-
-    services
+    ServicesProvider::new(connection_manager).set_service_instances(service_instances)
 }
 pub struct ServicesOverride {
     pub location_service: Option<Box<dyn LocationServiceQuery>>,
