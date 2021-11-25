@@ -4,20 +4,23 @@ mod query {
         location::{LocationFilter, LocationSortField},
         PaginationOption, Sort,
     };
-    use repository::{mock::MockDataInserts, test_db::setup_all};
+    use repository::{
+        mock::MockDataInserts, storage_connection_example::ConnectionPool, test_db::setup_all,
+    };
 
-    use crate::{service_provider::ServicesProvider, ListError, SingleRecordError};
+    use crate::{service_provider::ServiceProvider, ListError, SingleRecordError};
 
     #[actix_rt::test]
     async fn location_service_pagination() {
         let (_, _, connection_manager, _) =
             setup_all("test_location_service_pagination", MockDataInserts::all()).await;
 
-        let service_provider = ServicesProvider::new(connection_manager);
-        let services = service_provider.services().unwrap();
+        let service_provider =
+            ServiceProvider::new(ConnectionPool::new(connection_manager.pool.clone()));
+        let service = service_provider.location_service();
 
         assert_eq!(
-            services.get_locations(
+            service.get_locations(
                 Some(PaginationOption {
                     limit: Some(2000),
                     offset: None
@@ -29,7 +32,7 @@ mod query {
         );
 
         assert_eq!(
-            services.get_locations(
+            service.get_locations(
                 Some(PaginationOption {
                     limit: Some(0),
                     offset: None,
@@ -46,17 +49,16 @@ mod query {
         let (_, _, connection_manager, _) =
             setup_all("test_location_single_record", MockDataInserts::all()).await;
 
-        let service_provider = ServicesProvider::new(connection_manager);
-        let services = service_provider.services().unwrap();
+        let service_provider =
+            ServiceProvider::new(ConnectionPool::new(connection_manager.pool.clone()));
+        let service = service_provider.location_service();
 
         assert_eq!(
-            services.get_location("invalid_id".to_owned()),
+            service.get_location("invalid_id".to_owned()),
             Err(SingleRecordError::NotFound("invalid_id".to_owned()))
         );
 
-        let result = services
-            .get_location("location_on_hold".to_owned())
-            .unwrap();
+        let result = service.get_location("location_on_hold".to_owned()).unwrap();
 
         assert_eq!(result.id, "location_on_hold");
         assert_eq!(result.on_hold, true);
@@ -67,10 +69,11 @@ mod query {
         let (_, _, connection_manager, _) =
             setup_all("test_location_filter", MockDataInserts::all()).await;
 
-        let service_provider = ServicesProvider::new(connection_manager);
-        let services = service_provider.services().unwrap();
+        let service_provider =
+            ServiceProvider::new(ConnectionPool::new(connection_manager.pool.clone()));
+        let service = service_provider.location_service();
 
-        let result = services
+        let result = service
             .get_locations(
                 None,
                 Some(LocationFilter::new().match_id("location_1")),
@@ -81,7 +84,7 @@ mod query {
         assert_eq!(result.count, 1);
         assert_eq!(result.rows[0].id, "location_1");
 
-        let result = services
+        let result = service
             .get_locations(
                 None,
                 Some(
@@ -102,10 +105,12 @@ mod query {
         let (mock_data, _, connection_manager, _) =
             setup_all("test_location_sort", MockDataInserts::all()).await;
 
-        let service_provider = ServicesProvider::new(connection_manager);
-        let services = service_provider.services().unwrap();
+        let service_provider =
+            ServiceProvider::new(ConnectionPool::new(connection_manager.pool.clone()));
+        let service = service_provider.location_service();
+
         // Test Name sort with default sort order
-        let result = services
+        let result = service
             .get_locations(
                 None,
                 None,
@@ -132,7 +137,7 @@ mod query {
         assert_eq!(result_names, sorted_names);
 
         // Test Name sort with desc sort
-        let result = services
+        let result = service
             .get_locations(
                 None,
                 None,

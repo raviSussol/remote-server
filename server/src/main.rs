@@ -12,8 +12,8 @@ use graphql::{
     config as graphql_config,
     loader::{get_loaders, LoaderMap, LoaderRegistry},
 };
-use repository::get_storage_connection_manager;
-use service::{auth_data::AuthData, service_provider::ServicesProvider, token_bucket::TokenBucket};
+use repository::{get_storage_connection_manager, storage_connection_example::ConnectionPool};
+use service::{auth_data::AuthData, service_provider::ServiceProvider, token_bucket::TokenBucket};
 
 use actix_cors::Cors;
 use actix_web::{web::Data, App, HttpServer};
@@ -41,7 +41,9 @@ async fn main() -> std::io::Result<()> {
     });
     let connection_manager = get_storage_connection_manager(&settings.database);
     let loaders: LoaderMap = get_loaders(&connection_manager).await;
-    let service_provider = ServicesProvider::new(connection_manager.clone());
+    let service_provider =
+        ServiceProvider::new(ConnectionPool::new(connection_manager.pool.clone()));
+
     let (mut sync_sender, mut sync_receiver): (SyncSenderActor, SyncReceiverActor) =
         sync::get_sync_actors();
 

@@ -79,12 +79,9 @@ impl Queries {
         #[graphql(desc = "Sort options (only first sort input is evaluated for this endpoint)")]
         sort: Option<Vec<LocationSortInput>>,
     ) -> LocationsResponse {
-        let services = match ctx.services_provider().services() {
-            Ok(services) => services,
-            Err(repository_error) => return LocationsResponse::Error(repository_error.into()),
-        };
+        let service = ctx.service_provider().location_service();
 
-        match services.get_locations(
+        match service.get_locations(
             page.map(PaginationOption::from),
             filter.map(LocationFilter::from),
             convert_sort(sort),
