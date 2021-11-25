@@ -1,8 +1,5 @@
 use super::{ListError, ListResult};
-use crate::{
-    service_provider::{Services, ServicesConnection},
-    SingleRecordError,
-};
+use crate::SingleRecordError;
 use domain::{
     location::{Location, LocationFilter, LocationSort},
     PaginationOption,

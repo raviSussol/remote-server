@@ -4,7 +4,7 @@ mod graphql {
         location::{Location, LocationFilter, LocationSort, LocationSortField},
         PaginationOption, Sort,
     };
-    use repository::mock::MockDataInserts;
+    use repository::{StorageConnection, mock::MockDataInserts};
     use serde_json::json;
     use server::test_utils::setup_all;
     use service::{location::LocationServiceQuery, ListError, ListResult};
