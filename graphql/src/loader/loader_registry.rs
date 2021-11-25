@@ -5,7 +5,7 @@ use crate::loader::{
     StoreLoader, UserAccountLoader,
 };
 
-use repository::StorageConnectionManager;
+use repository::{storage_connection_example::ConnectionPool, StorageConnectionManager};
 
 use async_graphql::dataloader::DataLoader;
 
@@ -86,7 +86,7 @@ pub async fn get_loaders(connection_manager: &StorageConnectionManager) -> Loade
     });
 
     let location_by_id_loader = DataLoader::new(LocationByIdLoader {
-        connection_manager: connection_manager.clone(),
+        connection_pool: ConnectionPool::new(connection_manager.pool.clone()),
     });
 
     loaders.insert(item_loader);

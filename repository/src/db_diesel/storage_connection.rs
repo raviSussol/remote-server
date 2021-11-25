@@ -103,7 +103,7 @@ impl StorageConnection {
 
 #[derive(Clone)]
 pub struct StorageConnectionManager {
-    pool: Pool<ConnectionManager<DBBackendConnection>>,
+    pub pool: Pool<ConnectionManager<DBBackendConnection>>,
 }
 
 impl StorageConnectionManager {

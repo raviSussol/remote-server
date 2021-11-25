@@ -1,10 +1,10 @@
-use super::StorageConnection;
-
 use crate::diesel_extensions::OrderByExtensions;
 use crate::repository_error::RepositoryError;
 use crate::schema::diesel_schema::{location, location::dsl as location_dsl};
 use crate::schema::LocationRow;
 use crate::DBType;
+
+use super::storage_connection_example::Connection;
 
 use diesel::prelude::*;
 use domain::location::{Location, LocationFilter, LocationSort, LocationSortField};
@@ -65,19 +65,20 @@ macro_rules! apply_sort_no_case {
 }
 
 pub struct LocationRepository<'a> {
-    connection: &'a StorageConnection,
+    connection: Connection<'a>,
 }
 
 impl<'a> LocationRepository<'a> {
-    pub fn new(connection: &'a StorageConnection) -> Self {
+    pub fn new(connection: Connection<'a>) -> Self {
         LocationRepository { connection }
     }
 
     pub fn count(&self, filter: Option<LocationFilter>) -> Result<i64, RepositoryError> {
         // TODO (beyond M2), check that store_id matches current store
         let query = create_filtered_query(filter);
-
-        Ok(query.count().get_result(&self.connection.connection)?)
+        Ok(query
+            .count()
+            .get_result(self.connection.diesel_connection())?)
     }
 
     pub fn query_filter_only(
@@ -112,7 +113,7 @@ impl<'a> LocationRepository<'a> {
         let result = query
             .offset(pagination.offset as i64)
             .limit(pagination.limit as i64)
-            .load::<LocationRow>(&self.connection.connection)?;
+            .load::<LocationRow>(self.connection.diesel_connection())?;
 
         Ok(result.into_iter().map(to_domain).collect())
     }

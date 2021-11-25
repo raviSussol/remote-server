@@ -21,6 +21,7 @@ mod requisition_line;
 mod stock_line;
 mod stock_line_row;
 mod storage_connection;
+pub mod storage_connection_example;
 mod store;
 mod unit_row;
 mod user_account;
