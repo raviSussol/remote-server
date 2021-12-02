@@ -5,7 +5,9 @@ pub mod location;
 pub mod outbound_shipment;
 pub mod user_register;
 
-use self::location::{InsertLocationInput, InsertLocationResponse};
+use self::location::{
+    InsertLocationInput, InsertLocationResponse, UpdateLocationInput, UpdateLocationResponse,
+};
 
 use super::types::{get_invoice_response, Connector, InvoiceLineNode, InvoiceResponse};
 use crate::ContextExt;
@@ -43,6 +45,26 @@ impl Mutations {
         {
             Ok(location) => InsertLocationResponse::Response(location.into()),
             Err(error) => InsertLocationResponse::Error(error.into()),
+        }
+    }
+
+    async fn update_location(
+        &self,
+        ctx: &Context<'_>,
+        input: UpdateLocationInput,
+    ) -> UpdateLocationResponse {
+        let service_provider = ctx.service_provider();
+        let service_context = match service_provider.context() {
+            Ok(service) => service,
+            Err(error) => return UpdateLocationResponse::Error(error.into()),
+        };
+
+        match service_provider
+            .update_location_service
+            .update_location(input.into(), &service_context)
+        {
+            Ok(location) => UpdateLocationResponse::Response(location.into()),
+            Err(error) => UpdateLocationResponse::Error(error.into()),
         }
     }
 
@@ -255,6 +277,14 @@ pub struct RecordAlreadyExist;
 impl RecordAlreadyExist {
     pub async fn description(&self) -> &'static str {
         "Record already exists"
+    }
+}
+
+pub struct RecordBelongsToAnotherStore;
+#[Object]
+impl RecordBelongsToAnotherStore {
+    pub async fn description(&self) -> &'static str {
+        "Record belongs to another store"
     }
 }
 
