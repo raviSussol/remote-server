@@ -1,11 +1,14 @@
 extern crate libloading;
 
+use futures::channel::mpsc::{channel, Receiver, Sender};
+use futures::{SinkExt, StreamExt};
 #[cfg(unix)]
 use libloading::os::unix::Symbol as RawSymbol;
 #[cfg(windows)]
 use libloading::os::windows::Symbol as RawSymbol;
 use libloading::Library;
 use log::{error, info};
+use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use plugin_api::DestroyPluginFunc;
 use plugin_api::{
     CreatePluginFunc, MSupplyPlugin, OnLoadFunc, OnUnloadFunc, TestFunc, TestParameter,
@@ -13,10 +16,84 @@ use plugin_api::{
 };
 use std::ffi::*;
 use std::fs;
+use std::path::Path;
 
-pub fn load_plugins() -> anyhow::Result<Vec<PluginHostProxy>> {
+pub struct PluginManager {
+    plugin_dir: String,
+    stop_sender: Sender<()>,
+    stop_receiver: Receiver<()>,
+}
+
+impl PluginManager {
+    pub fn new(plugin_dir: &str) -> Self {
+        let (tx, rx) = channel(1);
+
+        PluginManager {
+            plugin_dir: plugin_dir.to_string(),
+            stop_sender: tx,
+            stop_receiver: rx,
+        }
+    }
+
+    pub async fn run(&mut self) {
+        let (mut tx, mut rx) = channel(1);
+
+        // Automatically select the best implementation for your platform.
+        // You can also access each implementation directly e.g. INotifyWatcher.
+        let mut watcher = RecommendedWatcher::new(move |res| {
+            futures::executor::block_on(async {
+                tx.send(res).await.unwrap();
+            })
+        })
+        .unwrap();
+
+        let plugins = load_plugins(&self.plugin_dir).unwrap();
+
+        // TODO: just for testing
+        let plugin = plugins.first().unwrap();
+        let result = plugin.test(
+            20,
+            "Hello".to_string(),
+            &plugin_api::TestParameter { value: 50 },
+        );
+        println!("Plugin test: {:?}", result);
+
+        // Add a path to be watched. All files and directories at that path and
+        // below will be monitored for changes.
+        watcher
+            .watch(&Path::new(&self.plugin_dir), RecursiveMode::Recursive)
+            .unwrap();
+
+        let stop_receiver = &mut self.stop_receiver;
+        loop {
+            tokio::select! {
+                _ = stop_receiver.next() => {
+                    break;
+                },
+                () = async {
+                    if let Some(res) = rx.next().await {
+                        match res {
+                            Ok(event) => println!("changed: {:?}", event),
+                            Err(e) => println!("watch error: {:?}", e),
+                        }
+                    }
+                } => {},
+            };
+        }
+    }
+
+    pub async fn shutdown(mut self) {
+        self.stop_sender.send(()).await.unwrap();
+    }
+}
+
+struct LoadedPlugin {
+    plugin: PluginHostProxy,
+}
+
+pub fn load_plugins(plugin_dir: &str) -> anyhow::Result<Vec<PluginHostProxy>> {
     let mut plugins = Vec::<PluginHostProxy>::new();
-    for item in fs::read_dir("./plugins")? {
+    for item in fs::read_dir(plugin_dir)? {
         let entry = match item {
             Err(_) => continue,
             Ok(entry) => entry,

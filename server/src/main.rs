@@ -1,11 +1,10 @@
 #![allow(where_clauses_object_safety)]
 
-use plugin_api::MSupplyPlugin;
 use server::{
     actor_registry::ActorRegistry,
     configuration,
     middleware::{compress as compress_middleware, logger as logger_middleware},
-    plugin_host::load_plugins,
+    plugin_host::PluginManager,
     settings::Settings,
     sync::{self, SyncConnection, SyncReceiverActor, SyncSenderActor, Synchroniser},
 };
@@ -19,7 +18,6 @@ use service::{auth_data::AuthData, token_bucket::TokenBucket};
 
 use actix_cors::Cors;
 use actix_web::{web::Data, App, HttpServer};
-use log::error;
 use std::{
     env,
     net::TcpListener,
@@ -29,23 +27,6 @@ use std::{
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // TODO move into an actor
-    {
-        // scope is for testing, i.e. it drops the plugins and causes them to unload
-        match load_plugins() {
-            Ok(plugins) => {
-                let plugin = plugins.first().unwrap();
-                let result = plugin.test(
-                    20,
-                    "Hello".to_string(),
-                    &plugin_api::TestParameter { value: 50 },
-                );
-                println!("Plugin test: {:?}", result);
-            }
-            Err(err) => error!("Failed to load plugins: {}", err),
-        };
-    }
-
     env::set_var("RUST_LOG", "info");
     env_logger::init();
 
@@ -94,9 +75,10 @@ async fn main() -> std::io::Result<()> {
     let connection = SyncConnection::new(&settings.sync);
     let mut synchroniser = Synchroniser { connection };
 
+    let mut plugin_manager = PluginManager::new("./plugins");
     // http_server is the only one that should quit; a proper shutdown signal can cause this,
     // and so we want an orderly exit. This achieves it nicely.
-    tokio::select! {
+    let result = tokio::select! {
         result = http_server => result,
         () = async {
           sync_sender.schedule_send(Duration::from_secs(settings.sync.interval)).await;
@@ -104,5 +86,10 @@ async fn main() -> std::io::Result<()> {
         () = async {
             sync_receiver.listen(&mut synchroniser, &connection_manager_data_sync).await;
         } => unreachable!("Sync scheduler unexpectedly died!?"),
-    }
+        () = async {
+            plugin_manager.run().await;
+        } => unreachable!("We call stop after this line..."),
+    };
+    plugin_manager.shutdown().await;
+    result
 }
