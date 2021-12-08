@@ -154,6 +154,6 @@ impl Queries {
         #[graphql(desc = "Invoice type")] invoice_type: InvoiceNodeType,
         #[graphql(desc = "Timezone offset")] timezone_offset: Option<i32>,
     ) -> Result<InvoiceCountsResponse> {
-        invoice_counts(ctx, invoice_type, timezone_offset)
+        Ok(invoice_counts(ctx, invoice_type, timezone_offset)?)
     }
 }

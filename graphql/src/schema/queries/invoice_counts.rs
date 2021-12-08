@@ -1,7 +1,10 @@
 use async_graphql::*;
 use chrono::Utc;
-use service::dashboard::invoice_count::{InvoiceCountService, InvoiceCountServiceTrait};
+use service::dashboard::invoice_count::{
+    InvoiceCountError, InvoiceCountService, InvoiceCountServiceTrait,
+};
 
+use crate::errors::ServerError;
 use crate::schema::types::invoice_query::InvoiceNodeType;
 use crate::ContextExt;
 
@@ -25,33 +28,27 @@ pub fn invoice_counts(
     ctx: &Context<'_>,
     invoice_type: InvoiceNodeType,
     timezone_offset: Option<i32>,
-) -> Result<InvoiceCountsResponse> {
+) -> Result<InvoiceCountsResponse, ServerError> {
     let service_provider = ctx.service_provider();
-    let service_ctx = service_provider.context().map_err(|_| Error {
-        message: "InternalError".to_string(),
-        source: None,
-        extensions: None,
-    })?;
+    let service_ctx = service_provider.context()?;
     let service = InvoiceCountService {};
-    let created = service
-        .invoice_count_created(
-            &service_ctx,
-            invoice_type.into(),
-            Utc::now(),
-            timezone_offset,
-        )
-        .map_err(|err| match err {
-            service::dashboard::invoice_count::InvoiceCountError::RepositoryError(_) => Error {
-                message: "InternalError".to_string(),
-                source: None,
-                extensions: None,
-            },
-            service::dashboard::invoice_count::InvoiceCountError::BadTimezoneOffset => Error {
-                message: "BadUserInput".to_string(),
-                source: None,
-                extensions: None,
-            },
-        })?;
+    let result = service.invoice_count_created(
+        &service_ctx,
+        invoice_type.into(),
+        Utc::now(),
+        timezone_offset,
+    );
+    let created = match result {
+        Ok(created) => created,
+        Err(err) => match err {
+            InvoiceCountError::RepositoryError(err) => return Err(err.into()),
+            InvoiceCountError::BadTimezoneOffset => {
+                return Err(ServerError::BadUserInput(
+                    "Invalid timezone offset".to_string(),
+                ));
+            }
+        },
+    };
 
     Ok(InvoiceCountsResponse::Response(InvoiceCounts {
         created: InvoiceCountsSummary {
