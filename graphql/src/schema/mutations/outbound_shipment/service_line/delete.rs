@@ -75,9 +75,12 @@ impl From<DeleteOutboundShipmentServiceLineError> for DeleteOutboundShipmentServ
             DeleteOutboundShipmentServiceLineError::NotThisStoreInvoice => {
                 OutError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})
             }
-            DeleteOutboundShipmentServiceLineError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
-            }
+            DeleteOutboundShipmentServiceLineError::InvoiceIsNotEditable(
+                invoice_is_not_editable,
+            ) => OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                "{:#?}",
+                invoice_is_not_editable
+            ))),
             DeleteOutboundShipmentServiceLineError::NotThisInvoiceLine(invoice_id) => {
                 OutError::InvoiceLineBelongsToAnotherInvoice(InvoiceLineBelongsToAnotherInvoice(
                     invoice_id,

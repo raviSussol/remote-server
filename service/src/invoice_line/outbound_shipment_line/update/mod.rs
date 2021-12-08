@@ -1,4 +1,4 @@
-use crate::{u32_to_i32, WithDBError};
+use crate::{invoice::InvoiceIsNotEditable, u32_to_i32, WithDBError};
 use domain::outbound_shipment::UpdateOutboundShipmentLine;
 use repository::{
     schema::{InvoiceLineRow, StockLineRow},
@@ -83,7 +83,7 @@ pub enum UpdateOutboundShipmentLineError {
     NotAnOutboundShipment,
     NotThisStoreInvoice,
     NotThisInvoiceLine(String),
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     ItemNotFound,
     StockLineNotFound,
     NumberOfPacksBelowOne,

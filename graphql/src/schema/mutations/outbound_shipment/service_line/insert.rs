@@ -105,9 +105,12 @@ impl From<InsertOutboundShipmentServiceLineError> for InsertOutboundShipmentServ
             InsertOutboundShipmentServiceLineError::NotAnOutboundShipment => {
                 OutError::NotAnOutboundShipment(NotAnOutboundShipment {})
             }
-            InsertOutboundShipmentServiceLineError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
-            }
+            InsertOutboundShipmentServiceLineError::InvoiceIsNotEditable(
+                invoice_is_not_editable,
+            ) => OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                "{:#?}",
+                invoice_is_not_editable
+            ))),
             InsertOutboundShipmentServiceLineError::ItemNotFound => {
                 OutError::ForeignKeyError(ForeignKeyError(ForeignKey::ItemId))
             }

@@ -72,8 +72,8 @@ pub fn check_other_party(
 }
 
 impl From<InvoiceIsNotEditable> for UpdateOutboundShipmentError {
-    fn from(_: InvoiceIsNotEditable) -> Self {
-        UpdateOutboundShipmentError::InvoiceIsNotEditable
+    fn from(error: InvoiceIsNotEditable) -> Self {
+        UpdateOutboundShipmentError::InvoiceIsNotEditable(error)
     }
 }
 

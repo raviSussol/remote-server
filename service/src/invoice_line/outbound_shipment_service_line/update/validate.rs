@@ -67,8 +67,8 @@ impl From<WrongInvoiceType> for UpdateOutboundShipmentServiceLineError {
 }
 
 impl From<InvoiceIsNotEditable> for UpdateOutboundShipmentServiceLineError {
-    fn from(_: InvoiceIsNotEditable) -> Self {
-        UpdateOutboundShipmentServiceLineError::CannotEditFinalised
+    fn from(error: InvoiceIsNotEditable) -> Self {
+        UpdateOutboundShipmentServiceLineError::InvoiceIsNotEditable(error)
     }
 }
 

@@ -7,7 +7,7 @@ use repository::{
 };
 use validate::validate;
 
-use crate::WithDBError;
+use crate::{invoice::InvoiceIsNotEditable, WithDBError};
 
 pub struct UpdateOutboundShipmentServiceLine {
     pub id: String,
@@ -49,7 +49,7 @@ pub enum UpdateOutboundShipmentServiceLineError {
     NotAnOutboundShipment,
     // NotThisStoreInvoice,
     NotThisInvoiceLine(String),
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     ItemNotFound,
     NotAServiceItem,
 }

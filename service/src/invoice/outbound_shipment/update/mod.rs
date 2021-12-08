@@ -10,6 +10,8 @@ pub mod validate;
 use generate::generate;
 use validate::validate;
 
+use crate::invoice::InvoiceIsNotEditable;
+
 pub fn update_outbound_shipment(
     connection_manager: &StorageConnectionManager,
     patch: UpdateOutboundShipment,
@@ -37,7 +39,7 @@ pub enum UpdateOutboundShipmentError {
     CannotReverseInvoiceStatus,
     CannotChangeStatusOfInvoiceOnHold,
     InvoiceDoesNotExists,
-    InvoiceIsNotEditable,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     DatabaseError(RepositoryError),
     OtherPartyDoesNotExists,
     OtherPartyNotACustomer(Name),

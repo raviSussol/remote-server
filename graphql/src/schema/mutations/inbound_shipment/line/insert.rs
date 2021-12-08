@@ -111,8 +111,11 @@ impl From<InsertInboundShipmentLineError> for InsertInboundShipmentLineResponse 
             InsertInboundShipmentLineError::NotThisStoreInvoice => {
                 OutError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})
             }
-            InsertInboundShipmentLineError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
+            InsertInboundShipmentLineError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
             InsertInboundShipmentLineError::ItemNotFound => {
                 OutError::ForeignKeyError(ForeignKeyError(ForeignKey::ItemId))

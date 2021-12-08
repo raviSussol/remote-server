@@ -58,7 +58,7 @@ mod graphql {
         let expected = json!({
             "updateOutboundShipment": {
               "error": {
-                "__typename": "InvoiceIsNotEditable"
+                "__typename": "CannotEditInvoice"
               }
             }
           }

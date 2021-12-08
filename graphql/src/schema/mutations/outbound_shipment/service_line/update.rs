@@ -107,9 +107,12 @@ impl From<UpdateOutboundShipmentServiceLineError> for UpdateOutboundShipmentServ
                     invoice_id,
                 ))
             }
-            UpdateOutboundShipmentServiceLineError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
-            }
+            UpdateOutboundShipmentServiceLineError::InvoiceIsNotEditable(
+                invoice_is_not_editable,
+            ) => OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                "{:#?}",
+                invoice_is_not_editable
+            ))),
             UpdateOutboundShipmentServiceLineError::ItemNotFound => {
                 OutError::ForeignKeyError(ForeignKeyError(ForeignKey::ItemId))
             }

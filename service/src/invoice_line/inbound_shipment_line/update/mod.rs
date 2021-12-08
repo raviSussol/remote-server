@@ -1,4 +1,4 @@
-use crate::WithDBError;
+use crate::{invoice::InvoiceIsNotEditable, WithDBError};
 use domain::inbound_shipment::UpdateInboundShipmentLine;
 use repository::{
     InvoiceLineRowRepository, RepositoryError, StockLineRowRepository, StorageConnectionManager,
@@ -52,7 +52,7 @@ pub enum UpdateInboundShipmentLineError {
     InvoiceDoesNotExist,
     NotAnInboundShipment,
     NotThisStoreInvoice,
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     LocationDoesNotExist,
     ItemNotFound,
     PackSizeBelowOne,

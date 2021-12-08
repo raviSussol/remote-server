@@ -5,7 +5,7 @@ use crate::schema::{
             CannotChangeStatusOfInvoiceOnHold, InvoiceLineHasNoStockLineError,
             NotAnOutboundShipmentError,
         },
-        CannotReverseInvoiceStatus, ForeignKey, ForeignKeyError,
+        CannotReverseInvoiceStatus, ForeignKey, ForeignKeyError, CannotEditInvoice,
     },
     types::{
         get_invoice_response, ErrorWrapper, InvoiceNode, InvoiceResponse, NameNode, NodeError,
@@ -17,8 +17,8 @@ use repository::StorageConnectionManager;
 use service::invoice::{update_outbound_shipment, UpdateOutboundShipmentError};
 
 use super::{
-    CanOnlyEditInvoicesInLoggedInStoreError, InvoiceIsNotEditable,
-    OtherPartyCannotBeThisStoreError, OtherPartyNotACustomerError,
+    CanOnlyEditInvoicesInLoggedInStoreError, OtherPartyCannotBeThisStoreError,
+    OtherPartyNotACustomerError,
 };
 
 use async_graphql::*;
@@ -99,7 +99,7 @@ pub enum UpdateOutboundShipmentErrorInterface {
     CannotReverseInvoiceStatus(CannotReverseInvoiceStatus),
     CannotChangeStatusOfInvoiceOnHold(CannotChangeStatusOfInvoiceOnHold),
     CanOnlyEditInvoicesInLoggedInStore(CanOnlyEditInvoicesInLoggedInStoreError),
-    InvoiceIsNotEditable(InvoiceIsNotEditable),
+    CannotEditInvoice(CannotEditInvoice),
     InvoiceDoesNotExists(RecordNotFound),
     OtherPartyCannotBeThisStore(OtherPartyCannotBeThisStoreError),
     /// Other party does not exist
@@ -123,8 +123,11 @@ impl From<UpdateOutboundShipmentError> for UpdateOutboundShipmentResponse {
             UpdateOutboundShipmentError::InvoiceDoesNotExists => {
                 OutError::InvoiceDoesNotExists(RecordNotFound {})
             }
-            UpdateOutboundShipmentError::InvoiceIsNotEditable => {
-                OutError::InvoiceIsNotEditable(InvoiceIsNotEditable {})
+            UpdateOutboundShipmentError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
             UpdateOutboundShipmentError::OtherPartyDoesNotExists => {
                 OutError::ForeignKeyError(ForeignKeyError(ForeignKey::OtherPartyId))

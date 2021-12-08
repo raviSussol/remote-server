@@ -5,7 +5,7 @@ pub mod validate;
 
 use validate::validate;
 
-use crate::WithDBError;
+use crate::{invoice::InvoiceIsNotEditable, WithDBError};
 
 pub fn delete_outbound_shipment(
     connection_manager: &StorageConnectionManager,
@@ -24,7 +24,7 @@ pub enum DeleteOutboundShipmentError {
     InvoiceDoesNotExist,
     DatabaseError(RepositoryError),
     NotThisStoreInvoice,
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     InvoiceLinesExists(Vec<InvoiceLine>),
     NotAnOutboundShipment,
 }

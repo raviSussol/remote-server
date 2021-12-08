@@ -67,8 +67,11 @@ impl From<DeleteInboundShipmentError> for DeleteInboundShipmentResponse {
             DeleteInboundShipmentError::NotThisStoreInvoice => {
                 OutError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})
             }
-            DeleteInboundShipmentError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
+            DeleteInboundShipmentError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
             DeleteInboundShipmentError::InvoiceLinesExists(lines) => {
                 OutError::CannotDeleteInvoiceWithLines(CannotDeleteInvoiceWithLines(lines.into()))

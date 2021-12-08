@@ -80,8 +80,8 @@ impl From<WrongInvoiceType> for InsertInboundShipmentLineError {
 }
 
 impl From<InvoiceIsNotEditable> for InsertInboundShipmentLineError {
-    fn from(_: InvoiceIsNotEditable) -> Self {
-        InsertInboundShipmentLineError::CannotEditFinalised
+    fn from(error: InvoiceIsNotEditable) -> Self {
+        InsertInboundShipmentLineError::InvoiceIsNotEditable(error)
     }
 }
 

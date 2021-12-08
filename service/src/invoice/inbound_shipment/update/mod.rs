@@ -1,4 +1,4 @@
-use crate::WithDBError;
+use crate::{invoice::InvoiceIsNotEditable, WithDBError};
 use domain::{inbound_shipment::UpdateInboundShipment, name::Name};
 use repository::{
     InvoiceLineRowRepository, InvoiceRepository, RepositoryError, StockLineRowRepository,
@@ -56,7 +56,7 @@ pub enum UpdateInboundShipmentError {
     NotAnInboundShipment,
     NotThisStoreInvoice,
     CannotReverseInvoiceStatus,
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     CannotChangeStatusOfInvoiceOnHold,
 }
 

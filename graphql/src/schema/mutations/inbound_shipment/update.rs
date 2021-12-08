@@ -128,8 +128,11 @@ impl From<UpdateInboundShipmentError> for UpdateInboundShipmentResponse {
             UpdateInboundShipmentError::CannotReverseInvoiceStatus => {
                 OutError::CannotReverseInvoiceStatus(CannotReverseInvoiceStatus {})
             }
-            UpdateInboundShipmentError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
+            UpdateInboundShipmentError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
             UpdateInboundShipmentError::CannotChangeStatusOfInvoiceOnHold => {
                 OutError::CannotChangeStatusOfInvoiceOnHold(CannotChangeStatusOfInvoiceOnHold {})

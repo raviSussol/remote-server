@@ -306,11 +306,15 @@ impl RecordBelongsToAnotherStore {
     }
 }
 
-pub struct CannotEditInvoice;
+pub struct CannotEditInvoice(String);
 #[Object]
 impl CannotEditInvoice {
     pub async fn description(&self) -> &'static str {
         "Cannot edit invoice"
+    }
+
+    pub async fn extra(&self) -> &str {
+        &self.0
     }
 }
 

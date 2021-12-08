@@ -19,15 +19,6 @@ impl CanOnlyEditInvoicesInLoggedInStoreError {
     }
 }
 
-pub struct InvoiceIsNotEditable;
-
-#[Object]
-impl InvoiceIsNotEditable {
-    pub async fn description(&self) -> &'static str {
-        "Once finalised, an invoice cannot be edited."
-    }
-}
-
 pub struct InvoiceDoesNotBelongToCurrentStoreError(pub String);
 
 #[Object]

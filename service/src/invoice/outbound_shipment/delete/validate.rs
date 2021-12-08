@@ -29,8 +29,8 @@ impl From<WrongInvoiceType> for DeleteOutboundShipmentError {
 }
 
 impl From<InvoiceIsNotEditable> for DeleteOutboundShipmentError {
-    fn from(_: InvoiceIsNotEditable) -> Self {
-        DeleteOutboundShipmentError::CannotEditFinalised
+    fn from(error: InvoiceIsNotEditable) -> Self {
+        DeleteOutboundShipmentError::InvoiceIsNotEditable(error)
     }
 }
 

@@ -45,8 +45,11 @@ impl From<DeleteOutboundShipmentError> for DeleteOutboundShipmentResponse {
             DeleteOutboundShipmentError::InvoiceDoesNotExist => {
                 OutError::RecordNotFound(RecordNotFound {})
             }
-            DeleteOutboundShipmentError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
+            DeleteOutboundShipmentError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
             DeleteOutboundShipmentError::NotThisStoreInvoice => {
                 OutError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})

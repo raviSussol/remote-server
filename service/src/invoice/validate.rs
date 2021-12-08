@@ -22,34 +22,39 @@ pub fn check_invoice_type(
     }
 }
 
-pub struct InvoiceIsNotEditable;
+#[derive(Debug)]
+pub enum InvoiceIsNotEditable {
+    InboundShippmentAllocated,
+    InboundShippmentPicked,
+    InboundShippmentVerified,
+    OutboundShippmentShipped,
+    OutboundShippmentDelivered,
+    OutboundShippmentVerified,
+}
 
 pub fn check_invoice_is_editable(invoice: &InvoiceRow) -> Result<(), InvoiceIsNotEditable> {
+    use InvoiceIsNotEditable::*;
     let status = InvoiceStatus::from(invoice.status.clone());
-    let is_editable = match &invoice.r#type {
-        InvoiceRowType::OutboundShipment => match status {
-            InvoiceStatus::New => true,
-            InvoiceStatus::Allocated => true,
-            InvoiceStatus::Picked => true,
-            InvoiceStatus::Shipped => false,
-            InvoiceStatus::Delivered => false,
-            InvoiceStatus::Verified => false,
+    match &invoice.r#type {
+        InvoiceRowType::OutboundShipment => match &status {
+            InvoiceStatus::New => {}
+            InvoiceStatus::Allocated => {}
+            InvoiceStatus::Picked => {}
+            InvoiceStatus::Shipped => return Err(OutboundShippmentShipped),
+            InvoiceStatus::Delivered => return Err(OutboundShippmentDelivered),
+            InvoiceStatus::Verified => return Err(OutboundShippmentVerified),
         },
-        InvoiceRowType::InboundShipment => match status {
-            InvoiceStatus::New => true,
-            InvoiceStatus::Shipped => true,
-            InvoiceStatus::Delivered => true,
-            InvoiceStatus::Allocated => false,
-            InvoiceStatus::Picked => false,
-            InvoiceStatus::Verified => false,
+        InvoiceRowType::InboundShipment => match &status {
+            InvoiceStatus::New => {}
+            InvoiceStatus::Shipped => {}
+            InvoiceStatus::Delivered => {}
+            InvoiceStatus::Allocated => return Err(InboundShippmentAllocated),
+            InvoiceStatus::Picked => return Err(InboundShippmentPicked),
+            InvoiceStatus::Verified => return Err(InboundShippmentVerified),
         },
     };
 
-    if is_editable {
-        Ok(())
-    } else {
-        Err(InvoiceIsNotEditable {})
-    }
+    Ok(())
 }
 pub enum InvoiceStatusError {
     CannotChangeStatusOfInvoiceOnHold,

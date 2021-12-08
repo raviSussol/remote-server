@@ -1,4 +1,4 @@
-use crate::WithDBError;
+use crate::{WithDBError, invoice::InvoiceIsNotEditable};
 use domain::inbound_shipment::DeleteInboundShipmentLine;
 use repository::{
     InvoiceLineRowRepository, RepositoryError, StockLineRowRepository, StorageConnectionManager,
@@ -43,7 +43,7 @@ pub enum DeleteInboundShipmentLineError {
     InvoiceDoesNotExist,
     NotAnInboundShipment,
     NotThisStoreInvoice,
-    CannotEditFinalised,
+    InvoiceIsNotEditable(InvoiceIsNotEditable),
     BatchIsReserved,
     NotThisInvoiceLine(String),
 }

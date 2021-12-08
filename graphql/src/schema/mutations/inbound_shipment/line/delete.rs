@@ -76,10 +76,12 @@ impl From<DeleteInboundShipmentLineError> for DeleteInboundShipmentLineResponse 
             DeleteInboundShipmentLineError::NotThisStoreInvoice => {
                 OutError::InvoiceDoesNotBelongToCurrentStore(InvoiceDoesNotBelongToCurrentStore {})
             }
-            DeleteInboundShipmentLineError::CannotEditFinalised => {
-                OutError::CannotEditInvoice(CannotEditInvoice {})
+            DeleteInboundShipmentLineError::InvoiceIsNotEditable(invoice_is_not_editable) => {
+                OutError::CannotEditInvoice(CannotEditInvoice(format!(
+                    "{:#?}",
+                    invoice_is_not_editable
+                )))
             }
-
             DeleteInboundShipmentLineError::BatchIsReserved => {
                 OutError::BatchIsReserved(BatchIsReserved {})
             }
