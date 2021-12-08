@@ -1,9 +1,10 @@
 use async_graphql::ErrorExtensions;
 use repository::RepositoryError;
+use std::fmt::Debug;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum ServerError {
+pub enum StandardError {
     #[error("Internal error")]
     InternalError(String),
 
@@ -17,23 +18,23 @@ pub enum ServerError {
     Forbidden(String),
 }
 
-impl ErrorExtensions for ServerError {
+impl ErrorExtensions for StandardError {
     // lets define our base extensions
     fn extend(self) -> async_graphql::Error {
         async_graphql::Error::new(format!("{}", self)).extend_with(|_, e| {
             e.set("code", format!("{:?}", self));
             match self {
-                ServerError::InternalError(details) => e.set("details", details),
-                ServerError::BadUserInput(details) => e.set("details", details),
-                ServerError::Unauthenticated(details) => e.set("details", details),
-                ServerError::Forbidden(details) => e.set("details", details),
+                StandardError::InternalError(details) => e.set("details", details),
+                StandardError::BadUserInput(details) => e.set("details", details),
+                StandardError::Unauthenticated(details) => e.set("details", details),
+                StandardError::Forbidden(details) => e.set("details", details),
             }
         })
     }
 }
 
-impl From<RepositoryError> for ServerError {
+impl From<RepositoryError> for StandardError {
     fn from(err: RepositoryError) -> Self {
-        ServerError::InternalError(format!("{:?}", err))
+        StandardError::InternalError(format!("{:?}", err))
     }
 }

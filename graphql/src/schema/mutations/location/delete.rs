@@ -6,6 +6,7 @@ use service::location::delete::{
 };
 
 use crate::{
+    errors::StandardError,
     schema::{
         mutations::{error::DatabaseError, DeleteResponse, RecordBelongsToAnotherStore},
         types::{Connector, InvoiceLineNode, RecordNotFound, StockLineNode},
@@ -13,20 +14,45 @@ use crate::{
     ContextExt,
 };
 
-pub fn delete_location(ctx: &Context<'_>, input: DeleteLocationInput) -> DeleteLocationResponse {
+pub fn delete_location(
+    ctx: &Context<'_>,
+    input: DeleteLocationInput,
+) -> Result<DeleteLocationResponse, StandardError> {
+    use DeleteLocationResponse::*;
     let service_provider = ctx.service_provider();
-    let service_context = match service_provider.context() {
-        Ok(service) => service,
-        Err(error) => return DeleteLocationResponse::Error(error.into()),
-    };
+    let service_context = service_provider.context()?;
 
-    match service_provider
+    let result = match service_provider
         .location_service
         .delete_location(&service_context, input.into())
     {
-        Ok(location_id) => DeleteLocationResponse::Response(DeleteResponse(location_id)),
-        Err(error) => DeleteLocationResponse::Error(error.into()),
-    }
+        Ok(location_id) => Response(DeleteResponse(location_id)),
+        Err(error) => DeleteLocationResponse::StructuredError(DeleteLocationError {
+            error: map_error(error)?,
+        }),
+    };
+
+    Ok(result)
+}
+
+pub fn map_error(error: InError) -> Result<DeleteLocationErrorInterface, StandardError> {
+    use DeleteLocationErrorInterface as OutError;
+    let standard_error = format!("{:#?}", error);
+    let standard_error = match error {
+        InError::LocationInUse(ServiceLocationInUse {
+            stock_lines,
+            invoice_lines,
+        }) => {
+            return Ok(OutError::LocationInUse(LocationInUse {
+                stock_lines: stock_lines.into(),
+                invoice_lines: invoice_lines.into(),
+            }))
+        }
+        InError::LocationDoesNotExist => StandardError::BadUserInput(standard_error),
+        InError::LocationDoesNotBelongToCurrentStore => StandardError::Forbidden(standard_error),
+        InError::DatabaseError(_) => StandardError::InternalError(standard_error),
+    };
+    Err(standard_error)
 }
 
 #[derive(InputObject)]
@@ -47,7 +73,7 @@ pub struct DeleteLocationError {
 
 #[derive(Union)]
 pub enum DeleteLocationResponse {
-    Error(DeleteLocationError),
+    StructuredError(DeleteLocationError),
     Response(DeleteResponse),
 }
 
@@ -83,27 +109,6 @@ impl LocationInUse {
 impl From<RepositoryError> for DeleteLocationError {
     fn from(error: RepositoryError) -> Self {
         let error = DeleteLocationErrorInterface::DatabaseError(DatabaseError(error));
-        DeleteLocationError { error }
-    }
-}
-
-impl From<InError> for DeleteLocationError {
-    fn from(error: InError) -> Self {
-        use DeleteLocationErrorInterface as OutError;
-        let error = match error {
-            InError::LocationDoesNotExist => OutError::LocationNotFound(RecordNotFound {}),
-            InError::LocationInUse(ServiceLocationInUse {
-                stock_lines,
-                invoice_lines,
-            }) => OutError::LocationInUse(LocationInUse {
-                stock_lines: stock_lines.into(),
-                invoice_lines: invoice_lines.into(),
-            }),
-            InError::LocationDoesNotBelongToCurrentStore => {
-                OutError::RecordBelongsToAnotherStore(RecordBelongsToAnotherStore {})
-            }
-            InError::DatabaseError(error) => OutError::DatabaseError(DatabaseError(error)),
-        };
         DeleteLocationError { error }
     }
 }

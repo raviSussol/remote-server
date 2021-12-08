@@ -4,7 +4,7 @@ use service::dashboard::invoice_count::{
     InvoiceCountError, InvoiceCountService, InvoiceCountServiceTrait,
 };
 
-use crate::errors::ServerError;
+use crate::errors::StandardError;
 use crate::schema::types::invoice_query::InvoiceNodeType;
 use crate::ContextExt;
 
@@ -28,7 +28,7 @@ pub fn invoice_counts(
     ctx: &Context<'_>,
     invoice_type: InvoiceNodeType,
     timezone_offset: Option<i32>,
-) -> Result<InvoiceCountsResponse, ServerError> {
+) -> Result<InvoiceCountsResponse, StandardError> {
     let service_provider = ctx.service_provider();
     let service_ctx = service_provider.context()?;
     let service = InvoiceCountService {};
@@ -43,7 +43,7 @@ pub fn invoice_counts(
         Err(err) => match err {
             InvoiceCountError::RepositoryError(err) => return Err(err.into()),
             InvoiceCountError::BadTimezoneOffset => {
-                return Err(ServerError::BadUserInput(
+                return Err(StandardError::BadUserInput(
                     "Invalid timezone offset".to_string(),
                 ));
             }

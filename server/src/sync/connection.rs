@@ -27,7 +27,7 @@ pub enum SyncConnectionError {
     #[error("Sync server responded with status 405 Method Not Allowed")]
     MethodNotAllowedError { source: reqwest::Error },
     #[error("Sync server responded with status 500 Internal Server Error")]
-    InternalServerError { source: reqwest::Error },
+    InternalStandardError { source: reqwest::Error },
     #[error("Unknown sync connection error")]
     UnknownError { source: reqwest::Error },
 }
@@ -54,7 +54,7 @@ impl From<reqwest::Error> for SyncConnectionError {
                     SyncConnectionError::MethodNotAllowedError { source: error }
                 }
                 reqwest::StatusCode::INTERNAL_SERVER_ERROR => {
-                    SyncConnectionError::InternalServerError { source: error }
+                    SyncConnectionError::InternalStandardError { source: error }
                 }
                 _ => SyncConnectionError::UnknownError { source: error },
             }

@@ -11,7 +11,7 @@ use self::location::{
 };
 
 use super::types::{get_invoice_response, Connector, InvoiceLineNode, InvoiceResponse};
-use crate::ContextExt;
+use crate::{errors::StandardError, ContextExt};
 use async_graphql::*;
 use inbound_shipment::*;
 use outbound_shipment::*;
@@ -49,7 +49,7 @@ impl Mutations {
         &self,
         ctx: &Context<'_>,
         input: DeleteLocationInput,
-    ) -> DeleteLocationResponse {
+    ) -> Result<DeleteLocationResponse, StandardError> {
         delete_location(ctx, input)
     }
 
