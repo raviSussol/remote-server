@@ -1,7 +1,7 @@
 server:
   port: 8000
 sync:
-  port: 2048
+  url: "http://localhost:2048"
   username: "username"
   password: "password"
   interval: 300
@@ -11,3 +11,5 @@ database:
   username: "postgres"
   password: "password"
   database_name: "omsupply-database"
+auth:
+  token_secret: "token-secret"

@@ -1,0 +1,28 @@
+[package]
+name = "service"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+domain = { path = "../domain" }
+repository = { path = "../repository" }
+util = { path = "../util" }
+anymap = "0.12"
+anyhow = "1.0.44"
+bcrypt = "0.10.1"
+chrono = { version = "0.4", features = ["serde"] }
+jsonwebtoken = "7.2.0"
+log = "0.4.14"
+serde = "1.0.126"
+serde_json = "1.0.66"
+
+[dev-dependencies]
+actix-rt = "1.1.1" # for Tokio 0.2
+
+[features]
+default = ["sqlite"]
+sqlite = ["repository/sqlite"]
+postgres = ["repository/postgres"]

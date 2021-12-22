@@ -36,10 +36,15 @@ Don't need to start sqlite, migration scripts should do that for you, but if you
 
 ```bash
 # postgres
-diesel migration run --database-url='postgres://postgres:password@localhost:5432/omsupply-database' --migration-dir ./migrations/postgres
+diesel migration run --database-url="postgres://[user]:[password]@[localhost]:[port]/[database]" --migration-dir ./repository/migrations/postgres
 
 # sqlite
-diesel migration run --database-url ./omsupply-database.sqlite --migration-dir ./migrations/sqlite/
+diesel migration run --database-url [database file] --migration-dir ./repository/migrations/sqlite
+
+# examples
+diesel migration run --database-url="postgres://postgres:password@localhost:5432/omsupply-database" --migration-dir ./repository/migrations/postgres
+
+diesel migration run --database-url ./omsupply-database.sqlite --migration-dir ./repository/migrations/sqlite
 ```
 
 ##### Configure
@@ -141,12 +146,14 @@ select * from list_master_name_join limit 1
 
 #### Other
 
-- The following graphql errors are not handled, yet
-  - `InvoiceDoesNotBelongToCurrentStore`
-  - `StockLineDoesNotBelongToCurrentStore`
-  - `InvoiceDoesNotBelongToCurrentStore`
-  - `OtherPartyCannotBeThisStoreError`
-  - `CannotChangeInvoiceBackToDraft`
-  - `CannotChangeStatusBackToDraftError` (oops those should be one)
-- Optional nullable inputs (on update mutations) (thierReference, comment, expiryDate and batch), wont' be set to null if null is provided
-- Can't set expiryDate to null. This also included if stock line is change on invoice line (to a stock line with null expiryDate, invoice line will still show previous stock line expiry date)
+* The following graphql errors are not handled, yet
+  * `InvoiceDoesNotBelongToCurrentStore`
+  * `StockLineDoesNotBelongToCurrentStore`
+  * `InvoiceDoesNotBelongToCurrentStore`
+  * `OtherPartyCannotBeThisStoreError`
+  * `CannotReverseInvoiceStatus` 
+  * `CannotReverseInvoiceStatus` (oops those should be one)
+* Optional nullable inputs (on update mutations) (thierReference, comment, expiryDate and batch), wont' be set to null if null is provided
+* Can't set expiryDate to null. This also included if stock line is change on invoice line (to a stock line with null expiryDate, invoice line will still show previous stock line expiry date)
+
+

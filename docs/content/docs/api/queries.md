@@ -40,7 +40,7 @@ query {
       invoiceNumber: Number!
       theirReference: String
       comment: String
-      entryDatetime: Datetime!
+      CreatedDatetime: Datetime!
       confirmDatetime: DateTime
       finalisedDatetime: DateTime
       pricing {
@@ -50,9 +50,9 @@ query {
   }
 }
 ```
-`destination` if type is `CUSTOMER_INVOICE`, linked name record represents destination of stock movement
+`destination` if type is `OUTBOUND_SHIPMENT`, linked name record represents destination of stock movement
 
-`source` if type is `SUPPLIER_INVOICE`, linked name record represents source of stock movement
+`source` if type is `INBOUND_SHIPMENT`, linked name record represents source of stock movement
 
 <details>
 <summary>IMPLEMENTATION DETAILS</summary>
@@ -101,7 +101,7 @@ query {
     invoiceNumber: Number!
     theirReference: String
     comment: String
-    entryDatetime: Datetime!
+    CreatedDatetime: Datetime!
     confirmDatetime: DateTime
     finalisedDatetime: DateTime
     lines {
@@ -129,9 +129,9 @@ query {
 
 _{TODO do we need stockLine here ? What happen in UI ? Is it a new window to edit quantity (and we show available nubmer of packs there) ?}_
 
-`destination` if type is `CUSTOMER_INVOICE`, linked name record represents destination of stock movement
+`destination` if type is `OUTBOUND_SHIPMENT`, linked name record represents destination of stock movement
 
-`source` if type is `SUPPLIER_INVOICE`, linked name record represents source of stock movement
+`source` if type is `INBOUND_SHIPMENT`, linked name record represents source of stock movement
 
 <details>
 <summary>IMPLEMENTATION DETAILS</summary>
