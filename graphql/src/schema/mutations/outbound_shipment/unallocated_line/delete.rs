@@ -11,34 +11,30 @@ use crate::{
 };
 
 #[derive(InputObject)]
-pub struct DeleteOutboundShipmentUnallocatedLineInput {
+#[graphql(name = "DeleteOutboundShipmentUnallocatedLineInput")]
+pub struct Input {
     pub id: String,
 }
 
-use DeleteOutboundShipmentUnallocatedLineInput as Input;
-
 #[derive(Interface)]
+#[graphql(name = "DeleteOutboundShipmentUnallocatedLineErrorInterface")]
 #[graphql(field(name = "description", type = "String"))]
-pub enum DeleteOutboundShipmentUnallocatedLineInterface {
+pub enum ErrorInterface {
     RecordDoesNotExist(RecordDoesNotExist),
 }
 
-use DeleteOutboundShipmentUnallocatedLineInterface as ErrorInterface;
-
 #[derive(SimpleObject)]
-pub struct DeleteOutboundShipmentUnallocatedLineError {
+#[graphql(name = "DeleteOutboundShipmentUnallocatedLineError")]
+pub struct Error {
     pub error: ErrorInterface,
 }
 
-use DeleteOutboundShipmentUnallocatedLineError as Error;
-
 #[derive(Union)]
-pub enum DeleteOutboundShipmentUnallocatedLineResponse {
+#[graphql(name = "DeleteOutboundShipmentUnallocatedLineResponse")]
+pub enum Response {
     Error(Error),
     Response(DeleteResponse),
 }
-
-use DeleteOutboundShipmentUnallocatedLineResponse as Response;
 
 impl From<Input> for ServiceInput {
     fn from(Input { id }: Input) -> Self {
@@ -46,10 +42,7 @@ impl From<Input> for ServiceInput {
     }
 }
 
-pub fn delete_outbound_shipment_unallocated_line(
-    ctx: &Context<'_>,
-    input: Input,
-) -> Result<Response> {
+pub fn op(ctx: &Context<'_>, input: Input) -> Result<Response> {
     let service_provider = ctx.service_provider();
     let service_context = service_provider.context()?;
 
