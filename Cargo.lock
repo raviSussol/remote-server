@@ -1329,6 +1329,7 @@ name = "domain"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "serde_json",
 ]
 
 [[package]]
@@ -3271,6 +3272,7 @@ dependencies = [
  "actix-rt",
  "anyhow",
  "anymap",
+ "assert-json-diff",
  "bcrypt",
  "chrono",
  "domain",
@@ -3954,6 +3956,8 @@ name = "util"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "serde 1.0.130",
+ "serde_json",
  "sha2",
  "uuid",
 ]

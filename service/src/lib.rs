@@ -4,6 +4,7 @@ use std::convert::TryInto;
 
 pub mod auth_data;
 pub mod dashboard;
+pub mod document;
 pub mod invoice;
 pub mod invoice_line;
 pub mod item;
@@ -15,9 +16,9 @@ pub mod permission_validation;
 pub mod permissions;
 pub mod service_provider;
 pub mod stock_line;
-pub mod store;
 pub mod stock_take;
 pub mod stock_take_line;
+pub mod store;
 pub mod token;
 pub mod token_bucket;
 pub mod user_account;

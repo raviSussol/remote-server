@@ -1,3 +1,4 @@
+pub mod document;
 pub mod inbound_shipment;
 pub mod invoice;
 pub mod invoice_line;
