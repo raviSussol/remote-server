@@ -260,6 +260,27 @@ table! {
     }
 }
 
+table! {
+    document (id) {
+        id -> Text,
+        name -> Text,
+        parents -> Text,
+        author -> Text,
+        timestamp -> Timestamp,
+        #[sql_name = "type"] type_ -> Text,
+        data -> Text,
+    }
+}
+
+table! {
+    document_head (id) {
+        id -> Text,
+        store -> Text,
+        name -> Text,
+        head -> Text,
+    }
+}
+
 joinable!(item -> unit (unit_id));
 joinable!(stock_line -> item (item_id));
 joinable!(stock_line -> store (store_id));

@@ -4,6 +4,7 @@ use std::convert::TryInto;
 
 pub mod auth_data;
 pub mod dashboard;
+pub mod document;
 pub mod invoice;
 pub mod invoice_line;
 pub mod item;
