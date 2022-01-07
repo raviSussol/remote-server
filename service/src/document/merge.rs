@@ -1,7 +1,9 @@
+use std::collections::HashSet;
+
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 
-type MergeObject = serde_json::Map<String, serde_json::Value>;
+pub type MergeObject = serde_json::Map<String, serde_json::Value>;
 
 pub trait ConflictSolver {
     fn solve(&self, our: &Value, their: &Value, base: Option<&Value>) -> Value;
@@ -37,27 +39,24 @@ impl ConflictSolver for TakeLatestConflictSolver {
 }
 
 pub fn two_way_merge(ours: &Value, theirs: &Value, strategy: &dyn ConflictSolver) -> Value {
-    match (ours, theirs) {
-        (Value::Object(o), Value::Object(t)) => {
-            return two_way_merge_object(o, t, strategy);
-        }
-        (o, t) => {
-            let merge = two_way_merge_value(Some(o), Some(t), strategy);
-            merge.unwrap_or(Value::Null)
-        }
-    }
+    let merge = two_way_merge_value(Some(ours), Some(theirs), strategy);
+    merge.unwrap_or(Value::Null)
 }
 
-fn two_way_merge_object(
+pub fn two_way_merge_object(
     ours: &MergeObject,
     theirs: &MergeObject,
     strategy: &dyn ConflictSolver,
-) -> Value {
+) -> MergeObject {
     let all_keys: Vec<String> = ours
         .keys()
         .into_iter()
         .chain(theirs.keys().into_iter())
-        .map(|it| it.to_owned())
+        .fold(HashSet::<String>::new(), |mut set, value| {
+            set.insert(value.to_owned());
+            set
+        })
+        .into_iter()
         .collect();
 
     let mut result = MergeObject::new();
@@ -65,8 +64,7 @@ fn two_way_merge_object(
         let merged = two_way_merge_value(ours.get(&key), theirs.get(&key), strategy);
         merged.map(|v| result.insert(key, v));
     }
-
-    Value::Object(result)
+    result
 }
 
 fn two_way_merge_value(
@@ -76,7 +74,9 @@ fn two_way_merge_value(
 ) -> Option<Value> {
     match (ours, theirs) {
         (Some(our), Some(their)) => match (our, their) {
-            (Value::Object(o), Value::Object(t)) => Some(two_way_merge_object(o, t, strategy)),
+            (Value::Object(o), Value::Object(t)) => {
+                Some(Value::Object(two_way_merge_object(o, t, strategy)))
+            }
             _ => Some(strategy.solve(our, their, None)),
         },
         (Some(our), None) => Some(our.clone()),
@@ -92,28 +92,26 @@ pub fn three_way_merge(
     base: &Value,
     strategy: &dyn ConflictSolver,
 ) -> Value {
-    match (ours, theirs, base) {
-        (Value::Object(o), Value::Object(t), Value::Object(b)) => {
-            return three_way_merge_object(o, t, b, strategy);
-        }
-        (o, t, b) => {
-            let merge = three_way_merge_value(Some(o), Some(t), Some(b), strategy);
-            merge.unwrap_or(Value::Null)
-        }
-    }
+    let merge = three_way_merge_value(Some(ours), Some(theirs), Some(base), strategy);
+    merge.unwrap_or(Value::Null)
 }
 
-fn three_way_merge_object(
+pub fn three_way_merge_object(
     ours: &MergeObject,
     theirs: &MergeObject,
     base: &MergeObject,
     strategy: &dyn ConflictSolver,
-) -> Value {
+) -> MergeObject {
     let all_keys: Vec<String> = ours
         .keys()
         .into_iter()
         .chain(theirs.keys().into_iter())
-        .map(|it| it.to_owned())
+        .chain(base.keys().into_iter())
+        .fold(HashSet::<String>::new(), |mut set, value| {
+            set.insert(value.to_owned());
+            set
+        })
+        .into_iter()
         .collect();
 
     let mut result = MergeObject::new();
@@ -122,8 +120,7 @@ fn three_way_merge_object(
             three_way_merge_value(ours.get(&key), theirs.get(&key), base.get(&key), strategy);
         merged.map(|v| result.insert(key, v));
     }
-
-    Value::Object(result)
+    result
 }
 
 fn three_way_merge_value(
@@ -135,7 +132,7 @@ fn three_way_merge_value(
     match (ours, theirs, base) {
         (Some(our), Some(their), Some(base)) => match (our, their, base) {
             (Value::Object(o), Value::Object(t), Value::Object(b)) => {
-                Some(three_way_merge_object(o, t, b, strategy))
+                Some(Value::Object(three_way_merge_object(o, t, b, strategy)))
             }
             _ => {
                 if our == their {
@@ -193,13 +190,16 @@ mod two_way_merge_test {
           "value1": "string2",
           "value2": true,
           "value4": 50,
-          "value5": 5
+          "value5": 5,
+          "array1": ["test"],
+          "array2": [1, 2]
         });
         let ours = json!({
           "value1": "string",
           "value2": false,
           "value3": 30,
-          "value4": 50
+          "value4": 50,
+          "array2": [1, 2, 3]
         });
         let result = two_way_merge(&ours, &theirs, &TakeOurConflictSolver {});
         assert_json_eq!(
@@ -209,7 +209,9 @@ mod two_way_merge_test {
               "value2": false,
               "value3": 30,
               "value4": 50,
-              "value5": 5
+              "value5": 5,
+              "array1": ["test"],
+              "array2": [1, 2, 3]
             })
         );
     }
@@ -270,18 +272,22 @@ mod three_way_merge_test {
           "value1": "string",
           "value2": true,
           "value3": 30,
-          "value4": 50
+          "value4": 50,
+          "array1": [1, "base"],
         });
         let theirs = json!({
           "value1": "string2",
           "value2": true,
-          "value4": 50
+          "value4": 50,
+          "array1": [1, "base"],
+          "array2": [2, 3],
         });
         let ours = json!({
           "value1": "string",
           "value2": false,
           "value3": 30,
-          "value4": 50
+          "value4": 50,
+          "array1": [1, "ours"],
         });
         let result = three_way_merge(&ours, &theirs, &base, &TakeOurConflictSolver {});
         assert_json_eq!(
@@ -289,7 +295,9 @@ mod three_way_merge_test {
             json!({
               "value1": "string2",
               "value2": false,
-              "value4": 50
+              "value4": 50,
+              "array1": [1, "ours"],
+              "array2": [2, 3],
             })
         );
     }
@@ -301,18 +309,23 @@ mod three_way_merge_test {
           "value1": "string",
           "value2": true,
           "value3": 30,
-          "value4": 50
+          "value4": 50,
+          "array1": [1, "test"],
         });
         let theirs = json!({
           "value1": "string2",
           "value2": false,
-          "value4": 51
+          "value4": 51,
+          "array1": [1, 2],
+          "array2": [{ "t": "theirs"}],
         });
         let ours = json!({
           "value1": "string3",
           "value2": false,
           "value3": 30,
-          "value4": 52
+          "value4": 52,
+          "array1": ["test", "test"],
+          "array2": [{ "t": "ours"}],
         });
         let result = three_way_merge(&ours, &theirs, &base, &TakeOurConflictSolver {});
         assert_json_eq!(
@@ -320,7 +333,9 @@ mod three_way_merge_test {
             json!({
               "value1": "string3",
               "value2": false,
-              "value4": 52
+              "value4": 52,
+              "array1": ["test", "test"],
+              "array2": [{ "t": "ours"}],
             })
         );
     }
