@@ -1,5 +1,7 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 
+use crate::json_schema::JSONSchema;
+
 #[derive(Debug)]
 pub struct Document {
     /// The document data hash
@@ -16,6 +18,7 @@ pub struct Document {
     pub type_: String,
     /// The actual document data
     pub data: serde_json::Value,
+    pub schema: Option<JSONSchema>,
 }
 
 #[derive(Clone)]

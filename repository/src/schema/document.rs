@@ -19,4 +19,6 @@ pub struct DocumentRow {
     pub type_: String,
     /// The actual document data
     pub data: String,
+    /// JSON schema id containing the schema for the data
+    pub schema_id: Option<String>,
 }

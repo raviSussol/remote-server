@@ -2,19 +2,23 @@ use super::StorageConnection;
 
 use crate::schema::diesel_schema::{
     document::dsl as document_dsl, document_head::dsl as document_head_dsl,
+    json_schema::dsl as json_schema_dsl,
 };
-use crate::schema::{DocumentHeadRow, DocumentRow};
+use crate::schema::{DocumentHeadRow, DocumentRow, JSONSchemaRow};
 use crate::RepositoryError;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use domain::document::{AncestorDetail, Document};
+use domain::json_schema::JSONSchema;
+
+pub type DocumentJoin = (DocumentRow, Option<JSONSchemaRow>);
 
 pub struct DocumentRepository<'a> {
     connection: &'a StorageConnection,
 }
 
-fn document_from_row(row: DocumentRow) -> Result<Document, RepositoryError> {
+fn document_from_row((row, schema_row): DocumentJoin) -> Result<Document, RepositoryError> {
     let parents: Vec<String> =
         serde_json::from_str(&row.parents).map_err(|err| RepositoryError::DBError {
             msg: "Invalid parents data".to_string(),
@@ -25,6 +29,19 @@ fn document_from_row(row: DocumentRow) -> Result<Document, RepositoryError> {
             msg: "Invalid data".to_string(),
             extra: format!("{}", err),
         })?;
+    let schema = if let Some(schema_row) = schema_row {
+        let parsed_schema: serde_json::Value =
+            serde_json::from_str(&schema_row.schema).map_err(|err| RepositoryError::DBError {
+                msg: "Invalid schema data".to_string(),
+                extra: format!("{}", err),
+            })?;
+        Some(JSONSchema {
+            id: schema_row.id,
+            schema: parsed_schema,
+        })
+    } else {
+        None
+    };
     Ok(Document {
         id: row.id,
         name: row.name,
@@ -33,6 +50,7 @@ fn document_from_row(row: DocumentRow) -> Result<Document, RepositoryError> {
         timestamp: DateTime::<Utc>::from_utc(row.timestamp, Utc),
         type_: row.type_,
         data,
+        schema,
     })
 }
 
@@ -53,6 +71,7 @@ fn row_from_document(doc: &Document) -> Result<DocumentRow, RepositoryError> {
         timestamp: doc.timestamp.naive_utc(),
         type_: doc.type_.to_owned(),
         data,
+        schema_id: doc.schema.as_ref().map(|schema| schema.id.clone()),
     })
 }
 
@@ -106,7 +125,8 @@ impl<'a> DocumentRepository<'a> {
 
     /// Get a specific document version
     pub fn find_one_by_id(&self, document_id: &str) -> Result<Document, RepositoryError> {
-        let row: DocumentRow = document_dsl::document
+        let row = document_dsl::document
+            .left_join(json_schema_dsl::json_schema)
             .filter(document_dsl::id.eq(document_id))
             .first(&self.connection.connection)?;
 
@@ -125,7 +145,8 @@ impl<'a> DocumentRepository<'a> {
 
     /// Gets all document versions
     pub fn find_many_by_name(&self, document_name: &str) -> Result<Vec<Document>, RepositoryError> {
-        let rows: Vec<DocumentRow> = document_dsl::document
+        let rows: Vec<DocumentJoin> = document_dsl::document
+            .left_join(json_schema_dsl::json_schema)
             .filter(document_dsl::name.eq(document_name))
             .load(&self.connection.connection)?;
         let mut result = Vec::<Document>::new();

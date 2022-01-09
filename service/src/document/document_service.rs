@@ -43,12 +43,15 @@ fn two_way_document_merge(our: RawDocument, their: Document) -> RawDocument {
     new_parents.push(their.id);
 
     RawDocument {
-        name: our.name,
         parents: new_parents,
-        author: our.author,
         timestamp: Utc::now(),
-        type_: our.type_,
         data: merged,
+
+        // keep exiting
+        name: our.name,
+        type_: our.type_,
+        author: our.author,
+        schema: our.schema,
     }
 }
 
@@ -64,12 +67,14 @@ fn three_way_document_merge(our: RawDocument, their: Document, base: Document) -
     new_parents.push(their.id);
 
     RawDocument {
-        name: our.name,
         parents: new_parents,
-        author: our.author,
         timestamp: Utc::now(),
-        type_: our.type_,
         data: merged,
+
+        name: our.name,
+        author: our.author,
+        type_: our.type_,
+        schema: our.schema,
     }
 }
 
@@ -199,6 +204,7 @@ mod document_service_test {
             timestamp: DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(5000, 0), Utc),
             type_: "test_data".to_string(),
             data: json!({}),
+            schema: None,
         };
 
         let mut base_doc = template.clone();

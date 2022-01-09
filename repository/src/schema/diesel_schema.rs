@@ -269,6 +269,7 @@ table! {
         timestamp -> Timestamp,
         #[sql_name = "type"] type_ -> Text,
         data -> Text,
+        schema_id -> Nullable<Text>,
     }
 }
 
@@ -315,6 +316,7 @@ joinable!(location -> store (store_id));
 joinable!(stock_take_line -> location (location_id));
 joinable!(stock_take_line -> stock_take (stock_take_id));
 joinable!(stock_take_line -> stock_line (stock_line_id));
+joinable!(document -> json_schema (schema_id));
 
 allow_tables_to_appear_in_same_query!(
     unit,
@@ -338,4 +340,6 @@ allow_tables_to_appear_in_same_query!(
     item_is_visible,
     stock_take,
     stock_take_line,
+    document,
+    json_schema,
 );
