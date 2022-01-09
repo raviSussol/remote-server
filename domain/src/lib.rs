@@ -3,6 +3,7 @@ pub mod inbound_shipment;
 pub mod invoice;
 pub mod invoice_line;
 pub mod item;
+pub mod json_schema;
 pub mod location;
 pub mod master_list;
 pub mod master_list_line;

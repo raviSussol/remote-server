@@ -281,6 +281,13 @@ table! {
     }
 }
 
+table! {
+    json_schema (id) {
+        id -> Text,
+        schema -> Text,
+    }
+}
+
 joinable!(item -> unit (unit_id));
 joinable!(stock_line -> item (item_id));
 joinable!(stock_line -> store (store_id));
