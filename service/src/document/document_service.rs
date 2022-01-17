@@ -83,7 +83,7 @@ impl<'a> DocumentService<'a> {
         DocumentService { connection }
     }
 
-    pub fn get_document(&self, name: &str, store: &str) -> Result<Document, RepositoryError> {
+    pub fn get_document(&self, store: &str, name: &str) -> Result<Document, RepositoryError> {
         DocumentRepository::new(self.connection).find_one_by_name(name, store)
     }
 
@@ -215,7 +215,7 @@ mod document_service_test {
         });
         let v0 = service.insert_document(store, base_doc).unwrap();
         // assert document is there:
-        let result = service.get_document(&template.name, store).unwrap();
+        let result = service.get_document(store, &template.name).unwrap();
         assert_eq!(result.id, v0.id);
 
         // concurrent edits form "their" and "our"
@@ -232,7 +232,7 @@ mod document_service_test {
           "conflict": "their change"
         });
         let v1 = service.insert_document(store, their_doc).unwrap();
-        let result = service.get_document(&template.name, store).unwrap();
+        let result = service.get_document(store, &template.name).unwrap();
         assert_eq!(result.id, v1.id);
 
         let mut our_doc = template.clone();
@@ -255,7 +255,7 @@ mod document_service_test {
         };
         // try to insert the auto merge
         service.insert_document(store, auto_merge).unwrap();
-        let result = service.get_document(&template.name, store).unwrap();
+        let result = service.get_document(store, &template.name).unwrap();
         assert_json_eq!(
             result.data,
             json!({
@@ -282,7 +282,7 @@ mod document_service_test {
           "conflict": "our change wins because we are more recent"
         });
         let v4 = service.insert_document(store, next_doc).unwrap();
-        let result = service.get_document(&template.name, store).unwrap();
+        let result = service.get_document(store, &template.name).unwrap();
         assert_eq!(result.id, v4.id);
         assert_json_eq!(
             result.data,
