@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use domain::{document::Document, json_schema::JSONSchema};
+use domain::document::Document;
 use serde::{Deserialize, Serialize};
 use util::{canonical_json::CanonicalJsonValue, hash::sha256};
 
@@ -14,7 +14,7 @@ pub struct RawDocument {
     pub type_: String,
     pub data: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub schema: Option<JSONSchema>,
+    pub schema_id: Option<String>,
 }
 
 impl RawDocument {
@@ -36,7 +36,7 @@ impl RawDocument {
             timestamp,
             type_,
             data,
-            schema,
+            schema_id,
         } = self;
         Ok(Document {
             id,
@@ -46,7 +46,7 @@ impl RawDocument {
             timestamp,
             type_,
             data,
-            schema,
+            schema_id,
         })
     }
 }
@@ -70,7 +70,7 @@ mod document_id_test {
               "b": 0.3453333,
               "a": "avalue",
             }),
-            schema: None,
+            schema_id: None,
         };
         let document = raw.finalise().unwrap();
         let expected_json_string = r#"{"author":"author","data":{"a":"avalue","b":0.3453333},"name":"name","parents":["p1"],"timestamp":"1970-01-01T00:00:01Z","type":"test"}"#;

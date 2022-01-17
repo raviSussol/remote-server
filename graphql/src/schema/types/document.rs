@@ -1,26 +1,11 @@
 use async_graphql::*;
+use async_graphql::{dataloader::DataLoader, Context};
 use chrono::{DateTime, Utc};
-use domain::{document::Document, json_schema::JSONSchema};
+use domain::document::Document;
 
-use crate::standard_graphql_error::StandardGraphqlError;
+use crate::{loader::JsonSchemaLoader, standard_graphql_error::StandardGraphqlError, ContextExt};
 
-pub struct JSONSchemaNode {
-    schema: JSONSchema,
-}
-
-#[Object]
-impl JSONSchemaNode {
-    pub async fn id(&self) -> &str {
-        &self.schema.id
-    }
-
-    pub async fn schema(&self) -> Result<String> {
-        Ok(serde_json::to_string(&self.schema.schema).map_err(|e| {
-            StandardGraphqlError::InternalError(format!("Failed to stringify json value: {}", e))
-                .extend()
-        })?)
-    }
-}
+use super::JSONSchemaNode;
 
 pub struct DocumentNode {
     pub document: Document,
@@ -60,15 +45,19 @@ impl DocumentNode {
         })?)
     }
 
-    pub async fn schema(&self) -> Result<Option<String>> {
-        Ok(match &self.document.schema {
-            Some(schema) => Some(serde_json::to_string(schema).map_err(|e| {
-                StandardGraphqlError::InternalError(format!(
-                    "Failed to stringify json value: {}",
-                    e
-                ))
-                .extend()
-            })?),
+    pub async fn schema(&self, ctx: &Context<'_>) -> Result<Option<JSONSchemaNode>> {
+        Ok(match &self.document.schema_id {
+            Some(schema_id) => {
+                let loader = ctx.get_loader::<DataLoader<JsonSchemaLoader>>();
+                let schema = loader.load_one(schema_id.clone()).await?.ok_or(
+                    StandardGraphqlError::InternalError(format!(
+                        "Cannot find schema {}",
+                        schema_id
+                    ))
+                    .extend(),
+                )?;
+                Some(JSONSchemaNode { schema })
+            }
             None => None,
         })
     }

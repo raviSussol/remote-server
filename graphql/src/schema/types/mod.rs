@@ -43,6 +43,9 @@ pub use self::stock_take_line::*;
 pub mod document;
 pub use self::document::*;
 
+pub mod json_schema;
+pub use self::json_schema::*;
+
 use super::mutations::{inbound_shipment::*, outbound_shipment::*};
 
 /// Generic Connector

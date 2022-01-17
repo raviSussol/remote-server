@@ -51,7 +51,7 @@ fn two_way_document_merge(our: RawDocument, their: Document) -> RawDocument {
         name: our.name,
         type_: our.type_,
         author: our.author,
-        schema: our.schema,
+        schema_id: our.schema_id,
     }
 }
 
@@ -74,7 +74,7 @@ fn three_way_document_merge(our: RawDocument, their: Document, base: Document) -
         name: our.name,
         author: our.author,
         type_: our.type_,
-        schema: our.schema,
+        schema_id: our.schema_id,
     }
 }
 
@@ -204,7 +204,7 @@ mod document_service_test {
             timestamp: DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(5000, 0), Utc),
             type_: "test_data".to_string(),
             data: json!({}),
-            schema: None,
+            schema_id: None,
         };
 
         let mut base_doc = template.clone();
