@@ -96,7 +96,7 @@ impl<'a> DocumentRepository<'a> {
     }
 
     /// Set document head to the provided version
-    #[cfg(feature = "sqlite")]
+    #[cfg(not(feature = "postgres"))]
     pub fn update_document_head(&self, store: &str, doc: &Document) -> Result<(), RepositoryError> {
         diesel::replace_into(document_head_dsl::document_head)
             .values(DocumentHeadRow {

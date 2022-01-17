@@ -43,10 +43,10 @@ impl<'a> JsonSchemaRepository<'a> {
     pub fn upsert_one(&self, schema: &JSONSchema) -> Result<(), RepositoryError> {
         let row = row_from_schema(schema)?;
         diesel::insert_into(json_schema_dsl::json_schema)
-            .values(row)
+            .values(&row)
             .on_conflict(json_schema_dsl::id)
             .do_update()
-            .set(row)
+            .set(&row)
             .execute(&self.connection.connection)?;
         Ok(())
     }
@@ -60,16 +60,14 @@ impl<'a> JsonSchemaRepository<'a> {
         Ok(())
     }
 
-    /// Get a specific document version
-    pub fn find_one_by_id(&self, document_id: &str) -> Result<JSONSchema, RepositoryError> {
+    pub fn find_one_by_id(&self, schema_id: &str) -> Result<JSONSchema, RepositoryError> {
         let row = json_schema_dsl::json_schema
-            .filter(json_schema_dsl::id.eq(document_id))
+            .filter(json_schema_dsl::id.eq(schema_id))
             .first(&self.connection.connection)?;
 
         schema_from_row(row)
     }
 
-    /// Gets all document versions
     pub fn find_many_by_ids(&self, ids: &[String]) -> Result<Vec<JSONSchema>, RepositoryError> {
         let rows: Vec<JSONSchemaRow> = json_schema_dsl::json_schema
             .filter(json_schema_dsl::id.eq_any(ids))
