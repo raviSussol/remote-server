@@ -2,6 +2,7 @@ use async_graphql::*;
 use async_graphql::{dataloader::DataLoader, Context};
 use chrono::{DateTime, Utc};
 use domain::document::Document;
+use service::document::raw_document::RawDocument;
 
 use crate::{loader::JsonSchemaLoader, standard_graphql_error::StandardGraphqlError, ContextExt};
 
@@ -60,5 +61,44 @@ impl DocumentNode {
             }
             None => None,
         })
+    }
+}
+
+pub struct RawDocumentNode {
+    pub document: RawDocument,
+}
+
+#[Object]
+impl RawDocumentNode {
+    pub async fn name(&self) -> &str {
+        &self.document.name
+    }
+
+    pub async fn parents(&self) -> &[String] {
+        &self.document.parents
+    }
+
+    pub async fn author(&self) -> &str {
+        &self.document.author
+    }
+
+    pub async fn timestamp(&self) -> &DateTime<Utc> {
+        &self.document.timestamp
+    }
+
+    #[graphql(name = "type")]
+    pub async fn type_(&self) -> &str {
+        &self.document.type_
+    }
+
+    pub async fn data(&self) -> Result<String> {
+        Ok(serde_json::to_string(&self.document.data).map_err(|e| {
+            StandardGraphqlError::InternalError(format!("Failed to stringify json value: {}", e))
+                .extend()
+        })?)
+    }
+
+    pub async fn schema_id(&self) -> &Option<String> {
+        &self.document.schema_id
     }
 }

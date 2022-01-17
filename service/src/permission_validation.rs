@@ -29,6 +29,8 @@ pub enum Resource {
     DeleteStockTakeLine,
     // document
     GetDocument,
+    UpdateDocument,
+    UpdateJsonSchema,
 }
 
 fn default() -> PermissionDSL {
@@ -50,6 +52,10 @@ fn all_permissions() -> HashMap<Resource, PermissionDSL> {
     map.insert(Resource::InsertStockTakeLine, default());
     map.insert(Resource::UpdateStockTakeLine, default());
     map.insert(Resource::DeleteStockTakeLine, default());
+    // document
+    map.insert(Resource::GetDocument, default());
+    map.insert(Resource::UpdateDocument, default());
+    map.insert(Resource::UpdateJsonSchema, default());
 
     map
 }

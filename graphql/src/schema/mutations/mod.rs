@@ -1,5 +1,6 @@
 mod error;
 
+pub mod document;
 pub mod inbound_shipment;
 pub mod location;
 pub mod outbound_shipment;
@@ -8,6 +9,7 @@ pub mod tax_update_input;
 pub mod user_register;
 
 use self::{
+    document::update_document::{update_document, UpdateDocumentInput, UpdateDocumentResponse},
     location::{
         delete_location, insert_location, update_location, DeleteLocationInput,
         DeleteLocationResponse, InsertLocationInput, InsertLocationResponse, UpdateLocationInput,
@@ -362,6 +364,15 @@ impl Mutations {
             &ctx.get_connection_manager().connection()?,
         )?);
         delete_stock_take_line(ctx, &store_id, &input)
+    }
+
+    async fn update_document(
+        &self,
+        ctx: &Context<'_>,
+        store_id: String,
+        input: UpdateDocumentInput,
+    ) -> Result<UpdateDocumentResponse> {
+        update_document(ctx, &store_id, input)
     }
 }
 
