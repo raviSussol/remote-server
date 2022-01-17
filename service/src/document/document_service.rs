@@ -87,92 +87,103 @@ impl<'a> DocumentService<'a> {
         DocumentRepository::new(self.connection).find_one_by_name(name, store)
     }
 
-    /// Must be called in a transaction
     pub fn insert_document(
         &self,
         store: &str,
         doc: RawDocument,
     ) -> Result<Document, DocumentInsertError> {
-        let repo = DocumentRepository::new(self.connection);
-        let head_option =
-            repo.head(&doc.name, store)
-                .map(|v| Some(v))
-                .or_else(|err| match err {
-                    RepositoryError::NotFound => Ok(None),
-                    _ => return Err(DocumentInsertError::DatabaseError(err)),
-                })?;
-        // do a unchecked insert of the doc and update the head
-        let insert_doc_and_head = |raw_doc: RawDocument| -> Result<Document, DocumentInsertError> {
-            let doc = raw_doc
-                .finalise()
-                .map_err(|err| DocumentInsertError::FinalisationError(err))?;
-            repo.insert_document(&doc)?;
-            repo.update_document_head(store, &doc)?;
-            Ok(doc)
-        };
-        let head = match head_option {
-            Some(head) => {
-                if doc.parents.contains(&head.head) {
-                    return Ok(insert_doc_and_head(doc)?);
-                }
-                head
+        let document = self
+            .connection
+            .transaction_sync(|con| insert_document(con, store, doc))
+            .map_err(|err| err.to_inner_error())?;
+        Ok(document)
+    }
+}
+
+fn insert_document(
+    connection: &StorageConnection,
+    store: &str,
+    doc: RawDocument,
+) -> Result<Document, DocumentInsertError> {
+    let repo = DocumentRepository::new(connection);
+    let head_option = repo
+        .head(&doc.name, store)
+        .map(|v| Some(v))
+        .or_else(|err| match err {
+            RepositoryError::NotFound => Ok(None),
+            _ => return Err(DocumentInsertError::DatabaseError(err)),
+        })?;
+    // do a unchecked insert of the doc and update the head
+    let insert_doc_and_head = |raw_doc: RawDocument| -> Result<Document, DocumentInsertError> {
+        let doc = raw_doc
+            .finalise()
+            .map_err(|err| DocumentInsertError::FinalisationError(err))?;
+        repo.insert_document(&doc)?;
+        repo.update_document_head(store, &doc)?;
+        Ok(doc)
+    };
+    let head = match head_option {
+        Some(head) => {
+            if doc.parents.contains(&head.head) {
+                return Ok(insert_doc_and_head(doc)?);
             }
-            None => {
-                if doc.parents.is_empty() {
-                    return Ok(insert_doc_and_head(doc)?);
-                }
+            head
+        }
+        None => {
+            if doc.parents.is_empty() {
+                return Ok(insert_doc_and_head(doc)?);
+            }
+            return Err(DocumentInsertError::InvalidDocumentHistory);
+        }
+    };
+
+    // Leaving the happy path; propose a auto merged doc:
+    // 1) if has common ancestor -> 3 way merge
+    // 2) else -> 2 way merge
+
+    // prepare some common data:
+    let their_doc = repo.find_one_by_id(&head.head)?;
+    let mut db = InMemoryAncestorDB::new();
+    db.insert(&repo.ancestor_details(&doc.name)?);
+
+    // use our latest parent to find the common ancestor
+    let mut our_parents = Vec::<AncestorDetail>::new();
+    for parent in &doc.parents {
+        match db.get_details(parent) {
+            Some(detail) => our_parents.push(detail),
+            None => return Err(DocumentInsertError::InvalidDocumentHistory),
+        }
+    }
+    our_parents.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    let latest_parent = our_parents.first();
+    let latest_parent_id = match latest_parent {
+        Some(p) => p.id.to_owned(),
+        None => {
+            // no parents try a two way merge
+            let merged = two_way_document_merge(doc, their_doc);
+            return Err(DocumentInsertError::MergeRequired(merged));
+        }
+    };
+    let ancestor = match common_ancestors(&db, &latest_parent_id, &their_doc.id) {
+        Ok(a) => Some(a),
+        Err(err) => match err {
+            CommonAncestorError::NoCommonAncestorFound => None,
+            CommonAncestorError::InvalidAncestorData => {
                 return Err(DocumentInsertError::InvalidDocumentHistory);
             }
-        };
+        },
+    };
 
-        // Leaving the happy path; propose a auto merged doc:
-        // 1) if has common ancestor -> 3 way merge
-        // 2) else -> 2 way merge
-
-        // prepare some common data:
-        let their_doc = repo.find_one_by_id(&head.head)?;
-        let mut db = InMemoryAncestorDB::new();
-        db.insert(&repo.ancestor_details(&doc.name)?);
-
-        // use our latest parent to find the common ancestor
-        let mut our_parents = Vec::<AncestorDetail>::new();
-        for parent in &doc.parents {
-            match db.get_details(parent) {
-                Some(detail) => our_parents.push(detail),
-                None => return Err(DocumentInsertError::InvalidDocumentHistory),
-            }
+    match ancestor {
+        Some(base) => {
+            let base_doc = repo.find_one_by_id(&base)?;
+            let merged = three_way_document_merge(doc, their_doc, base_doc);
+            Err(DocumentInsertError::MergeRequired(merged))
         }
-        our_parents.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
-        let latest_parent = our_parents.first();
-        let latest_parent_id = match latest_parent {
-            Some(p) => p.id.to_owned(),
-            None => {
-                // no parents try a two way merge
-                let merged = two_way_document_merge(doc, their_doc);
-                return Err(DocumentInsertError::MergeRequired(merged));
-            }
-        };
-        let ancestor = match common_ancestors(&db, &latest_parent_id, &their_doc.id) {
-            Ok(a) => Some(a),
-            Err(err) => match err {
-                CommonAncestorError::NoCommonAncestorFound => None,
-                CommonAncestorError::InvalidAncestorData => {
-                    return Err(DocumentInsertError::InvalidDocumentHistory);
-                }
-            },
-        };
-
-        match ancestor {
-            Some(base) => {
-                let base_doc = repo.find_one_by_id(&base)?;
-                let merged = three_way_document_merge(doc, their_doc, base_doc);
-                Err(DocumentInsertError::MergeRequired(merged))
-            }
-            None => {
-                // no common ancestor try a two way merge
-                let merged = two_way_document_merge(doc, their_doc);
-                Err(DocumentInsertError::MergeRequired(merged))
-            }
+        None => {
+            // no common ancestor try a two way merge
+            let merged = two_way_document_merge(doc, their_doc);
+            Err(DocumentInsertError::MergeRequired(merged))
         }
     }
 }
