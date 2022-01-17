@@ -26,8 +26,10 @@ pub mod item;
 pub use self::item::*;
 pub mod stock_counts;
 pub use self::stock_counts::*;
-use self::store::{stores, StoreFilterInput, StoresResponse};
 pub mod store;
+use self::store::{stores, StoreFilterInput, StoresResponse};
+pub mod document;
+pub use self::document::*;
 
 #[Object]
 impl Queries {
@@ -174,5 +176,14 @@ impl Queries {
         #[graphql(desc = "Expiring soon threshold")] days_till_expired: Option<i32>,
     ) -> Result<StockCounts> {
         stock_counts(timezone_offset, days_till_expired)
+    }
+
+    pub async fn document(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "Store id")] store_id: String,
+        #[graphql(desc = "The document name")] name: String,
+    ) -> Result<DocumentResponse> {
+        document(ctx, store_id, name)
     }
 }

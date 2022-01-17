@@ -27,6 +27,8 @@ pub enum Resource {
     InsertStockTakeLine,
     UpdateStockTakeLine,
     DeleteStockTakeLine,
+    // document
+    GetDocument,
 }
 
 fn default() -> PermissionDSL {
