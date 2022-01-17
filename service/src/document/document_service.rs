@@ -1,6 +1,7 @@
 use chrono::Utc;
 use domain::document::{AncestorDetail, Document};
-use repository::{DocumentRepository, RepositoryError, StorageConnection};
+use jsonschema::JSONSchema;
+use repository::{DocumentRepository, JsonSchemaRepository, RepositoryError, StorageConnection};
 
 use super::{
     common_ancestor::{common_ancestors, AncestorDB, CommonAncestorError, InMemoryAncestorDB},
@@ -10,13 +11,18 @@ use super::{
 
 #[derive(Debug)]
 pub enum DocumentInsertError {
+    /// Input document doesn't match the provided json schema
+    InvalidDataSchema(Vec<String>),
     /// Document version needs to be merged first. Contains an automerged document which can be
     /// reviewed and/or inserted.
-    MergeRequired(RawDocument),
+    /// If no automerged document is provided the document couldn't be automerged, e.g because the
+    /// merged data has an invalid data schema.
+    MergeRequired(Option<RawDocument>),
     InvalidDocumentHistory,
     /// Unable to finalise a document (assign an id)
     FinalisationError(String),
     DatabaseError(RepositoryError),
+    InternalError(String),
 }
 
 pub struct DocumentService<'a> {
@@ -94,12 +100,60 @@ impl<'a> DocumentService<'a> {
     ) -> Result<Document, DocumentInsertError> {
         let document = self
             .connection
-            .transaction_sync(|con| insert_document(con, store, doc))
+            .transaction_sync(|con| {
+                let validator = json_validator(con, &doc)?;
+                if let Some(validator) = &validator {
+                    validate_json(&validator, &doc.data)
+                        .map_err(|errors| DocumentInsertError::InvalidDataSchema(errors))?;
+                }
+
+                match insert_document(con, store, doc) {
+                    Ok(doc) => Ok(doc),
+                    Err(err) => match err {
+                        DocumentInsertError::MergeRequired(ref merged_doc) => {
+                            // check that the merged document has a valid schema
+                            if let (Some(validator), Some(merged_doc)) = (&validator, merged_doc) {
+                                validate_json(&validator, &merged_doc.data)
+                                    .map_err(|_| DocumentInsertError::MergeRequired(None))?;
+                            }
+                            Err(err)
+                        }
+                        _ => Err(err),
+                    },
+                }
+            })
             .map_err(|err| err.to_inner_error())?;
         Ok(document)
     }
 }
 
+fn json_validator(
+    connection: &StorageConnection,
+    doc: &RawDocument,
+) -> Result<Option<JSONSchema>, DocumentInsertError> {
+    if let Some(schema_id) = &doc.schema_id {
+        let schema_repo = JsonSchemaRepository::new(connection);
+        let schema = schema_repo.find_one_by_id(schema_id)?;
+        let compiled = match JSONSchema::compile(&schema.schema) {
+            Ok(v) => Ok(v),
+            Err(err) => Err(DocumentInsertError::InternalError(format!(
+                "Invalid json schema: {}",
+                err
+            ))),
+        }?;
+        return Ok(Some(compiled));
+    }
+    Ok(None)
+}
+
+fn validate_json(validator: &JSONSchema, data: &serde_json::Value) -> Result<(), Vec<String>> {
+    Ok(validator.validate(data).map_err(|errors| {
+        let errors: Vec<String> = errors.into_iter().map(|err| format!("{}", err)).collect();
+        errors
+    })?)
+}
+
+/// Does a raw insert without schema validation
 fn insert_document(
     connection: &StorageConnection,
     store: &str,
@@ -161,7 +215,7 @@ fn insert_document(
         None => {
             // no parents try a two way merge
             let merged = two_way_document_merge(doc, their_doc);
-            return Err(DocumentInsertError::MergeRequired(merged));
+            return Err(DocumentInsertError::MergeRequired(Some(merged)));
         }
     };
     let ancestor = match common_ancestors(&db, &latest_parent_id, &their_doc.id) {
@@ -178,12 +232,12 @@ fn insert_document(
         Some(base) => {
             let base_doc = repo.find_one_by_id(&base)?;
             let merged = three_way_document_merge(doc, their_doc, base_doc);
-            Err(DocumentInsertError::MergeRequired(merged))
+            Err(DocumentInsertError::MergeRequired(Some(merged)))
         }
         None => {
             // no common ancestor try a two way merge
             let merged = two_way_document_merge(doc, their_doc);
-            Err(DocumentInsertError::MergeRequired(merged))
+            Err(DocumentInsertError::MergeRequired(Some(merged)))
         }
     }
 }
@@ -263,7 +317,8 @@ mod document_service_test {
                 "Expected DocumentInsertError::MergeRequired but got: {:?}",
                 err
             ),
-        };
+        }
+        .unwrap();
         // try to insert the auto merge
         service.insert_document(store, auto_merge).unwrap();
         let result = service.get_document(store, &template.name).unwrap();
