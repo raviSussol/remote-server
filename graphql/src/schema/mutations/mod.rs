@@ -9,7 +9,10 @@ pub mod tax_update_input;
 pub mod user_register;
 
 use self::{
-    document::update_document::{update_document, UpdateDocumentInput, UpdateDocumentResponse},
+    document::{
+        insert_json_schema::{insert_json_schema, InsertJsonSchemaInput, InsertJsonSchemaResponse},
+        update_document::{update_document, UpdateDocumentInput, UpdateDocumentResponse},
+    },
     location::{
         delete_location, insert_location, update_location, DeleteLocationInput,
         DeleteLocationResponse, InsertLocationInput, InsertLocationResponse, UpdateLocationInput,
@@ -373,6 +376,14 @@ impl Mutations {
         input: UpdateDocumentInput,
     ) -> Result<UpdateDocumentResponse> {
         update_document(ctx, &store_id, input)
+    }
+
+    async fn insert_json_schema(
+        &self,
+        ctx: &Context<'_>,
+        input: InsertJsonSchemaInput,
+    ) -> Result<InsertJsonSchemaResponse> {
+        insert_json_schema(ctx, input)
     }
 }
 

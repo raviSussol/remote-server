@@ -30,7 +30,8 @@ pub enum Resource {
     // document
     GetDocument,
     UpdateDocument,
-    UpdateJsonSchema,
+    GetJsonSchema,
+    InsertJsonSchema,
 }
 
 fn default() -> PermissionDSL {
@@ -55,7 +56,14 @@ fn all_permissions() -> HashMap<Resource, PermissionDSL> {
     // document
     map.insert(Resource::GetDocument, default());
     map.insert(Resource::UpdateDocument, default());
-    map.insert(Resource::UpdateJsonSchema, default());
+    map.insert(
+        Resource::GetJsonSchema,
+        PermissionDSL::HasApiRole(ApiRole::User),
+    );
+    map.insert(
+        Resource::InsertJsonSchema,
+        PermissionDSL::HasApiRole(ApiRole::User),
+    );
 
     map
 }

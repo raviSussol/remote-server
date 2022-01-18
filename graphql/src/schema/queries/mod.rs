@@ -30,6 +30,8 @@ pub mod store;
 use self::store::{stores, StoreFilterInput, StoresResponse};
 pub mod document;
 pub use self::document::*;
+pub mod json_schema;
+pub use self::json_schema::*;
 
 #[Object]
 impl Queries {
@@ -185,5 +187,9 @@ impl Queries {
         #[graphql(desc = "The document name")] name: String,
     ) -> Result<DocumentResponse> {
         document(ctx, store_id, name)
+    }
+
+    pub async fn json_schema(&self, ctx: &Context<'_>, id: String) -> Result<JSONSchemaResponse> {
+        json_schema(ctx, id)
     }
 }
