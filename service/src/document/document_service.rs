@@ -62,7 +62,7 @@ pub trait DocumentServiceTrait: Sync + Send {
 
         // We might have Documents from different stores in our repo; extract our tree:
         let graph =
-            extract_tree(head.id, docs).map_err(|err| DocumentHistoryError::GraphError(err))?;
+            extract_tree(head.head, docs).map_err(|err| DocumentHistoryError::GraphError(err))?;
         let sorted = topo_sort(graph).map_err(|err| DocumentHistoryError::GraphError(err))?;
         Ok(sorted)
     }
