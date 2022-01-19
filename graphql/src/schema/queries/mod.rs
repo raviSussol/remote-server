@@ -30,6 +30,8 @@ pub mod store;
 use self::store::{stores, StoreFilterInput, StoresResponse};
 pub mod document;
 pub use self::document::*;
+pub mod document_history;
+pub use self::document_history::*;
 pub mod json_schema;
 pub use self::json_schema::*;
 
@@ -187,6 +189,15 @@ impl Queries {
         #[graphql(desc = "The document name")] name: String,
     ) -> Result<DocumentResponse> {
         document(ctx, store_id, name)
+    }
+
+    pub async fn document_history(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "Store id")] store_id: String,
+        #[graphql(desc = "The document name")] name: String,
+    ) -> Result<DocumentHistoryResponse> {
+        document_history(ctx, store_id, name)
     }
 
     pub async fn json_schema(&self, ctx: &Context<'_>, id: String) -> Result<JSONSchemaResponse> {

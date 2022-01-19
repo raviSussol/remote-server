@@ -1,0 +1,58 @@
+use crate::schema::types::DocumentNode;
+use crate::standard_graphql_error::{validate_auth, StandardGraphqlError};
+use crate::ContextExt;
+use async_graphql::*;
+use service::document::document_service::{
+    DocumentHistoryError, DocumentService, DocumentServiceTrait,
+};
+use service::permission_validation::{Resource, ResourceAccessRequest};
+use service::usize_to_u32;
+
+#[derive(SimpleObject)]
+pub struct DocumentConnector {
+    total_count: u32,
+    nodes: Vec<DocumentNode>,
+}
+
+#[derive(Union)]
+pub enum DocumentHistoryResponse {
+    Response(DocumentConnector),
+}
+
+pub fn document_history(
+    ctx: &Context<'_>,
+    store_id: String,
+    document_name: String,
+) -> Result<DocumentHistoryResponse> {
+    validate_auth(
+        ctx,
+        &ResourceAccessRequest {
+            resource: Resource::GetDocumentHistory,
+            store_id: Some(store_id.to_string()),
+        },
+    )?;
+
+    let service_provider = ctx.service_provider();
+    let context = service_provider.context()?;
+    let service = DocumentService {};
+
+    let documents = service
+        .get_document_history(&context, &store_id, &document_name)
+        .map_err(|err| {
+            let formated_err = format! {"{:?}", err};
+            let error = match err {
+                DocumentHistoryError::DatabaseError(err) => err.into(),
+                DocumentHistoryError::GraphError(_) => {
+                    StandardGraphqlError::InternalError(formated_err)
+                }
+            };
+            error.extend()
+        })?;
+    Ok(DocumentHistoryResponse::Response(DocumentConnector {
+        total_count: usize_to_u32(documents.len()),
+        nodes: documents
+            .into_iter()
+            .map(|document| DocumentNode { document })
+            .collect(),
+    }))
+}

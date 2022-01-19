@@ -29,6 +29,7 @@ pub enum Resource {
     DeleteStockTakeLine,
     // document
     GetDocument,
+    GetDocumentHistory,
     UpdateDocument,
     GetJsonSchema,
     InsertJsonSchema,
@@ -55,6 +56,7 @@ fn all_permissions() -> HashMap<Resource, PermissionDSL> {
     map.insert(Resource::DeleteStockTakeLine, default());
     // document
     map.insert(Resource::GetDocument, default());
+    map.insert(Resource::GetDocumentHistory, default());
     map.insert(Resource::UpdateDocument, default());
     map.insert(
         Resource::GetJsonSchema,

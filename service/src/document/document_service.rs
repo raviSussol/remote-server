@@ -9,6 +9,7 @@ use super::{
     common_ancestor::{common_ancestors, AncestorDB, CommonAncestorError, InMemoryAncestorDB},
     merge::{three_way_merge, two_way_merge, TakeLatestConflictSolver},
     raw_document::RawDocument,
+    topological_sort::{extract_tree, topo_sort},
 };
 
 #[derive(Debug)]
@@ -27,6 +28,18 @@ pub enum DocumentInsertError {
     InternalError(String),
 }
 
+#[derive(Debug)]
+pub enum DocumentHistoryError {
+    DatabaseError(RepositoryError),
+    GraphError(String),
+}
+
+impl From<RepositoryError> for DocumentHistoryError {
+    fn from(err: RepositoryError) -> Self {
+        DocumentHistoryError::DatabaseError(err)
+    }
+}
+
 pub trait DocumentServiceTrait: Sync + Send {
     fn get_document(
         &self,
@@ -35,6 +48,23 @@ pub trait DocumentServiceTrait: Sync + Send {
         name: &str,
     ) -> Result<Document, RepositoryError> {
         DocumentRepository::new(&ctx.connection).find_one_by_name(name, store)
+    }
+
+    fn get_document_history(
+        &self,
+        ctx: &ServiceContext,
+        store: &str,
+        name: &str,
+    ) -> Result<Vec<Document>, DocumentHistoryError> {
+        let repo = DocumentRepository::new(&ctx.connection);
+        let head = repo.head(name, store)?;
+        let docs = repo.find_many_by_name(name)?;
+
+        // We might have Documents from different stores in our repo; extract our tree:
+        let graph =
+            extract_tree(head.id, docs).map_err(|err| DocumentHistoryError::GraphError(err))?;
+        let sorted = topo_sort(graph).map_err(|err| DocumentHistoryError::GraphError(err))?;
+        Ok(sorted)
     }
 
     fn update_document(
