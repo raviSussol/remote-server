@@ -39,11 +39,8 @@ impl DocumentNode {
         &self.document.type_
     }
 
-    pub async fn data(&self) -> Result<String> {
-        Ok(serde_json::to_string(&self.document.data).map_err(|e| {
-            StandardGraphqlError::InternalError(format!("Failed to stringify json value: {}", e))
-                .extend()
-        })?)
+    pub async fn data(&self) -> &serde_json::Value {
+        &self.document.data
     }
 
     pub async fn schema(&self, ctx: &Context<'_>) -> Result<Option<JSONSchemaNode>> {
