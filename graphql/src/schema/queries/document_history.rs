@@ -1,4 +1,4 @@
-use crate::schema::types::DocumentNode;
+use crate::schema::types::{DocumentConnector, DocumentNode};
 use crate::standard_graphql_error::{validate_auth, StandardGraphqlError};
 use crate::ContextExt;
 use async_graphql::*;
@@ -7,12 +7,6 @@ use service::document::document_service::{
 };
 use service::permission_validation::{Resource, ResourceAccessRequest};
 use service::usize_to_u32;
-
-#[derive(SimpleObject)]
-pub struct DocumentConnector {
-    total_count: u32,
-    nodes: Vec<DocumentNode>,
-}
 
 #[derive(Union)]
 pub enum DocumentHistoryResponse {

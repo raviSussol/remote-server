@@ -182,13 +182,13 @@ impl Queries {
         stock_counts(timezone_offset, days_till_expired)
     }
 
-    pub async fn document(
+    pub async fn documents(
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "Store id")] store_id: String,
-        #[graphql(desc = "The document name")] name: String,
+        #[graphql(desc = "The document filter")] filter: Option<DocumentFilterInput>,
     ) -> Result<DocumentResponse> {
-        document(ctx, store_id, name)
+        documents(ctx, store_id, filter)
     }
 
     pub async fn document_history(

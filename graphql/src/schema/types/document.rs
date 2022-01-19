@@ -61,6 +61,12 @@ impl DocumentNode {
     }
 }
 
+#[derive(SimpleObject)]
+pub struct DocumentConnector {
+    pub total_count: u32,
+    pub nodes: Vec<DocumentNode>,
+}
+
 pub struct RawDocumentNode {
     pub document: RawDocument,
 }
