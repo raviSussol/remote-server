@@ -1,7 +1,9 @@
 use chrono::Utc;
 use domain::document::{AncestorDetail, Document};
 use jsonschema::JSONSchema;
-use repository::{DocumentRepository, JsonSchemaRepository, RepositoryError, StorageConnection};
+use repository::{
+    DocumentFilter, DocumentRepository, JsonSchemaRepository, RepositoryError, StorageConnection,
+};
 
 use crate::service_provider::ServiceContext;
 
@@ -47,7 +49,16 @@ pub trait DocumentServiceTrait: Sync + Send {
         store: &str,
         name: &str,
     ) -> Result<Option<Document>, RepositoryError> {
-        DocumentRepository::new(&ctx.connection).find_one_by_name(name, store)
+        DocumentRepository::new(&ctx.connection).find_one_by_name(store, name)
+    }
+
+    fn get_documents(
+        &self,
+        ctx: &ServiceContext,
+        store: &str,
+        filter: Option<DocumentFilter>,
+    ) -> Result<Vec<Document>, RepositoryError> {
+        DocumentRepository::new(&ctx.connection).query(store, filter)
     }
 
     fn get_document_history(
@@ -57,12 +68,12 @@ pub trait DocumentServiceTrait: Sync + Send {
         name: &str,
     ) -> Result<Vec<Document>, DocumentHistoryError> {
         let repo = DocumentRepository::new(&ctx.connection);
-        let head = match repo.head(name, store)? {
+        let head = match repo.head(store, name)? {
             Some(head) => head,
             None => return Ok(vec![]),
         };
 
-        let docs = repo.find_many_by_name(name)?;
+        let docs = repo.document_history(name)?;
 
         // We might have Documents from different stores in our repo; extract our tree:
         let graph =
@@ -197,7 +208,7 @@ fn insert_document(
     doc: RawDocument,
 ) -> Result<Document, DocumentInsertError> {
     let repo = DocumentRepository::new(connection);
-    let head_option = repo.head(&doc.name, store)?;
+    let head_option = repo.head(store, &doc.name)?;
     // do a unchecked insert of the doc and update the head
     let insert_doc_and_head = |raw_doc: RawDocument| -> Result<Document, DocumentInsertError> {
         let doc = raw_doc
