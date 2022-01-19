@@ -46,7 +46,7 @@ pub trait DocumentServiceTrait: Sync + Send {
         ctx: &ServiceContext,
         store: &str,
         name: &str,
-    ) -> Result<Document, RepositoryError> {
+    ) -> Result<Option<Document>, RepositoryError> {
         DocumentRepository::new(&ctx.connection).find_one_by_name(name, store)
     }
 
@@ -57,7 +57,11 @@ pub trait DocumentServiceTrait: Sync + Send {
         name: &str,
     ) -> Result<Vec<Document>, DocumentHistoryError> {
         let repo = DocumentRepository::new(&ctx.connection);
-        let head = repo.head(name, store)?;
+        let head = match repo.head(name, store)? {
+            Some(head) => head,
+            None => return Ok(vec![]),
+        };
+
         let docs = repo.find_many_by_name(name)?;
 
         // We might have Documents from different stores in our repo; extract our tree:
@@ -193,13 +197,7 @@ fn insert_document(
     doc: RawDocument,
 ) -> Result<Document, DocumentInsertError> {
     let repo = DocumentRepository::new(connection);
-    let head_option = repo
-        .head(&doc.name, store)
-        .map(|v| Some(v))
-        .or_else(|err| match err {
-            RepositoryError::NotFound => Ok(None),
-            _ => return Err(DocumentInsertError::DatabaseError(err)),
-        })?;
+    let head_option = repo.head(&doc.name, store)?;
     // do a unchecked insert of the doc and update the head
     let insert_doc_and_head = |raw_doc: RawDocument| -> Result<Document, DocumentInsertError> {
         let doc = raw_doc
@@ -229,7 +227,11 @@ fn insert_document(
     // 2) else -> 2 way merge
 
     // prepare some common data:
-    let their_doc = repo.find_one_by_id(&head.head)?;
+    let their_doc = repo
+        .find_one_by_id(&head.head)?
+        .ok_or(DocumentInsertError::InternalError(
+            "Failed to load existing document".to_string(),
+        ))?;
     let mut db = InMemoryAncestorDB::new();
     db.insert(&repo.ancestor_details(&doc.name)?);
 
@@ -263,7 +265,11 @@ fn insert_document(
 
     match ancestor {
         Some(base) => {
-            let base_doc = repo.find_one_by_id(&base)?;
+            let base_doc =
+                repo.find_one_by_id(&base)?
+                    .ok_or(DocumentInsertError::InternalError(
+                        "Failed to load common ancestor document".to_string(),
+                    ))?;
             let merged = three_way_document_merge(doc, their_doc, base_doc);
             Err(DocumentInsertError::MergeRequired(Some(merged)))
         }
@@ -316,6 +322,7 @@ mod document_service_test {
         // assert document is there:
         let result = service
             .get_document(&context, store, &template.name)
+            .unwrap()
             .unwrap();
         assert_eq!(result.id, v0.id);
 
@@ -335,6 +342,7 @@ mod document_service_test {
         let v1 = service.update_document(&context, store, their_doc).unwrap();
         let result = service
             .get_document(&context, store, &template.name)
+            .unwrap()
             .unwrap();
         assert_eq!(result.id, v1.id);
 
@@ -365,6 +373,7 @@ mod document_service_test {
             .unwrap();
         let result = service
             .get_document(&context, store, &template.name)
+            .unwrap()
             .unwrap();
         assert_json_eq!(
             result.data,
@@ -394,6 +403,7 @@ mod document_service_test {
         let v4 = service.update_document(&context, store, next_doc).unwrap();
         let result = service
             .get_document(&context, store, &template.name)
+            .unwrap()
             .unwrap();
         assert_eq!(result.id, v4.id);
         assert_json_eq!(

@@ -110,12 +110,16 @@ impl<'a> DocumentRepository<'a> {
     }
 
     /// Get a specific document version
-    pub fn find_one_by_id(&self, document_id: &str) -> Result<Document, RepositoryError> {
-        let row = document_dsl::document
+    pub fn find_one_by_id(&self, document_id: &str) -> Result<Option<Document>, RepositoryError> {
+        let row: Option<DocumentRow> = document_dsl::document
             .filter(document_dsl::id.eq(document_id))
-            .first(&self.connection.connection)?;
+            .first(&self.connection.connection)
+            .optional()?;
 
-        document_from_row(row)
+        Ok(match row {
+            Some(row) => Some(document_from_row(row)?),
+            None => None,
+        })
     }
 
     /// Get the latest version of a document
@@ -123,8 +127,11 @@ impl<'a> DocumentRepository<'a> {
         &self,
         document_name: &str,
         store: &str,
-    ) -> Result<Document, RepositoryError> {
-        let head = self.head(document_name, store)?;
+    ) -> Result<Option<Document>, RepositoryError> {
+        let head = match self.head(document_name, store)? {
+            Some(head) => head,
+            None => return Ok(None),
+        };
         self.find_one_by_id(&head.head)
     }
 
@@ -144,10 +151,11 @@ impl<'a> DocumentRepository<'a> {
         &self,
         document_name: &str,
         store: &str,
-    ) -> Result<DocumentHeadRow, RepositoryError> {
-        let result: DocumentHeadRow = document_head_dsl::document_head
+    ) -> Result<Option<DocumentHeadRow>, RepositoryError> {
+        let result: Option<DocumentHeadRow> = document_head_dsl::document_head
             .filter(document_head_dsl::id.eq(make_head_id(document_name, store)))
-            .first(&self.connection.connection)?;
+            .first(&self.connection.connection)
+            .optional()?;
         Ok(result)
     }
 
