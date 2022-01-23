@@ -106,7 +106,8 @@ pub fn three_way_merge_object(
         .keys()
         .into_iter()
         .chain(theirs.keys().into_iter())
-        .chain(base.keys().into_iter())
+        // merged object can only contain keys from our or theirs; no need to check base keys
+        //.chain(base.keys().into_iter())
         .fold(HashSet::<String>::new(), |mut set, value| {
             set.insert(value.to_owned());
             set
