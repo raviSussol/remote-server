@@ -208,15 +208,6 @@ impl Queries {
         stock_takes(ctx, &store_id, page, filter, sort)
     }
 
-    pub async fn requisition(
-        &self,
-        ctx: &Context<'_>,
-        store_id: String,
-        id: String,
-    ) -> Result<RequisitionResponse> {
-        get_requisition(ctx, &store_id, &id)
-    }
-
     pub async fn requisitions(
         &self,
         ctx: &Context<'_>,

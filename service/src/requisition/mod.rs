@@ -1,5 +1,5 @@
 use self::{
-    query::{get_requisition, get_requisition_by_number, get_requisitions},
+    query::{get_requisition_by_number, get_requisitions},
     request_requisition::{
         add_from_master_list, delete_request_requisition, insert_request_requisition,
         update_request_requisition, use_calculated_quantity, AddFromMasterList,
@@ -16,7 +16,7 @@ use self::{
 
 use super::{ListError, ListResult};
 use crate::service_provider::ServiceContext;
-use domain::{PaginationOption, invoice::Invoice};
+use domain::{invoice::Invoice, PaginationOption};
 use repository::{
     schema::RequisitionRowType, RepositoryError, Requisition, RequisitionFilter, RequisitionLine,
     RequisitionSort,
@@ -37,15 +37,6 @@ pub trait RequisitionServiceTrait: Sync + Send {
         sort: Option<RequisitionSort>,
     ) -> Result<ListResult<Requisition>, ListError> {
         get_requisitions(ctx, store_id_option, pagination, filter, sort)
-    }
-
-    fn get_requisition(
-        &self,
-        ctx: &ServiceContext,
-        store_id_option: Option<&str>,
-        id: &str,
-    ) -> Result<Option<Requisition>, RepositoryError> {
-        get_requisition(ctx, store_id_option, id)
     }
 
     fn get_requisition_by_number(

@@ -60,40 +60,6 @@ pub enum RequisitionsResponse {
     Response(RequisitionConnector),
 }
 
-#[derive(Union)]
-pub enum RequisitionResponse {
-    Error(RecordNotFound),
-    Response(RequisitionNode),
-}
-
-pub fn get_requisition(ctx: &Context<'_>, store_id: &str, id: &str) -> Result<RequisitionResponse> {
-    validate_auth(
-        ctx,
-        &ResourceAccessRequest {
-            resource: Resource::QueryRequisition,
-            store_id: Some(store_id.to_string()),
-        },
-    )?;
-
-    let service_provider = ctx.service_provider();
-    let service_context = service_provider.context()?;
-
-    let requisition_option = service_provider.requisition_service.get_requisition(
-        &service_context,
-        Some(store_id),
-        id,
-    )?;
-
-    let response = match requisition_option {
-        Some(requisition) => {
-            RequisitionResponse::Response(RequisitionNode::from_domain(requisition))
-        }
-        None => RequisitionResponse::Error(RecordNotFound {}),
-    };
-
-    Ok(response)
-}
-
 pub fn get_requisitions(
     ctx: &Context<'_>,
     store_id: &str,

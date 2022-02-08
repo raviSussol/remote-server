@@ -30,19 +30,6 @@ pub fn get_requisitions(
     })
 }
 
-pub fn get_requisition(
-    ctx: &ServiceContext,
-    store_id_option: Option<&str>,
-    id: &str,
-) -> Result<Option<Requisition>, RepositoryError> {
-    let mut filter = RequisitionFilter::new().id(EqualFilter::equal_to(id));
-    filter.store_id = store_id_option.map(EqualFilter::equal_to);
-
-    let mut result = RequisitionRepository::new(&ctx.connection).query_by_filter(filter)?;
-
-    Ok(result.pop())
-}
-
 pub fn get_requisition_by_number(
     ctx: &ServiceContext,
     store_id: &str,
@@ -100,21 +87,6 @@ mod test {
         assert_eq!(
             result.rows[0].requisition_row.id,
             mock_request_draft_requisition().id
-        );
-
-        // Requisition
-        let result = service
-            .get_requisition(
-                &context,
-                Some(&mock_request_draft_requisition2().store_id),
-                &mock_request_draft_requisition2().id,
-            )
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(
-            result.requisition_row.id,
-            mock_request_draft_requisition2().id
         );
 
         // Requisition by number
