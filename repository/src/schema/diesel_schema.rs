@@ -72,26 +72,6 @@ table! {
 }
 
 table! {
-    requisition (id) {
-        id -> Text,
-        requisition_number -> Bigint,
-        name_id -> Text,
-        store_id -> Text,
-        #[sql_name = "type"] type_ -> crate::schema::requisition::RequisitionRowTypeMapping,
-        #[sql_name = "status"] status -> crate::schema::requisition::RequisitionRowStatusMapping,
-        created_datetime -> Timestamp,
-        sent_datetime -> Nullable<Timestamp>,
-        finalised_datetime -> Nullable<Timestamp>,
-        colour -> Nullable<Text>,
-        comment -> Nullable<Text>,
-        their_reference -> Nullable<Text>,
-        max_months_of_stock -> Double,
-        threshold_months_of_stock -> Double,
-        linked_requisition_id -> Nullable<Text>,
-    }
-}
-
-table! {
     requisition_line (id) {
         id -> Text,
         requisition_id -> Text,

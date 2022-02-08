@@ -33,7 +33,6 @@ pub struct ServiceProvider {
     pub stock_take_line_service: Box<dyn StockTakeLineServiceTrait>,
     pub store_service: Box<dyn StoreServiceTrait>,
     pub outbound_shipment_line: Box<dyn OutboundShipmentLineServiceTrait>,
-    pub requisition_service: Box<dyn RequisitionServiceTrait>,
     pub requisition_line_service: Box<dyn RequisitionLineServiceTrait>,
     // Dashboard:
     pub invoice_count_service: Box<dyn InvoiceCountServiceTrait>,
@@ -62,7 +61,6 @@ impl ServiceProvider {
             stock_expiry_count_service: Box::new(StockExpiryServiceCount {}),
             stock_take_service: Box::new(StockTakeService {}),
             stock_take_line_service: Box::new(StockTakeLineService {}),
-            requisition_service: Box::new(RequisitionService {}),
             requisition_line_service: Box::new(RequisitionLineService {}),
             item_stats_service: Box::new(ItemStatsService {}),
         }
