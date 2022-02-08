@@ -410,17 +410,6 @@ impl Mutations {
         request_requisition::use_calculated_quantity(ctx, &store_id, input)
     }
 
-    /// Add requisition lines from master item master list
-    async fn add_from_master_list(
-        &self,
-        ctx: &Context<'_>,
-        store_id: String,
-        input: request_requisition::AddFromMasterListInput,
-    ) -> Result<request_requisition::AddFromMasterListResponse> {
-        // TODO remove and make store_id parameter required
-        request_requisition::add_from_master_list(ctx, &store_id, input)
-    }
-
     async fn insert_request_requisition_line(
         &self,
         ctx: &Context<'_>,

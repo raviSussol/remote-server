@@ -64,15 +64,6 @@ pub trait RequisitionServiceTrait: Sync + Send {
         use_calculated_quantity(ctx, store_id, input)
     }
 
-    fn add_from_master_list(
-        &self,
-        ctx: &ServiceContext,
-        store_id: &str,
-        input: AddFromMasterList,
-    ) -> Result<Vec<RequisitionLine>, AddFromMasterListError> {
-        add_from_master_list(ctx, store_id, input)
-    }
-
     fn update_response_requisition(
         &self,
         ctx: &ServiceContext,
