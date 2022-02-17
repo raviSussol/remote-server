@@ -5,5 +5,6 @@ CREATE TABLE item (
     name TEXT NOT NULL,
     code TEXT NOT NULL,
     unit_id TEXT REFERENCES unit(id),
-    type TEXT NOT NULL
+    type TEXT NOT NULL,
+    universal_code TEXT NOT NULL
 )

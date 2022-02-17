@@ -29,6 +29,10 @@ impl ItemNode {
         &self.item.code
     }
 
+    pub async fn universal_code(&self) -> &str {
+        &self.item.universal_code
+    }
+
     pub async fn is_visible(&self) -> bool {
         self.item.is_visible
     }

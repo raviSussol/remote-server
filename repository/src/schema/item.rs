@@ -18,4 +18,5 @@ pub struct ItemRow {
     pub unit_id: Option<String>,
     #[column_name = "type_"]
     pub r#type: ItemRowType,
+    pub universal_code: String,
 }

@@ -8,6 +8,7 @@ pub struct Item {
     // Is visible is from master list join
     pub is_visible: bool,
     pub unit_name: Option<String>,
+    pub universal_code: String,
 }
 
 pub enum ItemSortField {

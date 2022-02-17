@@ -126,6 +126,7 @@ fn to_domain((item_row, item_is_visible_row, unit_row_option): ItemAndMasterList
         code: item_row.code,
         is_visible: item_is_visible_row.is_visible,
         unit_name: unit_row_option.map(|unit| unit.name),
+        universal_code: item_row.universal_code,
     }
 }
 

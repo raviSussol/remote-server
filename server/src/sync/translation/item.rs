@@ -19,6 +19,7 @@ pub struct LegacyItemRow {
     code: String,
     unit_ID: String,
     type_of: LegacyItemType,
+    universal_code: String,
 }
 
 fn to_item_type(type_of: LegacyItemType) -> ItemRowType {
@@ -52,6 +53,7 @@ impl LegacyItemRow {
             code: data.code,
             unit_id: None,
             r#type: to_item_type(data.type_of),
+            universal_code: data.universal_code,
         };
 
         if data.unit_ID != "" {
