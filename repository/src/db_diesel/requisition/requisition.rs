@@ -5,13 +5,13 @@ use crate::{
     },
     repository_error::RepositoryError,
     schema::{
-        diesel_schema::{
-            name, name::dsl as name_dsl, requisition, requisition::dsl as requisition_dsl,
-        },
-        NameRow, RequisitionRow,
+        diesel_schema::{name, name::dsl as name_dsl},
+        NameRow,
     },
     DBType, StorageConnection,
 };
+
+use super::{requisition_dsl, requisition_table, RequisitionRow};
 
 use diesel::{
     dsl::{InnerJoin, IntoBoxed},
@@ -102,7 +102,7 @@ impl<'a> RequisitionRepository<'a> {
     }
 }
 
-type BoxedRequisitionQuery = IntoBoxed<'static, InnerJoin<requisition::table, name::table>, DBType>;
+type BoxedRequisitionQuery = IntoBoxed<'static, InnerJoin<requisition_table, name::table>, DBType>;
 
 fn create_filtered_query(
     filter: Option<RequisitionFilter>,

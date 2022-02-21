@@ -15,7 +15,6 @@ mod name;
 mod name_store_join;
 mod number;
 mod remote_sync_buffer;
-mod requisition;
 mod requisition_line;
 mod stock_line;
 mod stocktake;
@@ -27,20 +26,9 @@ mod user_account;
 
 pub mod diesel_schema;
 
-#[derive(Clone)]
-pub enum DatabaseRow {
-    Unit(UnitRow),
-    Item(ItemRow),
-    StockLine(StockLineRow),
-    Name(NameRow),
-    Requisition(RequisitionRow),
-    RequisitionLine(RequisitionLineRow),
-    Store(StoreRow),
-    Invoice(InvoiceRow),
-    InvoiceLine(InvoiceLineRow),
-    UserAccount(UserAccountRow),
-    SyncOut(SyncOutRow),
-}
+pub use crate::RequisitionRow;
+pub use crate::RequisitionRowStatus;
+pub use crate::RequisitionRowType;
 
 pub use central_sync_buffer::CentralSyncBufferRow;
 pub use changelog::*;
@@ -59,7 +47,6 @@ pub use name::NameRow;
 pub use name_store_join::NameStoreJoinRow;
 pub use number::{NumberRow, NumberRowType};
 pub use remote_sync_buffer::*;
-pub use requisition::*;
 pub use requisition_line::RequisitionLineRow;
 pub use stock_line::StockLineRow;
 pub use stocktake::*;

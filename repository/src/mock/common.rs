@@ -1,11 +1,11 @@
 use crate::{
     schema::{
         InvoiceLineRow, InvoiceRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow,
-        RequisitionLineRow, RequisitionRow, StockLineRow,
+        RequisitionLineRow, StockLineRow,
     },
     InvoiceLineRowRepository, InvoiceRepository, MasterListLineRowRepository,
     MasterListNameJoinRepository, MasterListRowRepository, RequisitionLineRowRepository,
-    RequisitionRowRepository, StockLineRowRepository, StorageConnection,
+    RequisitionRow, RequisitionRowRepository, StockLineRowRepository, StorageConnection,
 };
 
 pub struct FullMockRequisition {

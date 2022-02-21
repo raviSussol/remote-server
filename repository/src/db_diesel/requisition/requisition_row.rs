@@ -1,7 +1,6 @@
+use super::{requisition_dsl, RequisitionRow};
+use crate::repository_error::RepositoryError;
 use crate::StorageConnection;
-use crate::{repository_error::RepositoryError, schema::RequisitionRow};
-
-use crate::schema::diesel_schema::requisition::dsl as requisition_dsl;
 use diesel::prelude::*;
 
 pub struct RequisitionRowRepository<'a> {

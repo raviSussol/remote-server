@@ -1,14 +1,12 @@
 use crate::{
     diesel_macros::apply_equal_filter,
     repository_error::RepositoryError,
+    requisition_dsl, requisition_table,
     schema::{
-        diesel_schema::{
-            requisition, requisition::dsl as requisition_dsl, requisition_line,
-            requisition_line::dsl as requisition_line_dsl,
-        },
-        RequisitionLineRow, RequisitionRow,
+        diesel_schema::{requisition_line, requisition_line::dsl as requisition_line_dsl},
+        RequisitionLineRow,
     },
-    DBType, StorageConnection,
+    DBType, RequisitionRow, StorageConnection,
 };
 
 use diesel::{
@@ -73,7 +71,7 @@ impl<'a> RequisitionLineRepository<'a> {
 }
 
 type BoxedRequisitionLineQuery =
-    IntoBoxed<'static, InnerJoin<requisition_line::table, requisition::table>, DBType>;
+    IntoBoxed<'static, InnerJoin<requisition_line::table, requisition_table>, DBType>;
 
 fn create_filtered_query(
     filter: Option<RequisitionLineFilter>,

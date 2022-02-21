@@ -63,7 +63,7 @@ pub use user_account::mock_user_accounts;
 
 use crate::{
     InvoiceLineRowRepository, LocationRowRepository, NumberRowRepository,
-    RequisitionLineRowRepository, RequisitionRowRepository, StockLineRowRepository,
+    RequisitionLineRowRepository, RequisitionRow, RequisitionRowRepository, StockLineRowRepository,
     StocktakeLineRowRepository, StocktakeRowRepository,
 };
 
