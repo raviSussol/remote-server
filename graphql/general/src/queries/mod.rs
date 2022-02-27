@@ -18,6 +18,3 @@ pub mod stock_counts;
 pub use self::stock_counts::*;
 pub mod store;
 pub use self::store::*;
-
-#[cfg(test)]
-mod tests;
