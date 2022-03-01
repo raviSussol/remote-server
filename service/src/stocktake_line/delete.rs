@@ -79,7 +79,7 @@ mod stocktake_line_test {
         mock::{
             mock_item_a, mock_item_a_lines, mock_locations, mock_new_stock_line_for_stocktake_a,
             mock_stocktake_a, mock_stocktake_finalised, mock_stocktake_line_a,
-            mock_stocktake_line_finalised, mock_store_a, mock_store_b, MockDataInserts,
+            mock_stocktake_line_finalised, mock_store_a, mock_store_b, MockDataInserts, mock_locked_stocktake_line,
         },
         schema::StocktakeLineRow,
         test_db::setup_all,
@@ -136,7 +136,7 @@ mod stocktake_line_test {
 
         // error StocktakeIsLocked
         let store_a = mock_store_a();
-        let existing_line = mock_stocktake_line_finalised();
+        let existing_line = mock_locked_stocktake_line();
         let error = service
             .delete_stocktake_line(&context, &store_a.id, &existing_line.id)
             .unwrap_err();
