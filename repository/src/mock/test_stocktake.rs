@@ -38,20 +38,42 @@ pub fn mock_stocktake_finalised_without_lines() -> StocktakeRow {
     })
 }
 
+pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
+    let stock_line = mock_stock_line_a();
+    StocktakeLineRow {
+        id: "stocktake_line_finalised".to_string(),
+        stocktake_id: mock_stocktake_finalised().id,
+        stock_line_id: Some(stock_line.id),
+        location_id: None,
+        comment: None,
+        snapshot_number_of_packs: 11,
+        counted_number_of_packs: Some(11),
+        item_id: stock_line.item_id,
+        expiry_date: None,
+        batch: None,
+        pack_size: None,
+        cost_price_per_pack: None,
+        sell_price_per_pack: None,
+        note: None,
+    }
+}
+
+// locked
+
 pub fn mock_locked_stocktake() -> StocktakeRow {
     inline_init(|st: &mut StocktakeRow| {
-        st.id = "mock_locked_stocktake".to_string();
+        st.id = "locked_stocktake".to_string();
         st.store_id = "store_a".to_string();
         st.status = StocktakeStatus::New;
         st.is_locked = true;
     })
 }
 
-pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
+pub fn mock_locked_stocktake_line() -> StocktakeLineRow {
     let stock_line = mock_stock_line_a();
     StocktakeLineRow {
-        id: "stocktake_line_finalised".to_string(),
-        stocktake_id: mock_stocktake_finalised().id,
+        id: "locked stocktake_line_row".to_string(),
+        stocktake_id: mock_locked_stocktake().id,
         stock_line_id: Some(stock_line.id),
         location_id: None,
         comment: None,
@@ -269,6 +291,7 @@ pub fn test_stocktake_data() -> MockData {
         mock_stocktake_line_stock_deficit(),
         mock_stocktake_line_no_count_change(),
         mock_stocktake_line_new_stock_line(),
+        mock_locked_stocktake_line(),
     ];
     data.stock_lines = vec![
         mock_stock_line_stocktake_surplus(),

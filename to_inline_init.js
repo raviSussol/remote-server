@@ -5,7 +5,9 @@ const file_path = argv[2];
 const type = argv[3];
 
 const lines = fs.readFileSync(file_path, 'utf-8').split('\n');
-let result = ['\n'];
+let result = [];
+
+let defaults = ['None', 'false', '0']
 
 // (?<!struct ) = no strarting with `struct `
 const findStartRegex = `(?<!struct )${type} {`;
@@ -43,13 +45,14 @@ const replace = (start_index, startMatch) => {
     let firstLine = lines[start_index];
 
     const startOfFieldRegex = `${indent}[\\w_]+:`;
-    const endOfFieldRegex = `,$`;
 
     changedResult.push(firstLine.replace(new RegExp(findStartRegex), `inline_init(|v: &mut ${type}|{`))
     notChangedResult.push(firstLine)
 
+    let first_line = true;
     for (let current_line_index = start_index + 1; current_line_index < lines.length; current_line_index++) {
         const current_line = lines[current_line_index];
+        notChangedResult.push(current_line);
 
         let matchEndRegex = current_line.match(new RegExp(findEndRegex));
         const foundEnd = matchEndRegex?.length > 0;
@@ -61,11 +64,13 @@ const replace = (start_index, startMatch) => {
         }
 
         if (foundEnd) {
+            if (!first_line) {
+                let lastIndex = changedResult.length - 1
+                changedResult[lastIndex] = `${changedResult[lastIndex].slice(0, -1)};`
+            }
             changedResult.push(current_line.replace(new RegExp(findEndRegex), '})'));
-            break;
+            return { replacements: changedResult, next_index: current_line_index };
         }
-
-        notChangedResult.push(current_line);
 
         let startOfFieldOriginalMatch = current_line.match(new RegExp(startOfFieldRegex));
         let foundStartOfField = startOfFieldOriginalMatch?.length > 0;
@@ -75,26 +80,29 @@ const replace = (start_index, startMatch) => {
             let startOfFieldOriginal = startOfFieldOriginalMatch[0]
 
             let startOfField = startOfFieldOriginal.slice(0, -1)
-            console.log(startOfField)
-
             changed_line = current_line.replace(startOfFieldOriginal, `v.${startOfField} = `);
+
+            if (!first_line) {
+                let lastIndex = changedResult.length - 1
+                changedResult[lastIndex] = `${changedResult[lastIndex].slice(0, -1)};`
+            }
         }
 
-        let endOfFiedMatch = changed_line.match(new RegExp(endOfFieldRegex));
-        let foundEndOfField = endOfFiedMatch?.length > 0;
+        let endsWithDefault = defaults.some(d => {
+            const endsWithDefautlMatch = current_line.match(new RegExp(`${d},$`));
+            return endsWithDefautlMatch?.length > 0;
+        });
 
-        if (foundEndOfField) {
-            changed_line = `${changed_line.slice(0, -1)};`
+
+        if (!endsWithDefault) {
+            changedResult.push(changed_line);
         }
-        changedResult.push(changed_line);
-
+        first_line = false;
     }
 
-    return { replacements: changedResult, next_index: current_line_index };
+    console.log('should never reach here');
+    process.exit(1);
 }
 
-
-
-// console.log('                    id: stocktake_line_a.id.clone(),'.match(new RegExp(' [\\w_]+:')))
-
+fs.writeFileSync(file_path, process().join('\n'))
 console.log(process().join('\n'));
