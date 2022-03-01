@@ -239,6 +239,7 @@ mod test {
         stocktake::StocktakeServiceTrait,
         ListError, ListResult,
     };
+    use util::inline_init;
 
     use crate::StocktakeQueries;
 
@@ -312,17 +313,18 @@ mod test {
         let test_service = TestService(Box::new(|_, _, _, _, _| {
             Ok(ListResult {
                 count: 1,
-                rows: vec![StocktakeRow {
-                    id: "id1".to_string(),
-                    stocktake_number: 123,
-                    store_id: "store id".to_string(),
-                    comment: Some("comment".to_string()),
-                    description: Some("description".to_string()),
-                    status: StocktakeStatus::Finalised,
-                    created_datetime: NaiveDate::from_ymd(2022, 1, 22).and_hms(15, 16, 0),
-                    finalised_datetime: Some(NaiveDate::from_ymd(2022, 1, 23).and_hms(15, 16, 0)),
-                    inventory_adjustment_id: Some("inv id".to_string()),
-                }],
+                rows: vec![inline_init(|st: &mut StocktakeRow| {
+                    st.id = "id1".to_string();
+                    st.stocktake_number = 123;
+                    st.store_id = "store id".to_string();
+                    st.comment = Some("comment".to_string());
+                    st.description = Some("description".to_string());
+                    st.status = StocktakeStatus::Finalised;
+                    st.created_datetime = NaiveDate::from_ymd(2022, 1, 22).and_hms(15, 16, 0);
+                    st.finalised_datetime =
+                        Some(NaiveDate::from_ymd(2022, 1, 23).and_hms(15, 16, 0));
+                    st.inventory_adjustment_id = Some("inv id".to_string());
+                })],
             })
         }));
         let variables = Some(json!({

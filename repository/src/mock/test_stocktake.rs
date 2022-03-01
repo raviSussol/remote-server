@@ -1,49 +1,50 @@
 use chrono::NaiveDate;
+use util::inline_init;
 
 use crate::schema::{StockLineRow, StocktakeLineRow, StocktakeRow, StocktakeStatus};
 
 use super::{mock_item_a, mock_stock_line_a, mock_stock_line_b, MockData};
 
 pub fn mock_stocktake_without_lines() -> StocktakeRow {
-    StocktakeRow {
-        id: "stocktake_without_lines".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 1,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 30, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "stocktake_without_lines".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 1;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 30, 0, 0);
+    })
 }
 
 pub fn mock_stocktake_finalised() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_finalised".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 2,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::Finalised,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 30, 0, 0),
-        finalised_datetime: Some(NaiveDate::from_ymd(2021, 12, 20).and_hms_milli(10, 15, 10, 0)),
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_finalised".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 2;
+        st.status = StocktakeStatus::Finalised;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 30, 0, 0);
+        st.finalised_datetime =
+            Some(NaiveDate::from_ymd(2021, 12, 20).and_hms_milli(10, 15, 10, 0));
+    })
 }
 
 pub fn mock_stocktake_finalised_without_lines() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_finalised_no_lines".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 3,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::Finalised,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 15).and_hms_milli(12, 30, 0, 0),
-        finalised_datetime: Some(NaiveDate::from_ymd(2021, 12, 21).and_hms_milli(10, 15, 10, 0)),
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_finalised_no_lines".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 3;
+        st.status = StocktakeStatus::Finalised;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 15).and_hms_milli(12, 30, 0, 0);
+        st.finalised_datetime =
+            Some(NaiveDate::from_ymd(2021, 12, 21).and_hms_milli(10, 15, 10, 0));
+    })
+}
+
+pub fn mock_locked_stocktake() -> StocktakeRow {
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_locked_stocktake".to_string();
+        st.store_id = "store_a".to_string();
+        st.status = StocktakeStatus::New;
+        st.is_locked = true;
+    })
 }
 
 pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
@@ -69,17 +70,12 @@ pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
 // stock surplus
 
 pub fn mock_stocktake_stock_surplus() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_stock_surplus".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 4,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 22).and_hms_milli(12, 31, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_stock_surplus".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 4;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 22).and_hms_milli(12, 31, 0, 0);
+    })
 }
 
 pub fn mock_stock_line_stocktake_surplus() -> StockLineRow {
@@ -123,17 +119,12 @@ pub fn mock_stocktake_line_stock_surplus() -> StocktakeLineRow {
 // stock deficit
 
 pub fn mock_stocktake_stock_deficit() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_stock_deficit".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 1,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 22).and_hms_milli(12, 31, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_stock_deficit".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 1;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 22).and_hms_milli(12, 31, 0, 0);
+    })
 }
 
 pub fn mock_stock_line_stocktake_deficit() -> StockLineRow {
@@ -177,33 +168,23 @@ pub fn mock_stocktake_line_stock_deficit() -> StocktakeLineRow {
 // stocktake without lines
 
 pub fn mock_stocktake_no_lines() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_no_lines".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 5,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2022, 1, 6).and_hms_milli(15, 31, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_no_lines".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 5;
+        st.created_datetime = NaiveDate::from_ymd(2022, 1, 6).and_hms_milli(15, 31, 0, 0);
+    })
 }
 
 // success: no count change should not generate shipment line
 
 pub fn mock_stocktake_no_count_change() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_no_count_change".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 8,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2022, 1, 6).and_hms_milli(16, 31, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_no_count_change".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 8;
+        st.created_datetime = NaiveDate::from_ymd(2022, 1, 6).and_hms_milli(16, 31, 0, 0);
+    })
 }
 
 pub fn mock_stocktake_line_no_count_change() -> StocktakeLineRow {
@@ -229,33 +210,25 @@ pub fn mock_stocktake_line_no_count_change() -> StocktakeLineRow {
 // stocktake full edit
 
 pub fn mock_stocktake_full_edit() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_full_edit".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 6,
-        comment: Some("comment_0".to_string()),
-        description: Some("description_0".to_string()),
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 32, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_full_edit".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 6;
+        st.comment = Some("comment_0".to_string());
+        st.description = Some("description_0".to_string());
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 32, 0, 0);
+    })
 }
 
 // stocktake with new stock line
 
 pub fn mock_stocktake_new_stock_line() -> StocktakeRow {
-    StocktakeRow {
-        id: "mock_stocktake_new_stock_line".to_string(),
-        store_id: "store_a".to_string(),
-        stocktake_number: 7,
-        comment: None,
-        description: None,
-        status: StocktakeStatus::New,
-        created_datetime: NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 33, 0, 0),
-        finalised_datetime: None,
-        inventory_adjustment_id: None,
-    }
+    inline_init(|st: &mut StocktakeRow| {
+        st.id = "mock_stocktake_new_stock_line".to_string();
+        st.store_id = "store_a".to_string();
+        st.stocktake_number = 7;
+        st.created_datetime = NaiveDate::from_ymd(2021, 12, 14).and_hms_milli(12, 33, 0, 0);
+    })
 }
 pub fn mock_stocktake_line_new_stock_line() -> StocktakeLineRow {
     StocktakeLineRow {
@@ -288,6 +261,7 @@ pub fn test_stocktake_data() -> MockData {
         mock_stocktake_no_count_change(),
         mock_stocktake_full_edit(),
         mock_stocktake_new_stock_line(),
+        mock_locked_stocktake(),
     ];
     data.stocktake_lines = vec![
         mock_stocktake_line_finalised(),

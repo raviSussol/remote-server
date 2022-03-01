@@ -12,5 +12,6 @@ CREATE TABLE stocktake (
     status stocktake_status NOT NULL,
     created_datetime TIMESTAMP NOT NULL,
     finalised_datetime TIMESTAMP,
-    inventory_adjustment_id TEXT REFERENCES invoice(id)
+    inventory_adjustment_id TEXT REFERENCES invoice(id),
+    is_locked BOOLEAN,
 )
