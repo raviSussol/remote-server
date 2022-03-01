@@ -40,22 +40,14 @@ pub fn mock_stocktake_finalised_without_lines() -> StocktakeRow {
 
 pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
     let stock_line = mock_stock_line_a();
-    StocktakeLineRow {
-        id: "stocktake_line_finalised".to_string(),
-        stocktake_id: mock_stocktake_finalised().id,
-        stock_line_id: Some(stock_line.id),
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: 11,
-        counted_number_of_packs: Some(11),
-        item_id: stock_line.item_id,
-        expiry_date: None,
-        batch: None,
-        pack_size: None,
-        cost_price_per_pack: None,
-        sell_price_per_pack: None,
-        note: None,
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "stocktake_line_finalised".to_string();
+        v.stocktake_id = mock_stocktake_finalised().id;
+        v.stock_line_id = Some(stock_line.id);
+        v.snapshot_number_of_packs = 11;
+        v.counted_number_of_packs = Some(11);
+        v.item_id = stock_line.item_id;
+    })
 }
 
 // locked
@@ -71,22 +63,12 @@ pub fn mock_locked_stocktake() -> StocktakeRow {
 
 pub fn mock_locked_stocktake_line() -> StocktakeLineRow {
     let stock_line = mock_stock_line_a();
-    StocktakeLineRow {
-        id: "locked stocktake_line_row".to_string(),
-        stocktake_id: mock_locked_stocktake().id,
-        stock_line_id: Some(stock_line.id),
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: 11,
-        counted_number_of_packs: Some(11),
-        item_id: stock_line.item_id,
-        expiry_date: None,
-        batch: None,
-        pack_size: None,
-        cost_price_per_pack: None,
-        sell_price_per_pack: None,
-        note: None,
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "locked stocktake_line_row".to_string();
+        v.stocktake_id = mock_locked_stocktake().id;
+        v.stock_line_id = Some(stock_line.id);
+        v.item_id = stock_line.item_id;
+    })
 }
 
 // stock surplus
@@ -120,22 +102,14 @@ pub fn mock_stock_line_stocktake_surplus() -> StockLineRow {
 
 pub fn mock_stocktake_line_stock_surplus() -> StocktakeLineRow {
     let stock_line = mock_stock_line_b();
-    StocktakeLineRow {
-        id: "mock_stocktake_line_stock_surplus".to_string(),
-        stocktake_id: mock_stocktake_stock_surplus().id,
-        stock_line_id: Some(mock_stock_line_stocktake_surplus().id),
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: stock_line.total_number_of_packs,
-        counted_number_of_packs: Some(stock_line.total_number_of_packs + 10),
-        item_id: stock_line.item_id,
-        expiry_date: None,
-        batch: None,
-        pack_size: None,
-        cost_price_per_pack: None,
-        sell_price_per_pack: None,
-        note: None,
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "mock_stocktake_line_stock_surplus".to_string();
+        v.stocktake_id = mock_stocktake_stock_surplus().id;
+        v.stock_line_id = Some(mock_stock_line_stocktake_surplus().id);
+        v.snapshot_number_of_packs = stock_line.total_number_of_packs;
+        v.counted_number_of_packs = Some(stock_line.total_number_of_packs + 10);
+        v.item_id = stock_line.item_id;
+    })
 }
 
 // stock deficit
@@ -169,22 +143,14 @@ pub fn mock_stock_line_stocktake_deficit() -> StockLineRow {
 
 pub fn mock_stocktake_line_stock_deficit() -> StocktakeLineRow {
     let stock_line = mock_stock_line_b();
-    StocktakeLineRow {
-        id: "mock_stocktake_line_stock_deficit".to_string(),
-        stocktake_id: mock_stocktake_stock_deficit().id,
-        stock_line_id: Some(mock_stock_line_stocktake_deficit().id),
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: stock_line.total_number_of_packs,
-        counted_number_of_packs: Some(stock_line.total_number_of_packs - 10),
-        item_id: mock_stock_line_stocktake_deficit().item_id,
-        expiry_date: None,
-        batch: None,
-        pack_size: None,
-        cost_price_per_pack: None,
-        sell_price_per_pack: None,
-        note: None,
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "mock_stocktake_line_stock_deficit".to_string();
+        v.stocktake_id = mock_stocktake_stock_deficit().id;
+        v.stock_line_id = Some(mock_stock_line_stocktake_deficit().id);
+        v.snapshot_number_of_packs = stock_line.total_number_of_packs;
+        v.counted_number_of_packs = Some(stock_line.total_number_of_packs - 10);
+        v.item_id = mock_stock_line_stocktake_deficit().item_id;
+    })
 }
 
 // stocktake without lines
@@ -211,22 +177,14 @@ pub fn mock_stocktake_no_count_change() -> StocktakeRow {
 
 pub fn mock_stocktake_line_no_count_change() -> StocktakeLineRow {
     let stock_line = mock_stock_line_b();
-    StocktakeLineRow {
-        id: "mock_stocktake_line_no_count_change".to_string(),
-        stocktake_id: mock_stocktake_no_count_change().id,
-        stock_line_id: Some(mock_stock_line_b().id),
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: stock_line.total_number_of_packs,
-        counted_number_of_packs: Some(stock_line.total_number_of_packs),
-        item_id: stock_line.item_id,
-        expiry_date: None,
-        batch: None,
-        pack_size: None,
-        cost_price_per_pack: None,
-        sell_price_per_pack: None,
-        note: None,
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "mock_stocktake_line_no_count_change".to_string();
+        v.stocktake_id = mock_stocktake_no_count_change().id;
+        v.stock_line_id = Some(mock_stock_line_b().id);
+        v.snapshot_number_of_packs = stock_line.total_number_of_packs;
+        v.counted_number_of_packs = Some(stock_line.total_number_of_packs);
+        v.item_id = stock_line.item_id;
+    })
 }
 
 // stocktake full edit
@@ -253,22 +211,18 @@ pub fn mock_stocktake_new_stock_line() -> StocktakeRow {
     })
 }
 pub fn mock_stocktake_line_new_stock_line() -> StocktakeLineRow {
-    StocktakeLineRow {
-        id: "mock_stocktake_line_new_stock_line".to_string(),
-        stocktake_id: mock_stocktake_new_stock_line().id,
-        stock_line_id: None,
-        location_id: None,
-        comment: None,
-        snapshot_number_of_packs: 0,
-        counted_number_of_packs: Some(55),
-        item_id: mock_item_a().id,
-        expiry_date: Some(NaiveDate::from_ymd(2022, 12, 14)),
-        batch: Some("batch".to_string()),
-        pack_size: Some(10),
-        cost_price_per_pack: Some(11.0),
-        sell_price_per_pack: Some(12.0),
-        note: Some("note".to_string()),
-    }
+    inline_init(|v: &mut StocktakeLineRow| {
+        v.id = "mock_stocktake_line_new_stock_line".to_string();
+        v.stocktake_id = mock_stocktake_new_stock_line().id;
+        v.counted_number_of_packs = Some(55);
+        v.item_id = mock_item_a().id;
+        v.expiry_date = Some(NaiveDate::from_ymd(2022, 12, 14));
+        v.batch = Some("batch".to_string());
+        v.pack_size = Some(10);
+        v.cost_price_per_pack = Some(11.0);
+        v.sell_price_per_pack = Some(12.0);
+        v.note = Some("note".to_string());
+    })
 }
 
 pub fn test_stocktake_data() -> MockData {

@@ -100,8 +100,7 @@ const replace = (start_index, startMatch) => {
         first_line = false;
     }
 
-    console.log('should never reach here');
-    process.exit(1);
+    return { replacements: [firstLine], next_index: start_index };
 }
 
 fs.writeFileSync(file_path, process().join('\n'))

@@ -152,9 +152,9 @@ mod stocktake_line_test {
     use repository::{
         mock::{
             mock_item_a, mock_item_a_lines, mock_locations, mock_locked_stocktake,
-            mock_new_stock_line_for_stocktake_a, mock_stocktake_a, mock_stocktake_finalised,
-            mock_stocktake_line_a, mock_stocktake_line_finalised, mock_store_a, mock_store_b,
-            MockDataInserts,
+            mock_locked_stocktake_line, mock_new_stock_line_for_stocktake_a, mock_stocktake_a,
+            mock_stocktake_finalised, mock_stocktake_line_a, mock_stocktake_line_finalised,
+            mock_store_a, mock_store_b, MockDataInserts,
         },
         schema::StocktakeLineRow,
         test_db::setup_all,
@@ -238,9 +238,9 @@ mod stocktake_line_test {
             .unwrap_err();
         assert_eq!(error, UpdateStocktakeLineError::CannotEditFinalised);
 
-        // error CannotEditFinalised
+        // error StocktakeIsLocked
         let store_a = mock_store_a();
-        let stocktake_line_a = mock_locked_stocktake();
+        let stocktake_line_a = mock_locked_stocktake_line();
         let error = service
             .update_stocktake_line(
                 &context,
