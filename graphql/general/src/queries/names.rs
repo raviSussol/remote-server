@@ -42,6 +42,10 @@ pub struct NameFilterInput {
     pub is_store: Option<bool>,
     /// Code of the store if store is linked to name
     pub store_code: Option<SimpleStringFilterInput>,
+    // Show invisible names in current store (based on store_id parameter)
+    pub show_invisible_in_current_store: Option<bool>,
+    // Show system names
+    pub show_system_names: Option<bool>,
 }
 
 impl From<NameFilterInput> for NameFilter {
@@ -55,6 +59,8 @@ impl From<NameFilterInput> for NameFilter {
             is_store: f.is_store,
             store_code: f.store_code.map(SimpleStringFilter::from),
             store_id: None,
+            show_invisible_in_current_store: f.show_invisible_in_current_store,
+            show_system_names: f.show_system_names,
         }
     }
 }

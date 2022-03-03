@@ -57,7 +57,7 @@ impl RemotePullTranslation for NameStoreJoinTranslation {
                 })
             }
         };
-
+        // TODO delete if inactive = false
         Ok(Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::NameStoreJoin(NameStoreJoinRow {
                 id: data.ID,

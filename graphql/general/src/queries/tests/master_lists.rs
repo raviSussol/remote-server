@@ -15,6 +15,33 @@ mod graphql {
         ListError, ListResult,
     };
 
+    macro_rules! map_filter {
+        ($from:ident, $f:expr) => {{
+            pub struct TestService;
+
+            impl MasterListServiceTrait for TestService {
+                fn get_master_lists(
+                    &self,
+                    _: &ServiceContext,
+
+                    filter: Option<MasterListFilter>,
+                    sort: Option<MasterListSort>,
+                ) -> Result<ListResult<MasterList>, ListError> {
+                    (self.0)(pagination, filter, sort)
+                }
+            }
+
+            repository::EqualFilter {
+                equal_to: $from.equal_to.map($f),
+                not_equal_to: $from.not_equal_to.map($f),
+                equal_any: $from
+                    .equal_any
+                    .map(|inputs| inputs.into_iter().map($f).collect()),
+                not_equal_all: None,
+            }
+        }};
+    }
+
     use crate::GeneralQueries;
 
     type GetMasterLists = dyn Fn(

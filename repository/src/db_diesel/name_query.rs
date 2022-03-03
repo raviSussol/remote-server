@@ -13,8 +13,9 @@ use crate::{
 use crate::{EqualFilter, Pagination, SimpleStringFilter, Sort};
 
 use diesel::{
-    dsl::{IntoBoxed, LeftJoin},
+    dsl::{And, Eq, IntoBoxed, LeftJoin},
     prelude::*,
+    query_source::joins::OnClauseWrapper,
 };
 use util::constants::SYSTEM_NAME_CODES;
 
@@ -35,6 +36,8 @@ pub struct NameFilter {
     pub store_id: Option<EqualFilter<String>>,
     pub is_store: Option<bool>,
     pub store_code: Option<SimpleStringFilter>,
+    pub show_invisible_in_current_store: Option<bool>,
+    pub show_system_names: Option<bool>,
 }
 
 pub enum NameSortField {
@@ -129,27 +132,22 @@ fn to_domain((name_row, name_store_join_row, store_row): NameAndNameStoreJoin) -
     }
 }
 
-type BoxedNameQuery = IntoBoxed<
+// name_store_join_dsl::name_id.eq(name_dsl::id)
+type NameIdEqualToId = Eq<name_store_join_dsl::name_id, name_dsl::id>;
+// name_store_join_dsl::store_id.eq(store_id)
+type StoreIdEqualToStr<'a> = Eq<name_store_join_dsl::store_id, &'a str>;
+// name_store_join_dsl::name_id.eq(name_dsl::id).and(name_store_join_dsl::store_id.eq(store_id))
+type OnNameStoreJoinToNameJoin<'a> =
+    OnClauseWrapper<name_store_join::table, And<NameIdEqualToId, StoreIdEqualToStr<'a>>>;
+
+type BoxedNameQuery<'a> = IntoBoxed<
     'static,
-    LeftJoin<LeftJoin<name::table, name_store_join::table>, store::table>,
+    LeftJoin<LeftJoin<name::table, OnNameStoreJoinToNameJoin<'a>>, store::table>,
     DBType,
 >;
 
-fn apply_special_filters(store_id: &str, mut query: BoxedNameQuery) -> BoxedNameQuery {
-    // Filter out special name and current store
-    query = query.filter(name::code.ne_all(SYSTEM_NAME_CODES));
-    // Only one instance of name store join
-    // query = query.filter(
-    //     name_store_join_dsl::store_id
-    //         .eq(store_id.to_string())
-    //         .or(name_store_join_dsl::store_id.is_null()),
-    // );
-
-    query
-}
-
 fn create_filtered_query(store_id: &str, filter: Option<NameFilter>) -> BoxedNameQuery {
-    let query = name_dsl::name
+    let mut query = name_dsl::name
         .left_join(
             name_store_join_dsl::name_store_join.on(name_store_join_dsl::name_id
                 .eq(name_dsl::id)
@@ -158,7 +156,36 @@ fn create_filtered_query(store_id: &str, filter: Option<NameFilter>) -> BoxedNam
         .left_join(store_dsl::store)
         .into_boxed();
 
-    let mut query = apply_special_filters(store_id, query);
+    // Special filters
+
+    let show_invisible_in_current_store = filter
+        .as_ref()
+        .map(|filter| filter.show_invisible_in_current_store)
+        .flatten()
+        .unwrap_or(false);
+
+    let show_system_names = filter
+        .as_ref()
+        .map(|filter| filter.show_system_names)
+        .flatten()
+        .unwrap_or(false);
+
+    query = match (show_invisible_in_current_store, show_system_names) {
+        (true, true) => query,
+        (false, true) => query.filter(
+            name_store_join_dsl::id
+                .is_not_null()
+                // System names don't have name_store_join
+                .or(name_dsl::code.eq_any(SYSTEM_NAME_CODES)),
+        ),
+        (true, false) => query.filter(name_dsl::code.ne_all(SYSTEM_NAME_CODES)),
+        (false, false) => {
+            query = query.filter(name_dsl::code.ne_all(SYSTEM_NAME_CODES));
+            query.filter(name_store_join_dsl::id.is_not_null())
+        }
+    };
+
+    // Normal filters
 
     if let Some(f) = filter {
         let NameFilter {
@@ -170,6 +197,8 @@ fn create_filtered_query(store_id: &str, filter: Option<NameFilter>) -> BoxedNam
             store_id,
             is_store,
             store_code,
+            show_invisible_in_current_store: _,
+            show_system_names: _,
         } = f;
 
         apply_equal_filter!(query, id, name_dsl::id);
@@ -189,8 +218,8 @@ fn create_filtered_query(store_id: &str, filter: Option<NameFilter>) -> BoxedNam
             Some(true) => query.filter(store_dsl::id.is_not_null()),
             Some(false) => query.filter(store_dsl::id.is_null()),
             None => query,
-        }
-    }
+        };
+    };
 
     query
 }
