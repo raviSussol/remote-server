@@ -1,5 +1,7 @@
 use super::{OutError, UpdateRequestRequisition};
-use crate::requisition::{common::check_requisition_exists, request_requisition::check_other_party_exists};
+use crate::requisition::{
+    common::check_requisition_exists, request_requisition::check_other_party_exists,
+};
 use repository::{
     schema::{RequisitionRow, RequisitionRowStatus, RequisitionRowType},
     StorageConnection,
@@ -30,7 +32,7 @@ pub fn validate(
         Some(other_party_id) => other_party_id,
     };
 
-    let other_party = check_other_party_exists(connection, &other_party_id)?
+    let other_party = check_other_party_exists(connection, store_id, &other_party_id)?
         .ok_or(OutError::OtherPartyDoesNotExist)?;
 
     if !other_party.is_supplier() {

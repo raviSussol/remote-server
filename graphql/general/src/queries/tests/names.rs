@@ -70,7 +70,7 @@ mod graphql {
           names(sort: $sort, storeId: \"store_a\"){
               ... on NameConnector {
                 nodes {
-                    name
+                    name(storeId: \"store_a\")
                 }
               }
           }

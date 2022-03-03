@@ -16,6 +16,7 @@ use diesel::{
     dsl::{IntoBoxed, LeftJoin},
     prelude::*,
 };
+use util::constants::SYSTEM_NAME_CODES;
 
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct Name {
@@ -24,7 +25,7 @@ pub struct Name {
     pub store_row: Option<StoreRow>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct NameFilter {
     pub id: Option<EqualFilter<String>>,
     pub name: Option<SimpleStringFilter>,
@@ -32,6 +33,8 @@ pub struct NameFilter {
     pub is_customer: Option<bool>,
     pub is_supplier: Option<bool>,
     pub store_id: Option<EqualFilter<String>>,
+    pub is_store: Option<bool>,
+    pub store_code: Option<SimpleStringFilter>,
 }
 
 pub enum NameSortField {
@@ -52,29 +55,42 @@ impl<'a> NameQueryRepository<'a> {
         NameQueryRepository { connection }
     }
 
-    pub fn count(&self, filter: Option<NameFilter>) -> Result<i64, RepositoryError> {
+    pub fn count(
+        &self,
+        store_id: &str,
+        filter: Option<NameFilter>,
+    ) -> Result<i64, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
-        let query = create_filtered_query(filter);
+        let query = create_filtered_query(store_id, filter);
 
         Ok(query.count().get_result(&self.connection.connection)?)
     }
 
-    pub fn query_by_filter(&self, filter: NameFilter) -> Result<Vec<Name>, RepositoryError> {
-        self.query(Pagination::new(), Some(filter), None)
+    pub fn query_by_filter(
+        &self,
+        store_id: &str,
+        filter: NameFilter,
+    ) -> Result<Vec<Name>, RepositoryError> {
+        self.query(store_id, Pagination::new(), Some(filter), None)
     }
 
-    pub fn query_one(&self, filter: NameFilter) -> Result<Option<Name>, RepositoryError> {
-        Ok(self.query_by_filter(filter)?.pop())
+    pub fn query_one(
+        &self,
+        store_id: &str,
+        filter: NameFilter,
+    ) -> Result<Option<Name>, RepositoryError> {
+        Ok(self.query_by_filter(store_id, filter)?.pop())
     }
 
     pub fn query(
         &self,
+        store_id: &str,
         pagination: Pagination,
         filter: Option<NameFilter>,
         sort: Option<NameSort>,
     ) -> Result<Vec<Name>, RepositoryError> {
         // TODO (beyond M1), check that store_id matches current store
-        let mut query = create_filtered_query(filter);
+        let mut query = create_filtered_query(store_id, filter);
 
         if let Some(sort) = sort {
             match sort.key {
@@ -89,10 +105,17 @@ impl<'a> NameQueryRepository<'a> {
             query = query.order(name_dsl::id.asc())
         }
 
-        let result = query
+        let final_query = query
             .offset(pagination.offset as i64)
-            .limit(pagination.limit as i64)
-            .load::<NameAndNameStoreJoin>(&self.connection.connection)?;
+            .limit(pagination.limit as i64);
+
+        // Debug diesel query
+        println!(
+            "{}",
+            diesel::debug_query::<DBType, _>(&final_query).to_string()
+        );
+
+        let result = final_query.load::<NameAndNameStoreJoin>(&self.connection.connection)?;
 
         Ok(result.into_iter().map(to_domain).collect())
     }
@@ -112,23 +135,60 @@ type BoxedNameQuery = IntoBoxed<
     DBType,
 >;
 
-pub fn create_filtered_query(filter: Option<NameFilter>) -> BoxedNameQuery {
-    let mut query = name_dsl::name
-        .left_join(name_store_join_dsl::name_store_join)
+fn apply_special_filters(store_id: &str, mut query: BoxedNameQuery) -> BoxedNameQuery {
+    // Filter out special name and current store
+    query = query.filter(name::code.ne_all(SYSTEM_NAME_CODES));
+    // Only one instance of name store join
+    // query = query.filter(
+    //     name_store_join_dsl::store_id
+    //         .eq(store_id.to_string())
+    //         .or(name_store_join_dsl::store_id.is_null()),
+    // );
+
+    query
+}
+
+fn create_filtered_query(store_id: &str, filter: Option<NameFilter>) -> BoxedNameQuery {
+    let query = name_dsl::name
+        .left_join(
+            name_store_join_dsl::name_store_join.on(name_store_join_dsl::name_id
+                .eq(name_dsl::id)
+                .and(name_store_join_dsl::store_id.eq(store_id))),
+        )
         .left_join(store_dsl::store)
         .into_boxed();
 
-    if let Some(f) = filter {
-        apply_equal_filter!(query, f.id, name_dsl::id);
-        apply_simple_string_filter!(query, f.code, name_dsl::code);
-        apply_simple_string_filter!(query, f.name, name_dsl::name_);
-        apply_equal_filter!(query, f.store_id, store_dsl::id);
+    let mut query = apply_special_filters(store_id, query);
 
-        if let Some(is_customer) = f.is_customer {
+    if let Some(f) = filter {
+        let NameFilter {
+            id,
+            name,
+            code,
+            is_customer,
+            is_supplier,
+            store_id,
+            is_store,
+            store_code,
+        } = f;
+
+        apply_equal_filter!(query, id, name_dsl::id);
+        apply_simple_string_filter!(query, code, name_dsl::code);
+        apply_simple_string_filter!(query, name, name_dsl::name_);
+        apply_simple_string_filter!(query, store_code, store_dsl::code);
+        apply_equal_filter!(query, store_id, store_dsl::id);
+
+        if let Some(is_customer) = is_customer {
             query = query.filter(name_store_join_dsl::name_is_customer.eq(is_customer));
         }
-        if let Some(is_supplier) = f.is_supplier {
+        if let Some(is_supplier) = is_supplier {
             query = query.filter(name_store_join_dsl::name_is_supplier.eq(is_supplier));
+        }
+
+        query = match is_store {
+            Some(true) => query.filter(store_dsl::id.is_not_null()),
+            Some(false) => query.filter(store_dsl::id.is_null()),
+            None => query,
         }
     }
 
@@ -137,14 +197,7 @@ pub fn create_filtered_query(filter: Option<NameFilter>) -> BoxedNameQuery {
 
 impl NameFilter {
     pub fn new() -> NameFilter {
-        NameFilter {
-            id: None,
-            name: None,
-            code: None,
-            is_customer: None,
-            is_supplier: None,
-            store_id: None,
-        }
+        NameFilter::default()
     }
 
     pub fn id(mut self, filter: EqualFilter<String>) -> Self {
@@ -154,6 +207,11 @@ impl NameFilter {
 
     pub fn code(mut self, filter: SimpleStringFilter) -> Self {
         self.code = Some(filter);
+        self
+    }
+
+    pub fn name(mut self, filter: SimpleStringFilter) -> Self {
+        self.name = Some(filter);
         self
     }
 
@@ -248,19 +306,20 @@ mod tests {
         }
 
         let default_page_size = usize::try_from(DEFAULT_PAGINATION_LIMIT).unwrap();
+        let store_id = "store_a";
 
         // Test
 
         // .count()
         assert_eq!(
-            usize::try_from(repository.count(None).unwrap()).unwrap(),
+            usize::try_from(repository.count(store_id, None).unwrap()).unwrap(),
             queries.len()
         );
 
         // .query, no pagenation (default)
         assert_eq!(
             repository
-                .query(Pagination::new(), None, None)
+                .query(store_id, Pagination::new(), None, None)
                 .unwrap()
                 .len(),
             default_page_size
@@ -269,6 +328,7 @@ mod tests {
         // .query, pagenation (offset 10)
         let result = repository
             .query(
+                store_id,
                 Pagination {
                     offset: 10,
                     limit: DEFAULT_PAGINATION_LIMIT,
@@ -287,6 +347,7 @@ mod tests {
         // .query, pagenation (first 10)
         let result = repository
             .query(
+                store_id,
                 Pagination {
                     offset: 0,
                     limit: 10,
@@ -301,6 +362,7 @@ mod tests {
         // .query, pagenation (offset 150, first 90) <- more then records in table
         let result = repository
             .query(
+                store_id,
                 Pagination {
                     offset: 150,
                     limit: 90,
@@ -323,10 +385,12 @@ mod tests {
             test_db::setup_all("test_name_query_sort", MockDataInserts::all()).await;
         let repo = NameQueryRepository::new(&connection);
 
-        let mut names = repo.query(Pagination::new(), None, None).unwrap();
+        let store_id = "store_a";
+        let mut names = repo.query(store_id, Pagination::new(), None, None).unwrap();
 
         let sorted = repo
             .query(
+                store_id,
                 Pagination::new(),
                 None,
                 Some(NameSort {
@@ -352,6 +416,7 @@ mod tests {
 
         let sorted = repo
             .query(
+                store_id,
                 Pagination::new(),
                 None,
                 Some(NameSort {

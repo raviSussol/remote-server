@@ -67,7 +67,7 @@ fn validate(
         return Err(OutError::RequisitionAlreadyExists);
     }
 
-    let other_party = check_other_party_exists(connection, &input.other_party_id)?
+    let other_party = check_other_party_exists(connection, store_id, &input.other_party_id)?
         .ok_or(OutError::OtherPartyDoesNotExist)?;
 
     if !other_party.is_supplier() {

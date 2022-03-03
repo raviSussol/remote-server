@@ -9,6 +9,7 @@ pub const MIN_LIMIT: u32 = 1;
 
 pub fn get_names(
     connection_manager: &StorageConnectionManager,
+    store_id: &str,
     pagination: Option<PaginationOption>,
     filter: Option<NameFilter>,
     sort: Option<NameSort>,
@@ -18,7 +19,7 @@ pub fn get_names(
     let repository = NameQueryRepository::new(&connection);
 
     Ok(ListResult {
-        rows: repository.query(pagination, filter.clone(), sort)?,
-        count: i64_to_u32(repository.count(filter)?),
+        rows: repository.query(store_id, pagination, filter.clone(), sort)?,
+        count: i64_to_u32(repository.count(store_id, filter)?),
     })
 }

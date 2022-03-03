@@ -38,6 +38,10 @@ pub struct NameFilterInput {
     pub is_customer: Option<bool>,
     /// Filter by supplier property
     pub is_supplier: Option<bool>,
+    /// Is this name a store
+    pub is_store: Option<bool>,
+    /// Code of the store if store is linked to name
+    pub store_code: Option<SimpleStringFilterInput>,
 }
 
 impl From<NameFilterInput> for NameFilter {
@@ -48,6 +52,8 @@ impl From<NameFilterInput> for NameFilter {
             code: f.code.map(SimpleStringFilter::from),
             is_customer: f.is_customer,
             is_supplier: f.is_supplier,
+            is_store: f.is_store,
+            store_code: f.store_code.map(SimpleStringFilter::from),
             store_id: None,
         }
     }
@@ -66,6 +72,7 @@ pub enum NamesResponse {
 
 pub fn names(
     ctx: &Context<'_>,
+    store_id: &str,
     page: Option<PaginationInput>,
     filter: Option<NameFilterInput>,
     sort: Option<Vec<NameSortInput>>,
@@ -73,6 +80,7 @@ pub fn names(
     let connection_manager = ctx.get_connection_manager();
     let names = get_names(
         connection_manager,
+        store_id,
         page.map(PaginationOption::from),
         filter.map(NameFilter::from),
         // Currently only one sort option is supported, use the first from the list.

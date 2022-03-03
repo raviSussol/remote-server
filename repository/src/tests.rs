@@ -376,6 +376,7 @@ mod repository_test {
         test_db::setup(&settings).await;
         let connection_manager = get_storage_connection_manager(&settings);
         let connection = connection_manager.connection().unwrap();
+        let store_id = "store_a";
 
         // setup
         let name_repo = NameRepository::new(&connection);
@@ -388,18 +389,9 @@ mod repository_test {
         // test filter:
         let result = repo
             .query(
+                store_id,
                 Pagination::new(),
-                Some(NameFilter {
-                    id: None,
-                    name: Some(SimpleStringFilter {
-                        equal_to: Some("name_1".to_string()),
-                        like: None,
-                    }),
-                    code: None,
-                    is_customer: None,
-                    is_supplier: None,
-                    store_id: None,
-                }),
+                Some(NameFilter::new().name(SimpleStringFilter::equal_to("name_1"))),
                 None,
             )
             .unwrap();
@@ -408,18 +400,9 @@ mod repository_test {
 
         let result = repo
             .query(
+                store_id,
                 Pagination::new(),
-                Some(NameFilter {
-                    id: None,
-                    name: Some(SimpleStringFilter {
-                        equal_to: None,
-                        like: Some("me_".to_string()),
-                    }),
-                    code: None,
-                    is_customer: None,
-                    is_supplier: None,
-                    store_id: None,
-                }),
+                Some(NameFilter::new().name(SimpleStringFilter::like("me_"))),
                 None,
             )
             .unwrap();
@@ -428,18 +411,9 @@ mod repository_test {
         // case insensitive search
         let result = repo
             .query(
+                store_id,
                 Pagination::new(),
-                Some(NameFilter {
-                    id: None,
-                    name: Some(SimpleStringFilter {
-                        equal_to: None,
-                        like: Some("mE_".to_string()),
-                    }),
-                    code: None,
-                    is_customer: None,
-                    is_supplier: None,
-                    store_id: None,
-                }),
+                Some(NameFilter::new().name(SimpleStringFilter::like("mE_"))),
                 None,
             )
             .unwrap();
@@ -469,18 +443,9 @@ mod repository_test {
 
         let result = repo
             .query(
+                store_id,
                 Pagination::new(),
-                Some(NameFilter {
-                    id: None,
-                    name: None,
-                    code: Some(SimpleStringFilter {
-                        equal_to: Some("code1".to_string()),
-                        like: None,
-                    }),
-                    is_customer: None,
-                    is_supplier: None,
-                    store_id: None,
-                }),
+                Some(NameFilter::new().name(SimpleStringFilter::equal_to("code1"))),
                 None,
             )
             .unwrap();
@@ -519,6 +484,7 @@ mod repository_test {
 
         let result = repo
             .query(
+                store_id,
                 Pagination::new(),
                 None,
                 Some(NameSort {
