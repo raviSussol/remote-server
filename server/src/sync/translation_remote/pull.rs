@@ -13,7 +13,7 @@ use crate::sync::{
     translation_remote::{
         invoice::InvoiceTranslation, invoice_line::InvoiceLineTranslation,
         number::NumberTranslation, stock_line::StockLineTranslation,
-        stocktake::StocktakeTranslation, stocktake_line::StocktakeLineTranslation,
+        stocktake::StocktakeTranslation, stocktake_line::StocktakeLineTranslation, name_store_join::NameStoreJoinTranslation,
     },
     SyncImportError, SyncTranslationError,
 };
@@ -84,7 +84,7 @@ fn do_translation(
         Box::new(NumberTranslation {}),
         Box::new(StockLineTranslation {}),
         // Don't pull name store joins for now
-        // Box::new(NameStoreJoinTranslation {}),
+        Box::new(NameStoreJoinTranslation {}),
         Box::new(InvoiceTranslation {}),
         Box::new(InvoiceLineTranslation {}),
         Box::new(StocktakeTranslation {}),
