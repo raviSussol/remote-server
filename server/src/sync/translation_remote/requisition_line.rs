@@ -18,17 +18,20 @@ use super::{
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, PartialEq)]
 pub struct LegacyRequisitionLineRow {
-    pub ID: String,
-    pub requisition_ID: String,
-    pub item_ID: String,
+    #[serde(rename = "ID")]
+    pub id: String,
+    #[serde(rename = "requisition_ID")]
+    pub requisition_id: String,
+    #[serde(rename = "item_ID")]
+    pub item_id: String,
 
-    // requested_quantity
-    pub Cust_stock_order: i32,
+    #[serde(rename = "Cust_stock_order")]
+    pub requested_quantity: i32,
     pub suggested_quantity: i32,
-    // supply_quantity
-    pub actualQuan: i32,
-    // available_stock_on_hand
-    pub stock_on_hand: i32,
+    #[serde(rename = "actualQuan")]
+    pub supply_quantity: i32,
+    #[serde(rename = "stock_on_hand")]
+    pub available_stock_on_hand: i32,
     // average_monthly_consumption: daily_usage * NUMBER_OF_DAYS_IN_A_MONTH
     pub daily_usage: f64,
 
@@ -57,17 +60,31 @@ impl RemotePullTranslation for RequisitionLineTranslation {
             },
         )?;
 
+        let LegacyRequisitionLineRow {
+            id,
+            requisition_id,
+            item_id,
+            requested_quantity,
+            suggested_quantity,
+            supply_quantity,
+            available_stock_on_hand,
+            daily_usage,
+            comment,
+        } = data;
+
         Ok(Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::RequisitionLine(RequisitionLineRow {
-                id: data.ID.to_string(),
-                requisition_id: data.requisition_ID,
-                item_id: data.item_ID,
-                requested_quantity: data.Cust_stock_order,
-                suggested_quantity: data.suggested_quantity,
-                supply_quantity: data.actualQuan,
-                available_stock_on_hand: data.stock_on_hand,
-                average_monthly_consumption: (data.daily_usage * NUMBER_OF_DAYS_IN_A_MONTH) as i32,
-                comment: data.comment,
+                // Simple
+                id,
+                requisition_id,
+                item_id,
+                requested_quantity,
+                suggested_quantity,
+                supply_quantity,
+                available_stock_on_hand,
+                comment,
+                // Complex
+                average_monthly_consumption: (daily_usage * NUMBER_OF_DAYS_IN_A_MONTH) as i32,
             }),
         )))
     }
@@ -107,15 +124,17 @@ impl RemotePushUpsertTranslation for RequisitionLineTranslation {
             ))?;
 
         let legacy_row = LegacyRequisitionLineRow {
-            ID: id.clone(),
-            requisition_ID: requisition_id,
-            item_ID: item_id,
-            Cust_stock_order: requested_quantity,
+            // Simple
+            id: id.clone(),
+            requisition_id,
+            item_id,
+            requested_quantity,
             suggested_quantity,
-            actualQuan: supply_quantity,
-            stock_on_hand: available_stock_on_hand,
-            daily_usage: average_monthly_consumption as f64 / NUMBER_OF_DAYS_IN_A_MONTH,
+            supply_quantity,
+            available_stock_on_hand,
             comment,
+            // Complex
+            daily_usage: average_monthly_consumption as f64 / NUMBER_OF_DAYS_IN_A_MONTH,
         };
 
         Ok(Some(vec![PushUpsertRecord {
