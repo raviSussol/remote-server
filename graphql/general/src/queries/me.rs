@@ -21,6 +21,10 @@ impl User {
     pub async fn email(&self) -> &Option<String> {
         &self.user.email
     }
+
+    pub async fn username(&self) -> &str {
+        &self.user.username
+    }
 }
 
 #[derive(Union)]
