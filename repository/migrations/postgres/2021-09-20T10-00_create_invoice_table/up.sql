@@ -19,6 +19,7 @@ CREATE TABLE invoice (
     -- For inbound shipments, the id of the sending supplier.
     name_id TEXT NOT NULL REFERENCES name(id),
     name_store_id TEXT REFERENCES store (id),
+    user_id TEXT NOT NULL REFERENCES user_account(id),
     -- For outbound shipments, the id of the issuing store.
     -- For inbound shipments, the id of the receiving store.
     store_id TEXT NOT NULL REFERENCES store (id),

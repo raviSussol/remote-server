@@ -177,7 +177,7 @@ mod invoice_count_service_test {
     async fn test_created_invoice_count() {
         let (_, connection, _, _) = test_db::setup_all(
             "omsupply-database-created-invoice-count",
-            MockDataInserts::none(),
+            MockDataInserts::none().user_accounts(),
         )
         .await;
 
