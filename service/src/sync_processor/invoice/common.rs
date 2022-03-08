@@ -1,6 +1,7 @@
 use crate::{
     number::next_number,
-    sync_processor::{ProcessRecordError, RecordForProcessing}, user_account::get_default_user_id,
+    sync_processor::{ProcessRecordError, RecordForProcessing},
+    user_account::get_default_user_id,
 };
 use chrono::Utc;
 use repository::EqualFilter;

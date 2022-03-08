@@ -5,7 +5,7 @@ use crate::schema::{
     InvoiceLineRow, InvoiceLineRowType, InvoiceRow, InvoiceRowStatus, InvoiceRowType,
 };
 
-use super::{MockData, user_account::mock_user_account_a};
+use super::{user_account::mock_user_account_a, MockData};
 
 pub fn mock_test_unallocated_line() -> MockData {
     let mut result = MockData::default();

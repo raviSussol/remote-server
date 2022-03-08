@@ -3,7 +3,7 @@ use repository::{
     schema::{RequisitionLineRow, RequisitionRow},
     ItemStatsFilter, ItemStatsRepository, RepositoryError, StorageConnection,
 };
-use util::inline_init;
+
 use util::uuid::uuid;
 
 pub struct GenerateSuggestedQuantity {

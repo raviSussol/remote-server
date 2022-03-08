@@ -153,7 +153,8 @@ mod graphql {
         stocktake::{
             update::{UpdateStocktakeError, UpdateStocktakeInput},
             StocktakeServiceTrait,
-        }, user_account::get_default_user_id,
+        },
+        user_account::get_default_user_id,
     };
 
     use crate::StocktakeMutations;

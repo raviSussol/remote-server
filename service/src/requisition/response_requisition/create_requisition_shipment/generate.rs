@@ -1,5 +1,7 @@
 use super::{ItemFulFillment, OutError};
-use crate::{invoice::check_other_party_id, number::next_number, user_account::get_default_user_id};
+use crate::{
+    invoice::check_other_party_id, number::next_number, user_account::get_default_user_id,
+};
 use chrono::Utc;
 use repository::{
     schema::{

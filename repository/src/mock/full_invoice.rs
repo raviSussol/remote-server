@@ -7,7 +7,10 @@ use crate::schema::{
     InvoiceLineRow, InvoiceLineRowType, InvoiceRow, InvoiceRowStatus, InvoiceRowType, StockLineRow,
 };
 
-use super::{common::{FullMockInvoice, FullMockInvoiceLine}, user_account::mock_user_account_a};
+use super::{
+    common::{FullMockInvoice, FullMockInvoiceLine},
+    user_account::mock_user_account_a,
+};
 
 pub fn mock_full_draft_outbound_shipment_a() -> FullMockInvoice {
     let invoice_id = "draft_ci_a".to_string();

@@ -13,7 +13,7 @@ use util::{constants::INVENTORY_ADJUSTMENT_NAME_CODE, inline_edit, uuid::uuid};
 
 use crate::{
     number::next_number, service_provider::ServiceContext, stocktake::query::get_stocktake,
-    validate::check_store_id_matches, user_account::get_default_user_id,
+    user_account::get_default_user_id, validate::check_store_id_matches,
 };
 
 use super::validate::{check_stocktake_exist, check_stocktake_not_finalised};

@@ -3,7 +3,9 @@ use util::inline_init;
 
 use crate::schema::{StockLineRow, StocktakeLineRow, StocktakeRow, StocktakeStatus};
 
-use super::{mock_item_a, mock_stock_line_a, mock_stock_line_b, MockData, user_account::mock_user_account_a};
+use super::{
+    mock_item_a, mock_stock_line_a, mock_stock_line_b, user_account::mock_user_account_a, MockData,
+};
 
 pub fn mock_stocktake_without_lines() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {

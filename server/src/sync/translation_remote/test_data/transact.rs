@@ -1,8 +1,11 @@
 use chrono::{Duration, NaiveDate};
-use repository::{schema::{
-    ChangelogAction, ChangelogRow, ChangelogTableName, InvoiceRow, InvoiceRowStatus,
-    InvoiceRowType, RemoteSyncBufferAction, RemoteSyncBufferRow,
-}, mock::user_account_for_remote_test};
+use repository::{
+    mock::user_account_for_remote_test,
+    schema::{
+        ChangelogAction, ChangelogRow, ChangelogTableName, InvoiceRow, InvoiceRowStatus,
+        InvoiceRowType, RemoteSyncBufferAction, RemoteSyncBufferRow,
+    },
+};
 use serde_json::json;
 
 use crate::sync::translation_remote::{
