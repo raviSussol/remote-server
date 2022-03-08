@@ -1,8 +1,8 @@
 use chrono::{Duration, NaiveDate};
-use repository::schema::{
+use repository::{schema::{
     ChangelogAction, ChangelogRow, ChangelogTableName, InvoiceRow, InvoiceRowStatus,
     InvoiceRowType, RemoteSyncBufferAction, RemoteSyncBufferRow,
-};
+}, mock::user_account_for_remote_test};
 use serde_json::json;
 
 use crate::sync::translation_remote::{
@@ -85,7 +85,7 @@ const TRANSACT_1: (&'static str, &'static str) = (
       "user2": "",
       "user3": "",
       "user4": "",
-      "user_ID": "",
+      "user_ID": "user_account_for_remote_test_id",
       "wardID": "",
       "waybill_number": ""
   }"#,
@@ -95,6 +95,7 @@ fn transact_1_pull_record() -> TestSyncRecord {
         translated_record: Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::Invoice(InvoiceRow {
                 id: TRANSACT_1.0.to_string(),
+                user_id: user_account_for_remote_test().id,
                 store_id: "store_a".to_string(),
                 name_id: "name_store_a".to_string(),
                 name_store_id: Some("store_a".to_string()),
@@ -138,6 +139,7 @@ fn transact_1_push_record() -> TestSyncPushRecord {
         },
         push_data: json!(LegacyTransactRow {
             ID: TRANSACT_1.0.to_string(),
+            user_id: user_account_for_remote_test().id,
             name_ID: "name_store_a".to_string(),
             store_ID: "store_a".to_string(),
             invoice_num: 1,
@@ -230,7 +232,7 @@ const TRANSACT_2: (&'static str, &'static str) = (
         "user2": "",
         "user3": "",
         "user4": "",
-        "user_ID": "0763E2E3053D4C478E1E6B6B03FEC207",
+        "user_ID": "user_account_for_remote_test_id",
         "wardID": "",
         "waybill_number": ""
     }"#,
@@ -240,6 +242,7 @@ fn transact_2_pull_record() -> TestSyncRecord {
         translated_record: Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::Invoice(InvoiceRow {
                 id: TRANSACT_2.0.to_string(),
+                user_id: user_account_for_remote_test().id,
                 store_id: "store_b".to_string(),
                 name_id: "name_store_b".to_string(),
                 name_store_id: Some("store_b".to_string()),
@@ -281,6 +284,7 @@ fn transact_2_push_record() -> TestSyncPushRecord {
         },
         push_data: json!(LegacyTransactRow {
             ID: TRANSACT_2.0.to_string(),
+            user_id: user_account_for_remote_test().id,
             name_ID: "name_store_b".to_string(),
             store_ID: "store_b".to_string(),
             invoice_num: 4,

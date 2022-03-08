@@ -59,6 +59,8 @@ pub struct LegacyTransactRow {
 
     pub name_ID: String,
     pub store_ID: String,
+    #[serde(rename = "user_ID")]
+    pub user_id: String,
     pub invoice_num: i64,
     #[serde(rename = "type")]
     pub _type: LegacyTransactType,
@@ -138,6 +140,7 @@ impl RemotePullTranslation for InvoiceTranslation {
         Ok(Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::Invoice(InvoiceRow {
                 id: data.ID,
+                user_id: data.user_id,
                 store_id: data.store_ID,
                 name_id: data.name_ID,
                 name_store_id,
@@ -276,6 +279,7 @@ impl RemotePushUpsertTranslation for InvoiceTranslation {
 
         let InvoiceRow {
             id,
+            user_id,
             name_id,
             // TODO
             name_store_id: _,
@@ -315,6 +319,7 @@ impl RemotePushUpsertTranslation for InvoiceTranslation {
         let legacy_row = LegacyTransactRow {
             ID: id.clone(),
             name_ID: name_id,
+            user_id,
             store_ID: store_id.clone(),
             invoice_num: invoice_number,
             _type,

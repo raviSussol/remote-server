@@ -153,7 +153,7 @@ mod graphql {
         stocktake::{
             update::{UpdateStocktakeError, UpdateStocktakeInput},
             StocktakeServiceTrait,
-        },
+        }, user_account::get_default_user_id,
     };
 
     use crate::StocktakeMutations;
@@ -267,6 +267,7 @@ mod graphql {
         let test_service = TestService(Box::new(|_, _, _| {
             Ok(StocktakeRow {
                 id: "id1".to_string(),
+                user_id: get_default_user_id(),
                 stocktake_number: 123,
                 store_id: "store id".to_string(),
                 comment: Some("comment".to_string()),

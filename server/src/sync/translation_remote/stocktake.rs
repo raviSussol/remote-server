@@ -30,6 +30,8 @@ pub enum LegacyStocktakeStatus {
 #[derive(Deserialize, Serialize)]
 pub struct LegacyStocktakeRow {
     pub ID: String,
+    #[serde(rename = "created_by_ID")]
+    pub user_id: String,
     pub status: LegacyStocktakeStatus,
     #[serde(deserialize_with = "empty_str_as_option")]
     pub Description: Option<String>,
@@ -77,6 +79,7 @@ impl RemotePullTranslation for StocktakeTranslation {
         Ok(Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::Stocktake(StocktakeRow {
                 id: data.ID,
+                user_id: data.user_id,
                 store_id: data.store_ID,
                 stocktake_number: data.serial_number,
                 comment: data.comment,
@@ -114,6 +117,7 @@ impl RemotePushUpsertTranslation for StocktakeTranslation {
 
         let StocktakeRow {
             id,
+            user_id,
             store_id,
             stocktake_number,
             comment,
@@ -135,6 +139,7 @@ impl RemotePushUpsertTranslation for StocktakeTranslation {
 
         let legacy_row = LegacyStocktakeRow {
             ID: id.clone(),
+            user_id,
             store_ID: store_id.clone(),
             status: legacy_stocktake_status(&status),
             Description: description,
