@@ -1,8 +1,8 @@
 use chrono::NaiveDate;
-use repository::schema::{
+use repository::{schema::{
     ChangelogAction, ChangelogRow, ChangelogTableName, RemoteSyncBufferAction, RemoteSyncBufferRow,
     StocktakeRow, StocktakeStatus,
-};
+}, mock::user_account_for_remote_test};
 use serde_json::json;
 
 use crate::sync::translation_remote::{
@@ -21,7 +21,7 @@ const STOCKTAKE_1: (&'static str, &'static str) = (
       "ID": "0a375950f0d211eb8dddb54df6d741bc",
       "Locked": false,
       "comment": "",
-      "created_by_ID": "",
+      "created_by_ID": "user_account_for_remote_test_id",
       "finalised_by_ID": "0763E2E3053D4C478E1E6B6B03FEC207",
       "invad_additions_ID": "inbound_shipment_a",
       "invad_reductions_ID": "",
@@ -40,6 +40,7 @@ fn stocktake_pull_record() -> TestSyncRecord {
         translated_record: Some(IntegrationRecord::from_upsert(
             IntegrationUpsertRecord::Stocktake(StocktakeRow {
                 id: STOCKTAKE_1.0.to_string(),
+                user_id: user_account_for_remote_test().id,
                 store_id: "store_a".to_string(),
                 stocktake_number: 3,
                 comment: None,
@@ -72,6 +73,7 @@ fn stocktake_push_record() -> TestSyncPushRecord {
         },
         push_data: json!(LegacyStocktakeRow {
             ID: STOCKTAKE_1.0.to_string(),
+            user_id: user_account_for_remote_test().id,
             store_ID: "store_a".to_string(),
             status: LegacyStocktakeStatus::Fn,
             Description: Some("Test".to_string()),

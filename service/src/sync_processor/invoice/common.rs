@@ -1,6 +1,6 @@
 use crate::{
     number::next_number,
-    sync_processor::{ProcessRecordError, RecordForProcessing},
+    sync_processor::{ProcessRecordError, RecordForProcessing}, user_account::get_default_user_id,
 };
 use chrono::Utc;
 use repository::EqualFilter;
@@ -88,6 +88,7 @@ pub fn generate_linked_invoice(
 
     let result = InvoiceRow {
         id: uuid(),
+        user_id: get_default_user_id(),
         invoice_number: next_number(connection, &NumberRowType::InboundShipment, &store_id)?,
         r#type: InvoiceRowType::InboundShipment,
         name_id,

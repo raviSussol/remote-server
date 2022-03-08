@@ -1,7 +1,7 @@
 use crate::{
     number::next_number,
     requisition::common::get_lines_for_requisition,
-    sync_processor::{ProcessRecordError, RecordForProcessing},
+    sync_processor::{ProcessRecordError, RecordForProcessing}, user_account::get_default_user_id,
 };
 use chrono::Utc;
 use repository::EqualFilter;
@@ -75,6 +75,7 @@ pub fn generate_linked_requisition(
 
     let result = RequisitionRow {
         id: uuid(),
+        user_id: get_default_user_id(),
         requisition_number: next_number(
             connection,
             &NumberRowType::ResponseRequisition,
