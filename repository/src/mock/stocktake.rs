@@ -3,8 +3,11 @@ use util::inline_init;
 
 use crate::schema::StocktakeRow;
 
+use super::user_account::mock_user_account_a;
+
 pub fn mock_stocktake_a() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "stocktake_a".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 9;
@@ -14,6 +17,7 @@ pub fn mock_stocktake_a() -> StocktakeRow {
 
 pub fn mock_stocktake_b() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "stocktake_b".to_string();
         r.store_id = "store_b".to_string();
         r.stocktake_number = 10;
@@ -25,6 +29,7 @@ pub fn mock_stocktake_b() -> StocktakeRow {
 
 pub fn mock_stocktake_no_line_a() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "no_line_a".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 10;
@@ -36,6 +41,7 @@ pub fn mock_stocktake_no_line_a() -> StocktakeRow {
 
 pub fn mock_stocktake_no_line_b() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "no_line_b".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 10;

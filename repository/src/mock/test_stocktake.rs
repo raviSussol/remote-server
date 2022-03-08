@@ -3,10 +3,11 @@ use util::inline_init;
 
 use crate::schema::{StockLineRow, StocktakeLineRow, StocktakeRow, StocktakeStatus};
 
-use super::{mock_item_a, mock_stock_line_a, mock_stock_line_b, MockData};
+use super::{mock_item_a, mock_stock_line_a, mock_stock_line_b, MockData, user_account::mock_user_account_a};
 
 pub fn mock_stocktake_without_lines() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "stocktake_without_lines".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 1;
@@ -16,6 +17,7 @@ pub fn mock_stocktake_without_lines() -> StocktakeRow {
 
 pub fn mock_stocktake_finalised() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_finalised".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 2;
@@ -27,6 +29,7 @@ pub fn mock_stocktake_finalised() -> StocktakeRow {
 
 pub fn mock_stocktake_finalised_without_lines() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_finalised_no_lines".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 3;
@@ -52,6 +55,7 @@ pub fn mock_stocktake_line_finalised() -> StocktakeLineRow {
 
 pub fn mock_locked_stocktake() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "locked_stocktake".to_string();
         r.store_id = "store_a".to_string();
         r.status = StocktakeStatus::New;
@@ -73,6 +77,7 @@ pub fn mock_locked_stocktake_line() -> StocktakeLineRow {
 
 pub fn mock_stocktake_stock_surplus() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_stock_surplus".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 4;
@@ -114,6 +119,7 @@ pub fn mock_stocktake_line_stock_surplus() -> StocktakeLineRow {
 
 pub fn mock_stocktake_stock_deficit() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_stock_deficit".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 1;
@@ -155,6 +161,7 @@ pub fn mock_stocktake_line_stock_deficit() -> StocktakeLineRow {
 
 pub fn mock_stocktake_no_lines() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_no_lines".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 5;
@@ -166,6 +173,7 @@ pub fn mock_stocktake_no_lines() -> StocktakeRow {
 
 pub fn mock_stocktake_no_count_change() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_no_count_change".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 8;
@@ -189,6 +197,7 @@ pub fn mock_stocktake_line_no_count_change() -> StocktakeLineRow {
 
 pub fn mock_stocktake_full_edit() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_full_edit".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 6;
@@ -202,6 +211,7 @@ pub fn mock_stocktake_full_edit() -> StocktakeRow {
 
 pub fn mock_stocktake_new_stock_line() -> StocktakeRow {
     inline_init(|r: &mut StocktakeRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_stocktake_new_stock_line".to_string();
         r.store_id = "store_a".to_string();
         r.stocktake_number = 7;

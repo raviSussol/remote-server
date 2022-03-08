@@ -1,4 +1,5 @@
 use chrono::{Duration, NaiveDate, Utc};
+use util::inline_init;
 
 use crate::schema::{
     InvoiceLineRow, InvoiceLineRowType, InvoiceRow, InvoiceRowStatus, InvoiceRowType, ItemRow,
@@ -7,7 +8,9 @@ use crate::schema::{
 
 use super::{
     common::{FullMockInvoice, FullMockInvoiceLine},
-    mock_name_a, mock_store_a, mock_store_b, MockData,
+    mock_name_a, mock_store_a, mock_store_b,
+    user_account::mock_user_account_a,
+    MockData,
 };
 
 pub fn mock_test_item_stats_repository() -> MockData {
@@ -179,28 +182,19 @@ pub fn mock_item_stats_invoice1_store_a() -> FullMockInvoice {
     let line2_id = format!("{}2", invoice_id);
 
     FullMockInvoice {
-        invoice: InvoiceRow {
-            id: invoice_id.clone(),
-            name_id: mock_name_a().id,
-            store_id: mock_store_a().id,
-            picked_datetime: Some(Utc::now().naive_utc() - Duration::days(3)),
-            r#type: InvoiceRowType::OutboundShipment,
+        invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
+            r.id = invoice_id.clone();
 
-            invoice_number: 20,
-            name_store_id: None,
-            status: InvoiceRowStatus::New,
-            on_hold: false,
-            comment: None,
-            their_reference: None,
-            created_datetime: NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0),
-            allocated_datetime: None,
-            shipped_datetime: None,
-            colour: None,
-            requisition_id: None,
-            linked_invoice_id: None,
-            delivered_datetime: None,
-            verified_datetime: None,
-        },
+            r.name_id = mock_name_a().id;
+            r.store_id = mock_store_a().id;
+            r.picked_datetime = Some(Utc::now().naive_utc() - Duration::days(3));
+            r.r#type = InvoiceRowType::OutboundShipment;
+
+            r.invoice_number = 20;
+            r.status = InvoiceRowStatus::New;
+            r.created_datetime = NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0);
+        }),
         lines: vec![
             FullMockInvoiceLine {
                 line: InvoiceLineRow {
@@ -260,28 +254,18 @@ pub fn mock_item_stats_invoice2_store_a() -> FullMockInvoice {
     let line2_id = format!("{}2", invoice_id);
 
     FullMockInvoice {
-        invoice: InvoiceRow {
-            id: invoice_id.clone(),
-            name_id: mock_name_a().id,
-            store_id: mock_store_a().id,
-            picked_datetime: Some(Utc::now().naive_utc() - Duration::days(30)),
-            r#type: InvoiceRowType::OutboundShipment,
+        invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
+            r.id = invoice_id.clone();
 
-            invoice_number: 20,
-            name_store_id: None,
-            status: InvoiceRowStatus::New,
-            on_hold: false,
-            comment: None,
-            their_reference: None,
-            created_datetime: NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0),
-            allocated_datetime: None,
-            shipped_datetime: None,
-            colour: None,
-            requisition_id: None,
-            linked_invoice_id: None,
-            delivered_datetime: None,
-            verified_datetime: None,
-        },
+            r.name_id = mock_name_a().id;
+            r.store_id = mock_store_a().id;
+            r.picked_datetime = Some(Utc::now().naive_utc() - Duration::days(30));
+            r.r#type = InvoiceRowType::OutboundShipment;
+            r.invoice_number = 20;
+            r.status = InvoiceRowStatus::New;
+            r.created_datetime = NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0);
+        }),
         lines: vec![
             FullMockInvoiceLine {
                 line: InvoiceLineRow {
@@ -341,28 +325,18 @@ pub fn mock_item_stats_invoice1_store_b() -> FullMockInvoice {
     let line2_id = format!("{}2", invoice_id);
 
     FullMockInvoice {
-        invoice: InvoiceRow {
-            id: invoice_id.clone(),
-            name_id: mock_name_a().id,
-            store_id: mock_store_b().id,
-            picked_datetime: Some(Utc::now().naive_utc() - Duration::days(3)),
-            r#type: InvoiceRowType::OutboundShipment,
+        invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
+            r.id = invoice_id.clone();
 
-            invoice_number: 20,
-            name_store_id: None,
-            status: InvoiceRowStatus::New,
-            on_hold: false,
-            comment: None,
-            their_reference: None,
-            created_datetime: NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0),
-            allocated_datetime: None,
-            shipped_datetime: None,
-            colour: None,
-            requisition_id: None,
-            linked_invoice_id: None,
-            delivered_datetime: None,
-            verified_datetime: None,
-        },
+            r.name_id = mock_name_a().id;
+            r.store_id = mock_store_b().id;
+            r.picked_datetime = Some(Utc::now().naive_utc() - Duration::days(3));
+            r.r#type = InvoiceRowType::OutboundShipment;
+            r.invoice_number = 20;
+            r.status = InvoiceRowStatus::New;
+            r.created_datetime = NaiveDate::from_ymd(1970, 1, 1).and_hms_milli(12, 30, 0, 0);
+        }),
         lines: vec![
             FullMockInvoiceLine {
                 line: InvoiceLineRow {

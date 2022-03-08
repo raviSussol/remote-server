@@ -2,6 +2,7 @@
 mod repository_test {
     mod data {
         use chrono::{NaiveDate, NaiveDateTime};
+        use util::inline_init;
 
         use crate::schema::*;
 
@@ -144,52 +145,34 @@ mod repository_test {
         }
 
         pub fn invoice_1() -> InvoiceRow {
-            InvoiceRow {
-                id: "invoice1".to_string(),
-                name_id: name_1().id.to_string(),
-                store_id: store_1().id.to_string(),
-                invoice_number: 12,
-                name_store_id: None,
-                r#type: InvoiceRowType::InboundShipment,
-                status: InvoiceRowStatus::New,
-                on_hold: false,
-                comment: Some("".to_string()),
-                their_reference: Some("".to_string()),
-                // Note: keep nsecs small enough for Postgres which has limited precision.
-                created_datetime: NaiveDateTime::from_timestamp(1000, 0),
-                colour: None,
-                requisition_id: None,
-                linked_invoice_id: None,
-                allocated_datetime: None,
-                picked_datetime: None,
-                shipped_datetime: None,
-                delivered_datetime: None,
-                verified_datetime: None,
-            }
+            inline_init(|r: &mut InvoiceRow| {
+                r.user_id = user_account_1().id;
+                r.id = "invoice1".to_string();
+                r.name_id = name_1().id.to_string();
+                r.store_id = store_1().id.to_string();
+                r.invoice_number = 12;
+                r.r#type = InvoiceRowType::InboundShipment;
+                r.status = InvoiceRowStatus::New;
+                r.comment = Some("".to_string());
+                r.their_reference = Some("".to_string());
+                // Note: keep nsecs small enough for Postgres which has limited precision;
+                r.created_datetime = NaiveDateTime::from_timestamp(1000, 0);
+            })
         }
 
         pub fn invoice_2() -> InvoiceRow {
-            InvoiceRow {
-                id: "invoice2".to_string(),
-                name_id: name_1().id.to_string(),
-                store_id: store_1().id.to_string(),
-                invoice_number: 12,
-                name_store_id: None,
-                r#type: InvoiceRowType::OutboundShipment,
-                status: InvoiceRowStatus::New,
-                on_hold: false,
-                comment: Some("".to_string()),
-                their_reference: Some("".to_string()),
-                created_datetime: NaiveDateTime::from_timestamp(2000, 0),
-                colour: None,
-                requisition_id: None,
-                linked_invoice_id: None,
-                allocated_datetime: None,
-                picked_datetime: None,
-                shipped_datetime: None,
-                delivered_datetime: None,
-                verified_datetime: None,
-            }
+            inline_init(|r: &mut InvoiceRow| {
+                r.user_id = user_account_1().id;
+                r.id = "invoice2".to_string();
+                r.name_id = name_1().id.to_string();
+                r.store_id = store_1().id.to_string();
+                r.invoice_number = 12;
+                r.r#type = InvoiceRowType::OutboundShipment;
+                r.status = InvoiceRowStatus::New;
+                r.comment = Some("".to_string());
+                r.their_reference = Some("".to_string());
+                r.created_datetime = NaiveDateTime::from_timestamp(2000, 0);
+            })
         }
 
         pub fn invoice_line_1() -> InvoiceLineRow {
@@ -338,7 +321,9 @@ mod repository_test {
             ChangelogAction, ChangelogRow, ChangelogTableName, InvoiceStatsRow, KeyValueType,
             NumberRowType, RequisitionRowStatus,
         },
-        test_db, CentralSyncBufferRepository, ChangelogRepository, InvoiceLineRepository,
+        test_db,
+        tests::repository_test::data::user_account_1,
+        CentralSyncBufferRepository, ChangelogRepository, InvoiceLineRepository,
         InvoiceLineRowRepository, InvoiceRepository, ItemRepository, ItemStatsFilter,
         ItemStatsRepository, KeyValueStoreRepository, MasterListFilter, MasterListLineFilter,
         MasterListLineRepository, MasterListLineRowRepository, MasterListNameJoinRepository,
@@ -799,6 +784,10 @@ mod repository_test {
         let connection = connection_manager.connection().unwrap();
 
         // setup
+        UserAccountRepository::new(&connection)
+            .insert_one(&user_account_1())
+            .unwrap();
+
         let name_repo = NameRepository::new(&connection);
         name_repo.insert_one(&data::name_1()).await.unwrap();
         let store_repo = StoreRowRepository::new(&connection);
@@ -835,6 +824,10 @@ mod repository_test {
         let connection = connection_manager.connection().unwrap();
 
         // setup
+        UserAccountRepository::new(&connection)
+            .insert_one(&user_account_1())
+            .unwrap();
+
         let item_repo = ItemRepository::new(&connection);
         item_repo.insert_one(&data::item_1()).await.unwrap();
         item_repo.insert_one(&data::item_2()).await.unwrap();
@@ -877,6 +870,9 @@ mod repository_test {
         let connection = connection_manager.connection().unwrap();
 
         // setup
+        UserAccountRepository::new(&connection)
+            .insert_one(&user_account_1())
+            .unwrap();
         let item_repo = ItemRepository::new(&connection);
         item_repo.insert_one(&data::item_1()).await.unwrap();
         item_repo.insert_one(&data::item_2()).await.unwrap();
@@ -994,8 +990,11 @@ mod repository_test {
 
     #[actix_rt::test]
     async fn test_changelog() {
-        let (_, connection, _, _) =
-            test_db::setup_all("test_changelog", MockDataInserts::none().names().stores()).await;
+        let (_, connection, _, _) = test_db::setup_all(
+            "test_changelog",
+            MockDataInserts::none().names().stores().user_accounts(),
+        )
+        .await;
 
         // use stock take entries to populate the changelog (via the trigger)
         let stocktake_repo = StocktakeRowRepository::new(&connection);
@@ -1102,8 +1101,11 @@ mod repository_test {
 
     #[actix_rt::test]
     async fn test_changelog_iteration() {
-        let (_, connection, _, _) =
-            test_db::setup_all("test_changelog_2", MockDataInserts::none().names().stores()).await;
+        let (_, connection, _, _) = test_db::setup_all(
+            "test_changelog_2",
+            MockDataInserts::none().names().user_accounts().stores(),
+        )
+        .await;
 
         // use stock take entries to populate the changelog (via the trigger)
         let stocktake_repo = StocktakeRowRepository::new(&connection);

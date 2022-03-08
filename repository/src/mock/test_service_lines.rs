@@ -2,7 +2,7 @@ use util::inline_init;
 
 use crate::schema::{InvoiceLineRow, InvoiceRow, InvoiceRowStatus, InvoiceRowType};
 
-use super::{mock_default_service_item, mock_name_a, MockData};
+use super::{mock_default_service_item, mock_name_a, user_account::mock_user_account_a, MockData};
 
 pub fn mock_test_service_item() -> MockData {
     let mut result = MockData::default();
@@ -25,6 +25,7 @@ pub fn mock_test_service_item() -> MockData {
 
 pub fn mock_draft_outbound_with_service_lines() -> InvoiceRow {
     inline_init(|r: &mut InvoiceRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_draft_outbound_with_service_lines".to_string();
         r.name_id = mock_name_a().id;
         r.store_id = "store_a".to_owned();
@@ -43,6 +44,7 @@ pub fn mock_draft_outbound_service_line() -> InvoiceLineRow {
 
 pub fn mock_draft_outbound_shipped_with_service_lines() -> InvoiceRow {
     inline_init(|r: &mut InvoiceRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_draft_outbound_shipped_with_service_lines".to_string();
         r.name_id = mock_name_a().id;
         r.store_id = "store_a".to_owned();
@@ -63,6 +65,7 @@ pub fn mock_draft_outbound_shipped_service_line() -> InvoiceLineRow {
 
 pub fn mock_draft_inbound_shipment_with_service_lines() -> InvoiceRow {
     inline_init(|r: &mut InvoiceRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_draft_inbound_shipment_with_service_lines".to_string();
         r.name_id = mock_name_a().id;
         r.store_id = "store_a".to_owned();
@@ -81,6 +84,7 @@ pub fn mock_draft_inbound_service_line() -> InvoiceLineRow {
 
 pub fn mock_draft_inbound_shipment_no_lines() -> InvoiceRow {
     inline_init(|r: &mut InvoiceRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_draft_inbound_shipment_no_lines".to_string();
         r.name_id = mock_name_a().id;
         r.store_id = "store_a".to_owned();
@@ -91,6 +95,7 @@ pub fn mock_draft_inbound_shipment_no_lines() -> InvoiceRow {
 
 pub fn mock_draft_inbound_verified_with_service_lines() -> InvoiceRow {
     inline_init(|r: &mut InvoiceRow| {
+        r.user_id = mock_user_account_a().id;
         r.id = "mock_draft_inbound_shipped_with_service_lines".to_string();
         r.name_id = mock_name_a().id;
         r.store_id = "store_a".to_owned();

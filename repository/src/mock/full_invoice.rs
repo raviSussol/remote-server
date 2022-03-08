@@ -7,7 +7,7 @@ use crate::schema::{
     InvoiceLineRow, InvoiceLineRowType, InvoiceRow, InvoiceRowStatus, InvoiceRowType, StockLineRow,
 };
 
-use super::common::{FullMockInvoice, FullMockInvoiceLine};
+use super::{common::{FullMockInvoice, FullMockInvoiceLine}, user_account::mock_user_account_a};
 
 pub fn mock_full_draft_outbound_shipment_a() -> FullMockInvoice {
     let invoice_id = "draft_ci_a".to_string();
@@ -18,6 +18,7 @@ pub fn mock_full_draft_outbound_shipment_a() -> FullMockInvoice {
 
     FullMockInvoice {
         invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
             r.id = invoice_id.clone();
             r.name_id = String::from("name_store_b");
             r.store_id = String::from("store_a");
@@ -91,6 +92,7 @@ pub fn mock_full_draft_inbound_shipment_on_hold() -> FullMockInvoice {
 
     FullMockInvoice {
         invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
             r.id = invoice_id.clone();
             r.name_id = String::from("name_store_a");
             r.store_id = String::from("store_b");
@@ -109,6 +111,7 @@ pub fn mock_full_draft_outbound_shipment_on_hold() -> FullMockInvoice {
 
     FullMockInvoice {
         invoice: inline_init(|r: &mut InvoiceRow| {
+            r.user_id = mock_user_account_a().id;
             r.id = invoice_id.clone();
             r.name_id = String::from("name_store_a");
             r.store_id = String::from("store_b");
