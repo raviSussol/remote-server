@@ -43,7 +43,7 @@ pub fn insert_outbound_shipment(
         .connection
         .transaction_sync(|connection| {
             let other_party = validate(&input, connection)?;
-            let new_invoice = generate(connection, user_id, store_id, input, other_party)?;
+            let new_invoice = generate(connection, store_id, user_id, input, other_party)?;
 
             InvoiceRepository::new(&connection).upsert_one(&new_invoice)?;
 

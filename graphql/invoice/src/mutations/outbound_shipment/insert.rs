@@ -120,7 +120,6 @@ fn map_error(error: ServiceError) -> Result<InsertErrorInterface> {
 
 #[cfg(test)]
 mod graphql {
-
     use graphql_core::test_helpers::setup_graphl_test;
     use graphql_core::{assert_graphql_query, assert_standard_graphql_error};
     use repository::mock::MockDataInserts;
