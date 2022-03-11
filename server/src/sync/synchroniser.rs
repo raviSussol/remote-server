@@ -97,13 +97,13 @@ impl Synchroniser {
         // implementation...
         // TODO enable once push is working/tested:
         //self.remote_data.push_changes(&connection).await?;
-        self.remote_data.pull(&connection).await?;
+        // self.remote_data.pull(&connection).await?;
 
         // Check if there is new data on the central server. Do this after pulling the remote data
         // in case the just pulled remote data requires the new central data.
-        self.central_data
-            .pull_and_integrate_records(&connection)
-            .await?;
+        // self.central_data
+        //     .pull_and_integrate_records(&connection)
+        //     .await?;
 
         self.remote_data.integrate_records(&connection).await?;
         Ok(())
