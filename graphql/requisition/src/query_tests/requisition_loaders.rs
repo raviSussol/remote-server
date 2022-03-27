@@ -155,10 +155,12 @@ mod test {
                         supplyQuantity
                         suggestedQuantity
                         comment
-                        itemStats {
-                            averageMonthlyConsumption
-                            availableStockOnHand
-                            availableMonthsOfStockOnHand
+                        linkedRequisitionLine {
+                            itemStats {
+                                averageMonthlyConsumption
+                                availableStockOnHand
+                                availableMonthsOfStockOnHand
+                            }
                         }
                     } 
                 }
@@ -169,6 +171,7 @@ mod test {
         "#;
 
         let response_requisition = mock_response_draft_requisition_all_fields();
+        let request_requisition = mock_request_draft_requisition_all_fields();
 
         let variables = json!({
           "filter": {
@@ -194,6 +197,14 @@ mod test {
                             "supplyQuantity": &response_requisition.lines[0].supply_quantity,
                             "suggestedQuantity": &response_requisition.lines[0].suggested_quantity,
                             "comment": &response_requisition.lines[0].comment,
+                            "linkedRequisitionLine": {
+                                "itemStats": {
+                                    "averageMonthlyConsumption": request_requisition.lines[0].average_monthly_consumption as f64,
+                                    "availableStockOnHand": &request_requisition.lines[0].available_stock_on_hand,
+                                    "availableMonthsOfStockOnHand":  request_requisition.lines[0].available_stock_on_hand as f64
+                                    / request_requisition.lines[0].average_monthly_consumption as f64
+                                }
+                            }
                          }]
                     }
                 }]
