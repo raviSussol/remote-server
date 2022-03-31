@@ -78,26 +78,17 @@ impl<'a> UserAccountService<'a> {
                 for store in stores_permissions {
                     // The list may contain stores we don't know about; try to insert the store
                     // in a sub-transaction and ignore the store when there is an error
-                    let sub_result = con.transaction_sync_etc(
-                        |_| {
-                            user_store_repo.upsert_one(&store.user_store_join)?;
-                            for permission in &store.permissions {
-                                permission_repo.upsert_one(permission)?;
-                            }
-                            Ok(())
-                        },
-                        false,
-                    );
-                    match sub_result {
-                        Ok(_) => Ok(()),
-                        Err(TransactionError::Inner(
-                            err @ RepositoryError::ForeignKeyViolation(_),
-                        )) => {
-                            warn!("Failed to insert store permissions({}): {:?}", err, store);
-                            Ok(())
-                        }
-                        Err(err) => Err(RepositoryError::from(err)),
-                    }?;
+                    let user_store_insert = user_store_repo.upsert_one(&store.user_store_join);
+
+                    if let Err(error @ RepositoryError::ForeignKeyViolation(_)) = &user_store_insert
+                    {
+                        warn!("Failed to insert store permissions({}): {:?}", error, store);
+                        continue;
+                    };
+                    user_store_insert?;
+                    for permission in &store.permissions {
+                        permission_repo.upsert_one(permission)?;
+                    }
                 }
 
                 Ok(())
