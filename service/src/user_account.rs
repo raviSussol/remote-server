@@ -76,8 +76,6 @@ impl<'a> UserAccountService<'a> {
                 // insert user
                 user_repo.insert_one(&user)?;
                 for store in stores_permissions {
-                    // The list may contain stores we don't know about; try to insert the store
-                    // in a sub-transaction and ignore the store when there is an error
                     let user_store_insert = user_store_repo.upsert_one(&store.user_store_join);
 
                     if let Err(error @ RepositoryError::ForeignKeyViolation(_)) = &user_store_insert
