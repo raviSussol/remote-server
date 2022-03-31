@@ -13,7 +13,7 @@ type ServiceError = RequisitionLineChartError;
 pub struct ConsumptionOptionsInput {
     /// Defaults to 3 months
     amc_lookback_months: Option<u32>,
-    /// Defaults to 20
+    /// Defaults to 12
     number_of_data_points: Option<u32>,
 }
 
@@ -126,13 +126,19 @@ impl StockEvolutionOptionsInput {
         }
     }
 }
-
 #[cfg(test)]
 mod graphql {
     use async_graphql::EmptyMutation;
 
+    use chrono::NaiveDate;
     use graphql_core::assert_standard_graphql_error;
+    use graphql_core::test_helpers::setup_graphl_test_with_data;
     use graphql_core::{assert_graphql_query, test_helpers::setup_graphl_test};
+    use repository::mock::{mock_item_a, mock_name_a, MockData};
+    use repository::schema::{
+        InvoiceLineRow, InvoiceLineRowType, InvoiceRow, InvoiceRowType, NameRow,
+        RequisitionLineRow, RequisitionRow, RequisitionRowType, StockLineRow, StoreRow,
+    };
     use repository::{mock::MockDataInserts, StorageConnectionManager};
     use serde_json::json;
 
@@ -143,7 +149,7 @@ mod graphql {
         requisition_line::RequisitionLineServiceTrait,
         service_provider::{ServiceContext, ServiceProvider},
     };
-    use util::inline_init;
+    use util::{inline_edit, inline_init, uuid};
 
     use crate::GeneralQueries;
 
@@ -213,6 +219,35 @@ mod graphql {
                 error {
                     __typename
                 }
+              }
+              ... on ItemChartNode {
+                consumptionHistory {
+                    nodes {
+                        consumption
+                        averageMonthlyConsumption
+                        date
+                        isHistoric
+                        isCurrent
+                    }
+                }
+                stockEvolution {
+                    nodes {
+                        stockOnHand
+                        date
+                        minimumStockOnHand
+                        maximumStockOnHand
+                        isHistoric
+                        isProjected
+                    }
+                }
+                suggestedQuantityCalculation {
+                    averageMonthlyConsumption
+                    minimumStockOnHand
+                    maximumStockOnHand
+                    suggestedQuantity
+
+                }
+               calculationDate
               }
             }
           }
@@ -376,5 +411,382 @@ mod graphql {
             &expected,
             Some(service_provider(test_service, &connection_manager))
         );
+    }
+
+    #[actix_rt::test]
+    async fn chart_data() {
+        fn name() -> NameRow {
+            inline_init(|r: &mut NameRow| {
+                r.id = "store".to_string();
+            })
+        }
+
+        fn store() -> StoreRow {
+            StoreRow {
+                id: "store".to_string(),
+                name_id: name().id,
+                code: "store".to_string(),
+            }
+        }
+
+        fn stock_line() -> StockLineRow {
+            inline_init(|r: &mut StockLineRow| {
+                r.id = "stcok_line".to_string();
+                r.item_id = mock_item_a().id;
+                r.store_id = store().id;
+                r.pack_size = 1;
+                r.available_number_of_packs = 20;
+                r.total_number_of_packs = 20;
+            })
+        }
+
+        fn requisition() -> RequisitionRow {
+            inline_init(|r: &mut RequisitionRow| {
+                r.id = "requisition".to_string();
+                r.store_id = store().id;
+                r.requisition_number = 333;
+                r.min_months_of_stock = 30.0 / 100.0;
+                r.max_months_of_stock = 200.0 / 100.0;
+                r.name_id = mock_name_a().id;
+                r.expected_delivery_date = Some(NaiveDate::from_ymd(2021, 01, 12));
+                r.r#type = RequisitionRowType::Request;
+            })
+        }
+
+        fn requisition_line() -> RequisitionLineRow {
+            inline_init(|r: &mut RequisitionLineRow| {
+                r.id = "requisition_line".to_string();
+                r.requisition_id = requisition().id;
+                r.item_id = mock_item_a().id;
+                r.snapshot_datetime = Some(NaiveDate::from_ymd(2021, 01, 02).and_hms(0, 0, 0));
+                r.average_monthly_consumption = 100;
+                r.available_stock_on_hand = 20;
+                r.suggested_quantity = 180;
+            })
+        }
+
+        fn consumption_point() -> MockData {
+            let invoice_id = uuid::uuid();
+            inline_init(|r: &mut MockData| {
+                r.invoices = vec![inline_init(|r: &mut InvoiceRow| {
+                    r.id = invoice_id.clone();
+                    r.store_id = store().id;
+                    r.name_id = mock_name_a().id;
+                    r.r#type = InvoiceRowType::OutboundShipment;
+                })];
+                r.invoice_lines = vec![inline_init(|r: &mut InvoiceLineRow| {
+                    r.id = format!("{}line", invoice_id);
+                    r.invoice_id = invoice_id.clone();
+                    r.item_id = mock_item_a().id;
+                    r.r#type = InvoiceLineRowType::StockOut;
+                    r.stock_line_id = None;
+                    r.pack_size = 1;
+                })];
+            })
+        }
+
+        let (_, _, connection_manager, settings) = setup_graphl_test_with_data(
+            GeneralQueries,
+            EmptyMutation,
+            "chart_data",
+            MockDataInserts::all(),
+            inline_init(|r: &mut MockData| {
+                r.names = vec![name()];
+                r.stores = vec![store()];
+                r.requisitions = vec![requisition()];
+                r.requisition_lines = vec![requisition_line()];
+                r.stock_lines = vec![stock_line()];
+            })
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 90;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 11, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 85;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 10, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 110;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 09, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 130;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 08, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 70;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 07, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 06, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 85;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 05, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 100;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 04, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 75;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 03, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 60;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 02, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 01, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2019, 12, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2019, 11, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2019, 11, 01).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 80;
+                u
+            }))
+            // stock history
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2021, 01, 02).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 2;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 30).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 5;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 29).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 5;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 25).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 2;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 23).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 1;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 24).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 5;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 19).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 4;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 18).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 3;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 15).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 5;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 12).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 3;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 10).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 2;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 9).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 8;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 5).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 5;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 4).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 6;
+                u
+            }))
+            .join(inline_edit(&consumption_point(), |mut u| {
+                u.invoices[0].picked_datetime =
+                    Some(NaiveDate::from_ymd(2020, 12, 3).and_hms(0, 0, 0));
+                u.invoice_lines[0].number_of_packs = 3;
+                u
+            })),
+        )
+        .await;
+
+        let expected = json!({
+           "requisitionLineChart":{
+              "__typename":"ItemChartNode",
+              "calculationDate":"2021-01-02",
+              "consumptionHistory":{
+                 "nodes":[
+                    {
+                       "averageMonthlyConsumption":80,
+                       "consumption":80,
+                       "date":"2020-02-29",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":73,
+                       "consumption":60,
+                       "date":"2020-03-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":72,
+                       "consumption":75,
+                       "date":"2020-04-30",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":77,
+                       "consumption":100,
+                       "date":"2020-05-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":86,
+                       "consumption":85,
+                       "date":"2020-06-30",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":87,
+                       "consumption":80,
+                       "date":"2020-07-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":77,
+                       "consumption":70,
+                       "date":"2020-08-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":92,
+                       "consumption":130,
+                       "date":"2020-09-30",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":102,
+                       "consumption":110,
+                       "date":"2020-10-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":108,
+                       "consumption":85,
+                       "date":"2020-11-30",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":112,
+                       "consumption":147,
+                       "date":"2020-12-31",
+                       "isCurrent":false,
+                       "isHistoric":true
+                    },
+                    {
+                       "averageMonthlyConsumption":100,
+                       "consumption":100,
+                       "date":"2021-01-31",
+                       "isCurrent":false,
+                       "isHistoric":false
+                    }
+                 ]
+              },
+              "suggestedQuantityCalculation":{
+                 "averageMonthlyConsumption":100,
+                 "maximumStockOnHand":200,
+                 "minimumStockOnHand":30,
+                 "suggestedQuantity":180
+              }
+           }
+        });
+
+        let variables = json!({
+            "requestRequisitionLineId": "requisition_line",
+            "storeId": "store",
+        });
+
+        assert_graphql_query!(&settings, &query(), &Some(variables), &expected, None);
     }
 }
