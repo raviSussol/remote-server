@@ -14,6 +14,6 @@ database:
   port: 5432
   username: "postgres"
   password: "password"
-  database_name: "omsupply-database"
+  database_name: "chart_data"
 auth:
   token_secret: "token-secret"

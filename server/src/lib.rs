@@ -42,15 +42,15 @@ pub async fn start_server(
 
     let connection_manager = get_storage_connection_manager(&settings.database);
 
-    info!("Run DB migrations...");
-    match run_db_migrations(&connection_manager.connection().unwrap()) {
-        Ok(_) => info!("DB migrations succeeded"),
-        Err(err) => {
-            let msg = format!("Failed to run DB migrations: {}", err);
-            error!("{}", msg);
-            panic!("{}", msg);
-        }
-    };
+    // info!("Run DB migrations...");
+    // match run_db_migrations(&connection_manager.connection().unwrap()) {
+    //     Ok(_) => info!("DB migrations succeeded"),
+    //     Err(err) => {
+    //         let msg = format!("Failed to run DB migrations: {}", err);
+    //         error!("{}", msg);
+    //         panic!("{}", msg);
+    //     }
+    // };
 
     let connection_manager_data_app = Data::new(connection_manager.clone());
 
