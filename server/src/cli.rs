@@ -185,9 +185,9 @@ async fn main() {
                     password: user[1].to_string(),
                     central_server_url: settings.sync.url.clone(),
                 };
-                LoginService::login(&service_provider, &auth_data, input, 0)
+                LoginService::login(&service_provider, &auth_data, input.clone(), 0)
                     .await
-                    .unwrap();
+                    .expect(&format!("Cannot login with user {:?}", input));
             }
         }
     }
