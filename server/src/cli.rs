@@ -24,9 +24,6 @@ use std::fs;
 struct Args {
     #[clap(subcommand)]
     action: Action,
-    /// Data file name for export and import of initilisation data
-    #[clap(short, long)]
-    data: String,
 }
 
 #[derive(clap::Subcommand)]
@@ -36,9 +33,17 @@ enum Action {
     /// Initilise empty database (existing database will be dropped, and new one created and migrated)
     InitiliseDatabase,
     /// Export initilisation data
-    ExportInitilisation,
+    ExportInitilisation {
+        /// File name for export of initilisation data
+        #[clap(short, long)]
+        data: String,
+    },
     /// Initilise database from exported data (will re-initilise database, removing existing data)
-    InitiliseFromExport,
+    InitiliseFromExport {
+        /// File name for import of initilisation data
+        #[clap(short, long)]
+        data: String,
+    },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,7 +64,7 @@ async fn main() {
             let schema = schema_builder().finish();
             fs::write("schema.graphql", &schema.sdl()).unwrap();
         }
-        Action::ExportInitilisation => {
+        Action::ExportInitilisation { data } => {
             let SyncSettings {
                 username,
                 password,
@@ -74,7 +79,7 @@ async fn main() {
             sync_api_v5.post_initialise().await.unwrap();
 
             fs::write(
-                args.data,
+                data,
                 serde_json::to_string_pretty(&InitilisationData {
                     central: sync_api_v5.get_central_records(0, 1000000).await.unwrap(),
                     remote: sync_api_v5.get_queued_records(1000000).await.unwrap(),
@@ -83,14 +88,14 @@ async fn main() {
             )
             .unwrap();
         }
-        Action::InitiliseFromExport => {
+
+        Action::InitiliseFromExport { data } => {
             test_db::setup(&settings.database).await;
 
             let connection_manager = get_storage_connection_manager(&settings.database);
             let connection = connection_manager.connection().unwrap();
 
-            let data: InitilisationData =
-                serde_json::from_slice(&fs::read(args.data).unwrap()).unwrap();
+            let data: InitilisationData = serde_json::from_slice(&fs::read(data).unwrap()).unwrap();
 
             for central_sync_record in
                 central_sync_batch_records_to_buffer_rows(data.central.data).unwrap()

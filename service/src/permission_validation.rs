@@ -420,6 +420,7 @@ mod permission_validation_test {
                 id: "store".to_string(),
                 name_id: name().id,
                 code: "n/a".to_string(),
+                site_id: 2,
             }
         }
 
