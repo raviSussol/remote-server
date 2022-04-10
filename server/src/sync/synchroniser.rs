@@ -14,7 +14,7 @@ use super::{
 };
 
 pub struct Synchroniser {
-    settings: SyncSettings,
+    interval: u64,
     connection_manager: StorageConnectionManager,
     pub(crate) central_data: CentralDataSynchroniser,
     pub(crate) remote_data: RemoteDataSynchroniser,
@@ -49,24 +49,38 @@ pub struct Synchroniser {
 #[allow(unused_assignments)]
 impl Synchroniser {
     pub fn new(
-        settings: SyncSettings,
+        SyncSettings {
+            url,
+            username,
+            password,
+            site_id,
+            central_server_site_id,
+            site_hardware_id,
+            batch_size,
+            interval,
+            ..
+        }: SyncSettings,
         connection_manager: StorageConnectionManager,
     ) -> anyhow::Result<Self> {
         let client = Client::new();
-        let url = Url::parse(&settings.url)?;
-        let credentials = SyncCredentials::new(&settings.username, &settings.password);
+        let url = Url::parse(&url)?;
+        let credentials = SyncCredentials::new(&username, &password);
         let sync_api_v5 = SyncApiV5::new(url.clone(), credentials.clone(), client.clone());
-        let sync_api_v3 = SyncApiV3::new(url, credentials, client, &settings.site_hardware_id)?;
+        let sync_api_v3 = SyncApiV3::new(url, credentials, client, &site_hardware_id)?;
         Ok(Synchroniser {
             remote_data: RemoteDataSynchroniser {
                 sync_api_v5: sync_api_v5.clone(),
                 sync_api_v3,
-                site_id: settings.site_id,
-                central_server_site_id: settings.central_server_site_id,
+                site_id,
+                central_server_site_id,
+                batch_size,
             },
-            settings,
+            interval,
             connection_manager,
-            central_data: CentralDataSynchroniser { sync_api_v5 },
+            central_data: CentralDataSynchroniser {
+                sync_api_v5,
+                batch_size,
+            },
         })
     }
 
@@ -115,7 +129,7 @@ impl Synchroniser {
 
         tokio::select! {
             () = async {
-              sync_sender.schedule_send(Duration::from_secs(self.settings.interval)).await;
+              sync_sender.schedule_send(Duration::from_secs(self.interval)).await;
             } => unreachable!("Sync receiver unexpectedly died!?"),
             () = async {
                 sync_receiver.listen(self).await;
