@@ -12,16 +12,18 @@ use server::{
         },
         remote_data_synchroniser::{self, remote_sync_batch_records_to_buffer_rows},
         sync_api_v5::{CentralSyncBatchV5, RemoteSyncBatchV5},
-        SyncApiV5, SyncCredentials,
+        SyncApiV5, SyncCredentials, Synchroniser,
     },
 };
 use service::{
     apis::login_v4::LoginUserInfoV4,
+    auth_data::AuthData,
     login::{LoginInput, LoginService},
-    service_provider::ServiceContext,
+    service_provider::{ServiceContext, ServiceProvider},
     sync_settings::SyncSettings,
+    token_bucket::TokenBucket,
 };
-use std::fs;
+use std::{fs, sync::RwLock};
 
 /// omSupply remote server cli
 #[derive(clap::Parser)]
@@ -42,6 +44,12 @@ enum Action {
         /// File name for export of initilisation data
         #[clap(short, long)]
         data: String,
+        /// Users to sync in format "username:password,username2:password2"
+        #[clap(short, long)]
+        users: String,
+    },
+    /// Initilise from running mSupply server
+    InitialiseFromCentral {
         /// Users to sync in format "username:password,username2:password2"
         #[clap(short, long)]
         users: String,
@@ -149,6 +157,38 @@ async fn main() {
         }
         Action::InitialiseDatabase => {
             test_db::setup(&settings.database).await;
+        }
+        Action::InitialiseFromCentral { users } => {
+            test_db::setup(&settings.database).await;
+
+            let connection_manager = get_storage_connection_manager(&settings.database);
+            let service_provider = ServiceProvider::new(connection_manager.clone());
+
+            let sync_settings = settings.sync.clone();
+
+            let auth_data = AuthData {
+                auth_token_secret: "secret".to_string(),
+                token_bucket: RwLock::new(TokenBucket::new()),
+                debug_no_ssl: true,
+                debug_no_access_control: false,
+            };
+            Synchroniser::new(sync_settings, connection_manager)
+                .unwrap()
+                .initial_pull()
+                .await
+                .unwrap();
+
+            for user in users.split(",") {
+                let user = user.split(':').collect::<Vec<&str>>();
+                let input = LoginInput {
+                    username: user[0].to_string(),
+                    password: user[1].to_string(),
+                    central_server_url: settings.sync.url.clone(),
+                };
+                LoginService::login(&service_provider, &auth_data, input, 0)
+                    .await
+                    .unwrap();
+            }
         }
     }
 }
