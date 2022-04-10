@@ -30,16 +30,16 @@ struct Args {
 enum Action {
     /// Export graphql schema
     ExportSchema,
-    /// Initilise empty database (existing database will be dropped, and new one created and migrated)
-    InitiliseDatabase,
+    /// Initialise empty database (existing database will be dropped, and new one created and migrated)
+    InitialiseDatabase,
     /// Export initilisation data
     ExportInitilisation {
         /// File name for export of initilisation data
         #[clap(short, long)]
         data: String,
     },
-    /// Initilise database from exported data (will re-initilise database, removing existing data)
-    InitiliseFromExport {
+    /// Initialise database from exported data (will re-initialise database, removing existing data)
+    InitialiseFromExport {
         /// File name for import of initilisation data
         #[clap(short, long)]
         data: String,
@@ -89,7 +89,7 @@ async fn main() {
             .unwrap();
         }
 
-        Action::InitiliseFromExport { data } => {
+        Action::InitialiseFromExport { data } => {
             test_db::setup(&settings.database).await;
 
             let connection_manager = get_storage_connection_manager(&settings.database);
@@ -116,7 +116,7 @@ async fn main() {
                 remote_data_synchroniser::do_integrate_records(&connection).unwrap()
             }
         }
-        Action::InitiliseDatabase => {
+        Action::InitialiseDatabase => {
             test_db::setup(&settings.database).await;
         }
     }
