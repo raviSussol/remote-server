@@ -15,7 +15,12 @@ use server::{
         SyncApiV5, SyncCredentials,
     },
 };
-use service::sync_settings::SyncSettings;
+use service::{
+    apis::login_v4::LoginUserInfoV4,
+    login::{LoginInput, LoginService},
+    service_provider::ServiceContext,
+    sync_settings::SyncSettings,
+};
 use std::fs;
 
 /// omSupply remote server cli
@@ -37,6 +42,9 @@ enum Action {
         /// File name for export of initilisation data
         #[clap(short, long)]
         data: String,
+        /// Users to sync in format "username:password,username2:password2"
+        #[clap(short, long)]
+        users: String,
     },
     /// Initialise database from exported data (will re-initialise database, removing existing data)
     InitialiseFromExport {
@@ -50,6 +58,7 @@ enum Action {
 struct InitilisationData {
     central: CentralSyncBatchV5,
     remote: RemoteSyncBatchV5,
+    users: Vec<(LoginInput, LoginUserInfoV4)>,
 }
 
 #[tokio::main]
@@ -64,13 +73,28 @@ async fn main() {
             let schema = schema_builder().finish();
             fs::write("schema.graphql", &schema.sdl()).unwrap();
         }
-        Action::ExportInitilisation { data } => {
+        Action::ExportInitilisation { data, users } => {
             let SyncSettings {
                 username,
                 password,
                 url,
                 ..
             } = settings.sync;
+
+            let mut synced_user_info_rows = Vec::new();
+            for user in users.split(",") {
+                let user = user.split(':').collect::<Vec<&str>>();
+                let input = LoginInput {
+                    username: user[0].to_string(),
+                    password: user[1].to_string(),
+                    central_server_url: url.to_string(),
+                };
+                synced_user_info_rows.push((
+                    input.clone(),
+                    LoginService::fetch_user_from_central(&input).await.unwrap(),
+                ));
+            }
+
             let client = Client::new();
             let url = Url::parse(&url).unwrap();
 
@@ -83,6 +107,7 @@ async fn main() {
                 serde_json::to_string_pretty(&InitilisationData {
                     central: sync_api_v5.get_central_records(0, 1000000).await.unwrap(),
                     remote: sync_api_v5.get_queued_records(1000000).await.unwrap(),
+                    users: synced_user_info_rows,
                 })
                 .unwrap(),
             )
@@ -114,6 +139,12 @@ async fn main() {
                     .upsert_many(&remote_sync_batch_records_to_buffer_rows(data).unwrap())
                     .unwrap();
                 remote_data_synchroniser::do_integrate_records(&connection).unwrap()
+            }
+
+            let ctx = ServiceContext { connection };
+
+            for (input, user_info) in data.users {
+                LoginService::update_user_from_central(&ctx, &input, user_info).unwrap();
             }
         }
         Action::InitialiseDatabase => {
