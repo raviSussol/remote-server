@@ -1,6 +1,7 @@
+use chrono::Utc;
 use clap::StructOpt;
 use graphql::schema_builder;
-use repository::{get_storage_connection_manager, test_db, RemoteSyncBufferRepository};
+use repository::{get_storage_connection_manager, test_db, RemoteSyncBufferRepository, RefreshDatesRepository};
 use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use server::{
@@ -60,6 +61,8 @@ enum Action {
         #[clap(short, long)]
         data: String,
     },
+    /// Make data current, base on latest date difference to now
+    RefreshData,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -189,6 +192,14 @@ async fn main() {
                     .await
                     .expect(&format!("Cannot login with user {:?}", input));
             }
+        }
+        Action::RefreshData => {
+            let connection_manager = get_storage_connection_manager(&settings.database);
+            let connection = connection_manager.connection().unwrap();
+
+            RefreshDatesRepository::new(&connection)
+                .refresh_dates(Utc::now().naive_local())
+                .unwrap()
         }
     }
 }
