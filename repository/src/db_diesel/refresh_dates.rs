@@ -4,6 +4,7 @@ use diesel::prelude::*;
 use diesel::sql_types::*;
 use diesel::QueryDsl;
 use diesel::{sql_query, RunQueryDsl};
+use log::info;
 
 use crate::{DBType, RepositoryError, StorageConnection};
 
@@ -82,30 +83,41 @@ impl<'a> RefreshDatesRepository<'a> {
         RefreshDatesRepository { connection }
     }
 
-    pub fn refresh_dates(&self, reference_date: NaiveDateTime) -> Result<(), RepositoryError> {
+    pub fn refresh_dates(
+        &self,
+        reference_date: NaiveDateTime,
+    ) -> Result<Option<(NaiveDateTime, u32)>, RepositoryError> {
         let all_date_values = self.get_all_date_values()?;
-        let updated_values = self.get_new_date_values(reference_date, all_date_values);
+        let (updated_values, max_timestamp, days_adjustment) =
+            match self.get_new_date_values(reference_date, all_date_values) {
+                Some(result) => result,
+                None => return Ok(None),
+            };
+
         self.update_timestamps(updated_values.timestamps)?;
         self.update_dates(updated_values.dates)?;
-        Ok(())
+        Ok(Some((max_timestamp, days_adjustment)))
     }
 
     fn get_new_date_values(
         &self,
         reference_date: NaiveDateTime,
         mut all_date_values: AllDateValues,
-    ) -> AllDateValues {
-        let max_timestamp = all_date_values
-            .timestamps
-            .iter()
-            .max_by_key(|row| row.0.dt)
+    ) -> Option<(AllDateValues, NaiveDateTime, u32)> {
+        let max_record = all_date_values.timestamps.iter().max_by_key(|row| row.0.dt);
+        let max_timestamp = max_record
+            .clone()
             .map(|row| row.0.dt)
             .unwrap_or(reference_date.clone());
 
         let days_difference = (reference_date - max_timestamp).num_days() - 1;
 
         if days_difference < 0 {
-            return all_date_values;
+            println!(
+                "Reference date {} - 1 day is lower then max data date {} for record: {:#?}",
+                reference_date, max_timestamp, max_record
+            );
+            return None;
         }
 
         let adjustment = Duration::days(days_difference);
@@ -118,7 +130,7 @@ impl<'a> RefreshDatesRepository<'a> {
             date.0.d = date.0.d + adjustment
         }
 
-        all_date_values
+        Some((all_date_values, max_timestamp, days_difference as u32))
     }
 
     fn get_all_date_values(&self) -> Result<AllDateValues, RepositoryError> {
@@ -368,12 +380,15 @@ mod tests {
 
         // Test updated values
 
-        let mut result = repo.get_new_date_values(
-            // Latest date was 2021, 02, 01, which is 11 days difference from 2021, 02, 12
-            // and -1, so should all be adjusted by 10
-            NaiveDate::from_ymd(2021, 02, 12).and_hms(00, 00, 00),
-            repo.get_all_date_values().unwrap(),
-        );
+        let mut result = repo
+            .get_new_date_values(
+                // Latest date was 2021, 02, 01, which is 11 days difference from 2021, 02, 12
+                // and -1, so should all be adjusted by 10
+                NaiveDate::from_ymd(2021, 02, 12).and_hms(00, 00, 00),
+                repo.get_all_date_values().unwrap(),
+            )
+            .unwrap()
+            .0;
         result.timestamps.sort_by(|a, b| {
             format!("{}{}", a.1.field_name, a.0.id).cmp(&format!("{}{}", b.1.field_name, b.0.id))
         });

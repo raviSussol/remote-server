@@ -1,7 +1,9 @@
 use chrono::Utc;
 use clap::StructOpt;
 use graphql::schema_builder;
-use repository::{get_storage_connection_manager, test_db, RemoteSyncBufferRepository, RefreshDatesRepository};
+use repository::{
+    get_storage_connection_manager, test_db, RefreshDatesRepository, RemoteSyncBufferRepository,
+};
 use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use server::{
@@ -197,9 +199,11 @@ async fn main() {
             let connection_manager = get_storage_connection_manager(&settings.database);
             let connection = connection_manager.connection().unwrap();
 
-            RefreshDatesRepository::new(&connection)
+            let result = RefreshDatesRepository::new(&connection)
                 .refresh_dates(Utc::now().naive_local())
-                .unwrap()
+                .expect("Error while refreshing data");
+
+            println!("Refresh data result: {:#?}", result)
         }
     }
 }
