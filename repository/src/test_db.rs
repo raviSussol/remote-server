@@ -1,14 +1,16 @@
+use crate::run_db_migrations;
 use crate::{
     database_settings::DatabaseSettings,
-    db_diesel::{DBBackendConnection, StorageConnection, StorageConnectionManager},
+    db_diesel::{StorageConnection, StorageConnectionManager},
     mock::{insert_all_mock_data, insert_mock_data, MockData, MockDataCollection, MockDataInserts},
 };
-use crate::{get_storage_connection_manager, run_db_migrations};
 use diesel::r2d2::{ConnectionManager, Pool};
 
 #[cfg(feature = "postgres")]
-pub async fn setup(db_settings: &DatabaseSettings) {
+pub async fn setup(db_settings: &DatabaseSettings) -> StorageConnectionManager {
     use diesel::{PgConnection, RunQueryDsl};
+
+    use crate::get_storage_connection_manager;
 
     let connection_manager =
         ConnectionManager::<PgConnection>::new(&db_settings.connection_string_without_db());
@@ -31,48 +33,65 @@ pub async fn setup(db_settings: &DatabaseSettings) {
 
     let connection_manager = get_storage_connection_manager(&db_settings);
     let connection = connection_manager.connection().unwrap();
-    run_db_migrations(&connection, false).unwrap()
+    run_db_migrations(&connection, false).unwrap();
+
+    connection_manager
 }
 
+// feature sqlite
 #[cfg(not(feature = "postgres"))]
-pub async fn setup(db_settings: &DatabaseSettings) {
-    use std::fs;
-    use std::path::Path;
+pub async fn setup(db_settings: &DatabaseSettings) -> StorageConnectionManager {
+    use crate::DBBackendConnection;
+    use std::{fs, path::Path};
 
-    let db_path = format!("./{}.sqlite", db_settings.database_name);
-    fs::remove_file(&db_path).ok();
+    let db_path = db_settings.connection_string();
 
-    // create parent dirs
-    let path = Path::new(&db_path);
-    let prefix = path.parent().unwrap();
-    fs::create_dir_all(prefix).unwrap();
+    // If not in-memory mode clean up and create test directory
+    // (in in-memory mode the db_path starts with "file:")
+    if !db_path.starts_with("file:") {
+        // remove existing db file
+        fs::remove_file(&db_path).ok();
+        // create parent dirs
+        let path = Path::new(&db_path);
+        let prefix = path.parent().unwrap();
+        fs::create_dir_all(prefix).unwrap();
+    }
 
-    let connection_manager = get_storage_connection_manager(&db_settings);
-    let connection = connection_manager.connection().unwrap();
+    let connection_manager =
+        ConnectionManager::<DBBackendConnection>::new(&db_settings.connection_string());
+    let pool = Pool::builder()
+        //.max_size(1)
+        .min_idle(Some(1))
+        .build(connection_manager)
+        .expect("Failed to connect to database");
+    let connection = pool.get().expect("Failed to open connection");
 
-    run_db_migrations(&connection, false).unwrap()
+    run_db_migrations(&StorageConnection::new(connection), false).unwrap();
+
+    StorageConnectionManager::new(pool)
 }
 
 #[cfg(feature = "postgres")]
-fn make_test_db_name(base_name: String) -> String {
-    base_name
-}
-
-#[cfg(not(feature = "postgres"))]
-fn make_test_db_name(base_name: String) -> String {
-    // store all test db files in a test directory
-    format!("test_output/{}", base_name)
-}
-
-// The following settings work for PG and Sqlite (username, password, host and port are
-// ignored for the later)
 pub fn get_test_db_settings(db_name: &str) -> DatabaseSettings {
     DatabaseSettings {
         username: "postgres".to_string(),
         password: "password".to_string(),
         port: 5432,
         host: "localhost".to_string(),
-        database_name: make_test_db_name(db_name.to_owned()),
+        database_name: db_name.to_string(),
+    }
+}
+
+// sqlite (username, password, host and port are ignored)
+#[cfg(not(feature = "postgres"))]
+pub fn get_test_db_settings(db_name: &str) -> DatabaseSettings {
+    DatabaseSettings {
+        username: "postgres".to_string(),
+        password: "password".to_string(),
+        port: 5432,
+        host: "localhost".to_string(),
+        // put DB test files into a test directory (also works for in-memory)
+        database_name: format!("test_output/{}.sqlite", db_name),
     }
 }
 
@@ -103,19 +122,10 @@ pub async fn setup_all_with_data(
     DatabaseSettings,
 ) {
     let settings = get_test_db_settings(db_name);
-
-    setup(&settings).await;
-
-    let connection_manager =
-        ConnectionManager::<DBBackendConnection>::new(&settings.connection_string());
-    let pool = Pool::new(connection_manager).expect("Failed to connect to database");
-
-    let storage_connection_manager = StorageConnectionManager::new(pool.clone());
-
-    let connection = storage_connection_manager.connection().unwrap();
+    let connection_manager = setup(&settings).await;
+    let connection = connection_manager.connection().unwrap();
 
     let core_data = insert_all_mock_data(&connection, inserts).await;
-
     insert_mock_data(
         &connection,
         MockDataInserts::all(),
@@ -124,5 +134,5 @@ pub async fn setup_all_with_data(
         },
     )
     .await;
-    (core_data, connection, storage_connection_manager, settings)
+    (core_data, connection, connection_manager, settings)
 }
