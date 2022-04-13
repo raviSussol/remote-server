@@ -3,16 +3,6 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use crate::{
-    apis::{
-        login_v4::{LoginApiV4, LoginInputV4, LoginStatusV4, LoginUserInfoV4, LoginUserTypeV4},
-        permissions::{map_api_permissions, Permissions},
-    },
-    auth_data::AuthData,
-    service_provider::{ServiceContext, ServiceProvider},
-    token::{JWTIssuingError, TokenPair, TokenService},
-    user_account::{StorePermissions, UserAccountService, VerifyPasswordError},
-};
 use log::info;
 use repository::{
     schema::{
@@ -23,8 +13,18 @@ use repository::{
     RepositoryError,
 };
 use reqwest::{ClientBuilder, Url};
-use serde::{Deserialize, Serialize};
 use util::uuid::uuid;
+
+use crate::{
+    apis::{
+        login_v4::{LoginApiV4, LoginInputV4, LoginStatusV4, LoginUserTypeV4},
+        permissions::{map_api_permissions, Permissions},
+    },
+    auth_data::AuthData,
+    service_provider::{ServiceContext, ServiceProvider},
+    token::{JWTIssuingError, TokenPair, TokenService},
+    user_account::{StorePermissions, UserAccountService, VerifyPasswordError},
+};
 
 const CONNECTION_TIMEOUT_SEC: u64 = 10;
 
@@ -32,12 +32,6 @@ const CONNECTION_TIMEOUT_SEC: u64 = 10;
 pub enum FetchUserError {
     Unauthenticated,
     ConnectionError(String),
-    InternalError(String),
-}
-
-#[derive(Debug)]
-pub enum UpdateUserError {
-    DatabaseError(RepositoryError),
     InternalError(String),
 }
 
@@ -52,7 +46,7 @@ pub enum LoginError {
     DatabaseError(RepositoryError),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct LoginInput {
     pub username: String,
     pub password: String,
@@ -83,12 +77,9 @@ impl LoginService {
         match LoginService::do_login(service_provider, auth_data, input).await {
             Ok(result) => Ok(result),
             Err(err) => {
-                let elapsed = now.elapsed().unwrap_or(Duration::from_secs(0));
-                let minimum = Duration::from_secs(min_err_response_time_sec);
-                if elapsed < minimum {
-                    tokio::time::sleep(minimum - elapsed).await;
-                }
-
+                let delay = Duration::from_secs(min_err_response_time_sec)
+                    - now.elapsed().unwrap_or(Duration::from_secs(0));
+                tokio::time::sleep(delay).await;
                 Err(err)
             }
         }
@@ -99,27 +90,18 @@ impl LoginService {
         auth_data: &AuthData,
         input: LoginInput,
     ) -> Result<TokenPair, LoginError> {
-        let user_info = match LoginService::fetch_user_from_central(&input).await {
-            Ok(user_info) => Some(user_info),
-            Err(FetchUserError::Unauthenticated) => return Err(LoginError::LoginFailure),
-            Err(err) => {
-                info!("{:?}", err);
-                None
+        match LoginService::fetch_user_from_central(&input).await {
+            Ok((user, store_permissions)) => {
+                let service_ctx = service_provider.context()?;
+                LoginService::update_user(&service_ctx, user, store_permissions)?;
             }
+            Err(err) => match err {
+                FetchUserError::Unauthenticated => return Err(LoginError::LoginFailure),
+                FetchUserError::ConnectionError(_) => info!("{:?}", err),
+                FetchUserError::InternalError(_) => info!("{:?}", err),
+            },
         };
-
         let service_ctx = service_provider.context()?;
-
-        if let Some(user_info) = user_info {
-            match LoginService::update_user_from_central(&service_ctx, &input, user_info) {
-                Err(UpdateUserError::DatabaseError(error)) => {
-                    return Err(LoginError::DatabaseError(error))
-                }
-                Err(error) => info!("{:?}", error),
-                Ok(_) => {}
-            }
-        }
-
         let user_service = UserAccountService::new(&service_ctx.connection);
         let user_account = match user_service.verify_password(&input.username, &input.password) {
             Ok(user) => user,
@@ -148,61 +130,9 @@ impl LoginService {
         Ok(pair)
     }
 
-    pub fn update_user_from_central(
-        service_ctx: &ServiceContext,
+    async fn fetch_user_from_central(
         input: &LoginInput,
-        user_info: LoginUserInfoV4,
-    ) -> Result<(), UpdateUserError> {
-        let hashed_password = UserAccountService::hash_password(&input.password)
-            .map_err(|error| UpdateUserError::InternalError(format!("{:?}", error)))?;
-
-        // convert user_info to internal format
-        let user = UserAccountRow {
-            id: user_info.user.id,
-            username: input.username.clone(),
-            hashed_password,
-            email: match user_info.user.e_mail.as_str() {
-                // TODO do this using serde
-                "" => None,
-                _ => Some(user_info.user.e_mail.to_string()),
-            },
-        };
-        let stores_permissions: Vec<StorePermissions> = user_info
-            .user_stores
-            .into_iter()
-            .filter(|store| store.can_login)
-            .map(|user_store| {
-                let user_store_join = UserStoreJoinRow {
-                    id: user_store.id,
-                    user_id: user_store.user_id,
-                    store_id: user_store.store_id,
-                    is_default: user_store.store_default,
-                };
-                let permissions = map_api_permissions(user_store.permissions);
-                let permissions = permissions_to_domain(permissions)
-                    .into_iter()
-                    .map(|(resource, permission)| UserPermissionRow {
-                        id: uuid(),
-                        user_id: user_store_join.user_id.clone(),
-                        store_id: Some(user_store_join.store_id.clone()),
-                        resource,
-                        permission,
-                    })
-                    .collect();
-                StorePermissions {
-                    user_store_join,
-                    permissions,
-                }
-            })
-            .collect();
-        LoginService::update_user(&service_ctx, user, stores_permissions)
-            .map_err(|error| UpdateUserError::DatabaseError(error))?;
-        Ok(())
-    }
-
-    pub async fn fetch_user_from_central(
-        input: &LoginInput,
-    ) -> Result<LoginUserInfoV4, FetchUserError> {
+    ) -> Result<(UserAccountRow, Vec<StorePermissions>), FetchUserError> {
         let central_server_url = Url::parse(&input.central_server_url).map_err(|err| {
             FetchUserError::InternalError(format!("Failed to parse central server url: {}", err))
         })?;
@@ -247,7 +177,47 @@ impl LoginService {
             }
         };
 
-        Ok(user_info)
+        // convert user_info to internal format
+        let user = UserAccountRow {
+            id: user_info.user.id,
+            username: username.to_string(),
+            hashed_password: UserAccountService::hash_password(&password)
+                .map_err(|err| FetchUserError::InternalError(format!("{:?}", err)))?,
+            email: match user_info.user.e_mail.as_str() {
+                // TODO do this using serde
+                "" => None,
+                _ => Some(user_info.user.e_mail.to_string()),
+            },
+        };
+        let stores_permissions: Vec<StorePermissions> = user_info
+            .user_stores
+            .into_iter()
+            .filter(|store| store.can_login)
+            .map(|user_store| {
+                let user_store_join = UserStoreJoinRow {
+                    id: user_store.id,
+                    user_id: user_store.user_id,
+                    store_id: user_store.store_id,
+                    is_default: user_store.store_default,
+                };
+                let permissions = map_api_permissions(user_store.permissions);
+                let permissions = permissions_to_domain(permissions)
+                    .into_iter()
+                    .map(|(resource, permission)| UserPermissionRow {
+                        id: uuid(),
+                        user_id: user_store_join.user_id.clone(),
+                        store_id: Some(user_store_join.store_id.clone()),
+                        resource,
+                        permission,
+                    })
+                    .collect();
+                StorePermissions {
+                    user_store_join,
+                    permissions,
+                }
+            })
+            .collect();
+        Ok((user, stores_permissions))
     }
 
     fn update_user(

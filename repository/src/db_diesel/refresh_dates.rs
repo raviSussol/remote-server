@@ -4,7 +4,6 @@ use diesel::prelude::*;
 use diesel::sql_types::*;
 use diesel::QueryDsl;
 use diesel::{sql_query, RunQueryDsl};
-use log::info;
 
 use crate::{DBType, RepositoryError, StorageConnection};
 

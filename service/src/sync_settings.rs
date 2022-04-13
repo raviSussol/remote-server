@@ -8,7 +8,6 @@ pub struct SyncSettings {
     pub central_server_site_id: u32,
     pub site_id: u32,
     pub site_hardware_id: String,
-    pub batch_size: u32,
 }
 
 impl Default for SyncSettings {
@@ -22,7 +21,6 @@ impl Default for SyncSettings {
             central_server_site_id: 1,
             site_id: 2,
             site_hardware_id: Default::default(),
-            batch_size: 500,
         }
     }
 }

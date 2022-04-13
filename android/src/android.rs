@@ -13,7 +13,6 @@ pub mod android {
     use server::start_server;
     use service::sync_settings::SyncSettings;
     use tokio::sync::oneshot;
-    use util::inline_init;
 
     use self::jni::objects::{JClass, JString};
     use self::jni::sys::{jlong, jstring};
@@ -97,9 +96,15 @@ pub mod android {
                         host: "n/a".to_string(),
                         database_name: db_path,
                     },
-                    sync: inline_init(|r: &mut SyncSettings| {
-                        r.url = "http://localhost".to_string();
-                    }),
+                    sync: SyncSettings {
+                        url: "http://localhost".to_string(),
+                        username: "username".to_string(),
+                        password: "password".to_string(),
+                        interval: 300,
+                        central_server_site_id: 1,
+                        site_id: 2,
+                        site_hardware_id: "".to_string(),
+                    },
                     auth: AuthSettings {
                         // TODO:
                         token_secret: "Make me configurable".to_string(),

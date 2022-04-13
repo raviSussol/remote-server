@@ -365,7 +365,6 @@ dependencies = [
  "server",
  "service",
  "tokio",
- "util",
 ]
 
 [[package]]
