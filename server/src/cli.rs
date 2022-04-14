@@ -1,7 +1,10 @@
 use chrono::Utc;
 use clap::StructOpt;
 use graphql::schema_builder;
-use repository::{get_storage_connection_manager, test_db, RefreshDatesRepository};
+use repository::{
+    get_storage_connection_manager, schema::KeyValueType, test_db, ChangelogRepository,
+    KeyValueStoreRepository, RefreshDatesRepository,
+};
 use server::{configuration, settings::Settings, sync::Synchroniser};
 use service::{
     auth_data::AuthData,
@@ -90,7 +93,19 @@ async fn main() {
                 .refresh_dates(Utc::now().naive_local())
                 .expect("Error while refreshing data");
 
-            println!("Refresh data result: {:#?}", result)
+            println!("Refresh data result: {:#?}", result);
+
+            // Update cursor
+            let latest_change_log = ChangelogRepository::new(&connection)
+                .latest_changelog()
+                .unwrap();
+            if let Some(latest_change_log) = latest_change_log {
+                let new_cursor = latest_change_log.id as i32 + 1;
+                KeyValueStoreRepository::new(&connection)
+                    .set_i32(KeyValueType::RemoteSyncPushCursor, Some(new_cursor))
+                    .unwrap();
+                println!("Cursor updated to {}", new_cursor)
+            }
         }
     }
 }
