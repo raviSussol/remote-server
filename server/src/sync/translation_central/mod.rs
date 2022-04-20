@@ -3,9 +3,11 @@ mod list_master;
 mod list_master_line;
 mod list_master_name_join;
 mod name;
+mod report;
 mod store;
-pub mod test_data;
 mod unit;
+
+pub mod test_data;
 
 use crate::sync::translation_central::{
     item::ItemTranslation, list_master_line::MasterListLineTranslation,
@@ -13,8 +15,8 @@ use crate::sync::translation_central::{
 };
 use repository::{
     schema::{
-        CentralSyncBufferRow, ItemRow, MasterListLineRow, MasterListNameJoinRow, MasterListRow,
-        NameRow, StoreRow, UnitRow,
+        report::ReportRow, CentralSyncBufferRow, ItemRow, MasterListLineRow, MasterListNameJoinRow,
+        MasterListRow, NameRow, StoreRow, UnitRow,
     },
     ItemRepository, MasterListLineRowRepository, MasterListNameJoinRepository,
     MasterListRowRepository, NameRepository, RepositoryError, StorageConnection,
@@ -24,8 +26,8 @@ use repository::{
 use log::{info, warn};
 
 use self::{
-    list_master::MasterListTranslation, name::NameTranslation, store::StoreTranslation,
-    unit::UnitTranslation,
+    list_master::MasterListTranslation, name::NameTranslation, report::ReportTranslation,
+    store::StoreTranslation, unit::UnitTranslation,
 };
 
 use super::{SyncImportError, SyncTranslationError};
@@ -39,6 +41,7 @@ pub enum IntegrationUpsertRecord {
     MasterList(MasterListRow),
     MasterListLine(MasterListLineRow),
     MasterListNameJoin(MasterListNameJoinRow),
+    Report(ReportRow),
 }
 
 #[derive(Debug)]
@@ -67,6 +70,7 @@ fn do_translation(
         Box::new(MasterListTranslation {}),
         Box::new(MasterListLineTranslation {}),
         Box::new(MasterListNameJoinTranslation {}),
+        Box::new(ReportTranslation {}),
     ];
     for translation in translations {
         match translation.try_translate(sync_record) {
@@ -103,6 +107,7 @@ pub const TRANSLATION_RECORD_STORE: &str = "store";
 pub const TRANSLATION_RECORD_LIST_MASTER: &str = "list_master";
 pub const TRANSLATION_RECORD_LIST_MASTER_LINE: &str = "list_master_line";
 pub const TRANSLATION_RECORD_LIST_MASTER_NAME_JOIN: &str = "list_master_name_join";
+pub const TRANSLATION_RECORD_REPORT: &str = "report";
 
 /// Returns a list of records that can be translated. The list is topologically sorted, i.e. items
 /// at the beginning of the list don't rely on later items to be translated first.
@@ -114,6 +119,7 @@ pub const TRANSLATION_RECORDS: &[&str] = &[
     TRANSLATION_RECORD_LIST_MASTER,
     TRANSLATION_RECORD_LIST_MASTER_LINE,
     TRANSLATION_RECORD_LIST_MASTER_NAME_JOIN,
+    TRANSLATION_RECORD_REPORT,
 ];
 
 /// Imports sync records and writes them to the DB
@@ -211,6 +217,7 @@ mod tests {
         master_list_line::get_test_master_list_line_records,
         master_list_name_join::get_test_master_list_name_join_records,
         name::{get_test_name_records, get_test_name_upsert_records},
+        report::{get_test_report_records, get_test_report_upsert_records},
         unit::{get_test_unit_records, get_test_unit_upsert_records},
     };
 
@@ -229,6 +236,7 @@ mod tests {
         records.append(&mut get_test_master_list_records());
         records.append(&mut get_test_master_list_line_records());
         records.append(&mut get_test_master_list_name_join_records());
+        records.append(&mut get_test_report_records());
 
         import_sync_records(&connection, &extract_sync_buffer_rows(&records))
             .await
@@ -249,11 +257,13 @@ mod tests {
         init_records.append(&mut get_test_unit_records());
         init_records.append(&mut get_test_item_records());
         init_records.append(&mut get_test_master_list_records());
+        init_records.append(&mut get_test_report_records());
         let mut upsert_records = Vec::new();
         upsert_records.append(&mut get_test_unit_upsert_records());
         upsert_records.append(&mut get_test_item_upsert_records());
         upsert_records.append(&mut get_test_name_upsert_records());
         upsert_records.append(&mut get_test_master_list_upsert_records());
+        upsert_records.append(&mut get_test_report_upsert_records());
 
         let mut records = Vec::new();
         records.append(&mut init_records.iter().cloned().collect());

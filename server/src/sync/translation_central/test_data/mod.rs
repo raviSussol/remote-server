@@ -3,6 +3,7 @@ pub mod master_list;
 pub mod master_list_line;
 pub mod master_list_name_join;
 pub mod name;
+pub mod report;
 pub mod store;
 pub mod unit;
 

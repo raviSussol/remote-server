@@ -222,7 +222,8 @@ mod tests {
                 item::get_test_item_records, master_list::get_test_master_list_records,
                 master_list_line::get_test_master_list_line_records,
                 master_list_name_join::get_test_master_list_name_join_records,
-                name::get_test_name_records, store::get_test_store_records,
+                name::get_test_name_records, report::get_test_report_records,
+                store::get_test_store_records,
             },
             SyncApiV5, SyncCredentials,
         },
@@ -246,6 +247,7 @@ mod tests {
         test_records.append(&mut get_test_master_list_records());
         test_records.append(&mut get_test_master_list_name_join_records());
         test_records.append(&mut get_test_master_list_line_records());
+        test_records.append(&mut get_test_report_records());
 
         let central_records: Vec<CentralSyncBufferRow> = extract_sync_buffer_rows(&test_records);
         let connection = connection_manager.connection().unwrap();

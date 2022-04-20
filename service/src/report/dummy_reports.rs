@@ -157,7 +157,7 @@ pub fn insert_dummy_reports(connection: &StorageConnection) -> Result<(), Reposi
         let row = ReportRow {
             id: report.id,
             name: report.name,
-            r#type: ReportType::OmReport,
+            r#type: ReportType::OmSupply,
             data: serde_json::to_string(&report.report).unwrap(),
             context: report.category,
         };

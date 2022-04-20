@@ -132,7 +132,7 @@ fn query_reports(
     let pagination = get_default_pagination(pagination, MAX_LIMIT, MIN_LIMIT)?;
     let filter = filter
         .unwrap_or(ReportFilter::new())
-        .r#type(ReportType::OmReport.equal_to());
+        .r#type(ReportType::OmSupply.equal_to());
     Ok(repo.query(pagination, Some(filter.clone()), sort)?)
 }
 
@@ -446,7 +446,7 @@ mod report_service_test {
         repo.upsert_one(&ReportRow {
             id: "report_1".to_string(),
             name: "Report 1".to_string(),
-            r#type: ReportType::OmReport,
+            r#type: ReportType::OmSupply,
             data: serde_json::to_string(&report_1).unwrap(),
             context: ReportCategory::Invoice,
         })
@@ -454,7 +454,7 @@ mod report_service_test {
         repo.upsert_one(&ReportRow {
             id: "report_base_1".to_string(),
             name: "Report base 1".to_string(),
-            r#type: ReportType::OmReport,
+            r#type: ReportType::OmSupply,
             data: serde_json::to_string(&report_base_1).unwrap(),
             context: ReportCategory::Resource,
         })
