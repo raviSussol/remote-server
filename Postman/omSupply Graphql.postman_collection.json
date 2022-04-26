@@ -1,0 +1,354 @@
+{
+	"info": {
+		"_postman_id": "845c00be-1fe2-4f60-9541-06d50916d18f",
+		"name": "omSupply Graphql",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login User (Set access_token)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const tokenUrl = pm.variables.get(\"remoteServerUrl\")+\"/graphql\";",
+							"const passwd = pm.variables.get(\"mSupplyUserPass\");",
+							"const user = pm.variables.get(\"mSupplyUserName\");",
+							"// console.log(pm.variables.get(\"mSupplyUserPass\"));",
+							"",
+							"",
+							"const authRequestBody = `query MyQuery {",
+							"                authToken(password: \"${passwd}\", username: \"${user}\") {",
+							"                    ... on AuthToken {",
+							"                    __typename",
+							"                    token",
+							"                    }",
+							"                    ... on AuthTokenError {",
+							"                    __typename",
+							"                    error {",
+							"                        description",
+							"                        ... on InvalidCredentials {",
+							"                        __typename",
+							"                        description",
+							"                        }",
+							"                    }",
+							"                    }",
+							"                }",
+							"            }`;",
+							"console.log(authRequestBody);",
+							"",
+							"jsonReq = {",
+							"    \"query\": authRequestBody",
+							"}",
+							"",
+							"const getTokenRequest = {",
+							"  method: 'POST',",
+							"  url: tokenUrl,",
+							"  header: {",
+							"     \"Content-Type\": \"application/json\"",
+							"  },",
+							"  body: {",
+							"      mode: 'raw',",
+							"      raw: JSON.stringify(jsonReq)",
+							"  }",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"  const jsonResponse = response.json();",
+							"  console.log(jsonResponse);",
+							"  const newAccessToken = jsonResponse.data.authToken.token;",
+							"  pm.variables.set('access_token', newAccessToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTA5MzUzNDYsImF1ZCI6IkFwaSIsImlhdCI6MTY1MDkzMTc0NiwiaXNzIjoib20tc3VwcGx5LXJlbW90ZS1zZXJ2ZXIiLCJzdWIiOiIwNzYzRTJFMzA1M0Q0QzQ3OEUxRTZCNkIwM0ZFQzIwNyJ9.IidBYCChynmFQXYkCRjuZuhOKX4IUqhAoyo136j6TLM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query MyQuery {\n  me {\n    ... on UserNode {\n      username\n    }\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{remoteServerUrl}}/graphql",
+					"host": [
+						"{{remoteServerUrl}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Me!",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const tokenUrl = pm.variables.get(\"remoteServerUrl\")+\"/graphql\";",
+							"const passwd = pm.variables.get(\"mSupplyUserPass\");",
+							"const user = pm.variables.get(\"mSupplyUserName\");",
+							"// console.log(pm.variables.get(\"mSupplyUserPass\"));",
+							"",
+							"",
+							"const authRequestBody = `query MyQuery {",
+							"                authToken(password: \"${passwd}\", username: \"${user}\") {",
+							"                    ... on AuthToken {",
+							"                    __typename",
+							"                    token",
+							"                    }",
+							"                    ... on AuthTokenError {",
+							"                    __typename",
+							"                    error {",
+							"                        description",
+							"                        ... on InvalidCredentials {",
+							"                        __typename",
+							"                        description",
+							"                        }",
+							"                    }",
+							"                    }",
+							"                }",
+							"            }`;",
+							"console.log(authRequestBody);",
+							"",
+							"jsonReq = {",
+							"    \"query\": authRequestBody",
+							"}",
+							"",
+							"const getTokenRequest = {",
+							"  method: 'POST',",
+							"  url: tokenUrl,",
+							"  header: {",
+							"     \"Content-Type\": \"application/json\"",
+							"  },",
+							"  body: {",
+							"      mode: 'raw',",
+							"      raw: JSON.stringify(jsonReq)",
+							"  }",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"  const jsonResponse = response.json();",
+							"  console.log(jsonResponse);",
+							"  const newAccessToken = jsonResponse.data.authToken.token;",
+							"  pm.variables.set('access_token', newAccessToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query MyQuery {\n  me {\n    ... on UserNode {\n      username\n      userId\n      email\n      defaultStore {\n        code\n        id\n        name\n      }\n      stores {\n        totalCount\n        nodes {\n          code\n          id\n          name\n        }\n      }\n    }\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{remoteServerUrl}}/graphql",
+					"host": [
+						"{{remoteServerUrl}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invoice Counts",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const tokenUrl = pm.variables.get(\"remoteServerUrl\")+\"/graphql\";",
+							"const passwd = pm.variables.get(\"mSupplyUserPass\");",
+							"const user = pm.variables.get(\"mSupplyUserName\");",
+							"// console.log(pm.variables.get(\"mSupplyUserPass\"));",
+							"",
+							"",
+							"const authRequestBody = `query MyQuery {",
+							"                authToken(password: \"${passwd}\", username: \"${user}\") {",
+							"                    ... on AuthToken {",
+							"                    __typename",
+							"                    token",
+							"                    }",
+							"                    ... on AuthTokenError {",
+							"                    __typename",
+							"                    error {",
+							"                        description",
+							"                        ... on InvalidCredentials {",
+							"                        __typename",
+							"                        description",
+							"                        }",
+							"                    }",
+							"                    }",
+							"                }",
+							"            }`;",
+							"console.log(authRequestBody);",
+							"",
+							"jsonReq = {",
+							"    \"query\": authRequestBody",
+							"}",
+							"",
+							"const getTokenRequest = {",
+							"  method: 'POST',",
+							"  url: tokenUrl,",
+							"  header: {",
+							"     \"Content-Type\": \"application/json\"",
+							"  },",
+							"  body: {",
+							"      mode: 'raw',",
+							"      raw: JSON.stringify(jsonReq)",
+							"  }",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"  const jsonResponse = response.json();",
+							"  console.log(jsonResponse);",
+							"  const newAccessToken = jsonResponse.data.authToken.token;",
+							"  pm.variables.set('access_token', newAccessToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query MyQuery {\n  invoiceCounts(storeId: \"D77F67339BF8400886D009178F4962E1\") {\n    inbound {\n      created {\n        thisWeek\n        today\n      }\n    }\n    outbound {\n      created {\n        thisWeek\n        today\n      }\n      toBePicked\n    }\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{remoteServerUrl}}/graphql",
+					"host": [
+						"{{remoteServerUrl}}"
+					],
+					"path": [
+						"graphql"
+					],
+					"query": [
+						{
+							"key": "StoreId",
+							"value": "D77F67339BF8400886D009178F4962E1",
+							"description": "General Warehouse",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User no-prerequest",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query MyQuery {\n  authToken(password: \"{{mSupplyUserPass}}\", username: \"{{mSupplyUserName}}\") {\n    ... on AuthToken {\n      __typename\n      token\n    }\n    ... on AuthTokenError {\n      __typename\n      error {\n        description\n        ... on InvalidCredentials {\n          __typename\n          description\n        }\n      }\n    }\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{remoteServerUrl}}/graphql",
+					"host": [
+						"{{remoteServerUrl}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
