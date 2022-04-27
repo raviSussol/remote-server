@@ -58,6 +58,10 @@ pub enum Resource {
     Report,
     // view/edit server setting
     ServerAdmin,
+
+    // documents
+    Document,
+    JsonSchema,
 }
 
 fn all_permissions() -> HashMap<Resource, PermissionDSL> {
@@ -201,6 +205,23 @@ fn all_permissions() -> HashMap<Resource, PermissionDSL> {
             PermissionDSL::HasPermission(Permission::Report),
         ]),
     );
+
+    // document
+    map.insert(
+        Resource::Document,
+        PermissionDSL::And(vec![
+            PermissionDSL::HasStoreAccess,
+            PermissionDSL::HasPermission(Permission::Document),
+        ]),
+    );
+    map.insert(
+        Resource::JsonSchema,
+        PermissionDSL::And(vec![
+            PermissionDSL::HasStoreAccess,
+            PermissionDSL::HasPermission(Permission::JsonSchema),
+        ]),
+    );
+
     map
 }
 

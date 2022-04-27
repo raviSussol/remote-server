@@ -304,6 +304,11 @@ fn permissions_to_domain(permissions: Vec<Permissions>) -> HashSet<Permission> {
             _ => continue,
         }
     }
+
+    // TODO: document permission mapping
+    output.insert(Permission::Document);
+    output.insert(Permission::JsonSchema);
+
     output
 }
 

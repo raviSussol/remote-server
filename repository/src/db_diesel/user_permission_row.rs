@@ -44,6 +44,9 @@ pub enum Permission {
     InboundShipmentMutate,
     // reporting
     Report,
+
+    // document
+    Document,
 }
 
 #[derive(Clone, Queryable, Insertable, Debug, PartialEq, Eq, AsChangeset)]
