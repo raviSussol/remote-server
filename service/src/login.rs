@@ -71,9 +71,11 @@ impl LoginService {
         match LoginService::do_login(service_provider, auth_data, input).await {
             Ok(result) => Ok(result),
             Err(err) => {
-                let delay = Duration::from_secs(min_err_response_time_sec)
-                    - now.elapsed().unwrap_or(Duration::from_secs(0));
-                tokio::time::sleep(delay).await;
+                // Note, core::time::Duration can't be negative thus this Duration -> sec ->
+                // Duration dance. This is mainly for tests where min_err_response_time_sec == 0.
+                let elapsed_sec = now.elapsed().map(|t| t.as_secs() as i64).unwrap_or(0);
+                let delay_sec = std::cmp::max(0, min_err_response_time_sec as i64 - elapsed_sec);
+                tokio::time::sleep(Duration::from_secs(delay_sec as u64)).await;
                 Err(err)
             }
         }
