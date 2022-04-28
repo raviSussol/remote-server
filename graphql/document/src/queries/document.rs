@@ -31,7 +31,7 @@ pub fn documents(
     validate_auth(
         ctx,
         &ResourceAccessRequest {
-            resource: Resource::Document,
+            resource: Resource::QueryDocument,
             store_id: Some(store_id.to_string()),
         },
     )?;

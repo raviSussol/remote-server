@@ -60,8 +60,10 @@ pub enum Resource {
     ServerAdmin,
 
     // documents
-    Document,
-    JsonSchema,
+    MutateDocument,
+    QueryDocument,
+    MutateJsonSchema,
+    QueryJsonSchema,
 }
 
 fn all_permissions() -> HashMap<Resource, PermissionDSL> {
@@ -208,17 +210,31 @@ fn all_permissions() -> HashMap<Resource, PermissionDSL> {
 
     // document
     map.insert(
-        Resource::Document,
+        Resource::MutateDocument,
         PermissionDSL::And(vec![
             PermissionDSL::HasStoreAccess,
             PermissionDSL::HasPermission(Permission::Document),
         ]),
     );
     map.insert(
-        Resource::JsonSchema,
+        Resource::QueryDocument,
         PermissionDSL::And(vec![
             PermissionDSL::HasStoreAccess,
-            PermissionDSL::HasPermission(Permission::JsonSchema),
+            PermissionDSL::HasPermission(Permission::Document),
+        ]),
+    );
+    map.insert(
+        Resource::MutateJsonSchema,
+        PermissionDSL::And(vec![
+            PermissionDSL::HasStoreAccess,
+            PermissionDSL::HasPermission(Permission::Document),
+        ]),
+    );
+    map.insert(
+        Resource::QueryJsonSchema,
+        PermissionDSL::And(vec![
+            PermissionDSL::HasStoreAccess,
+            PermissionDSL::HasPermission(Permission::Document),
         ]),
     );
 

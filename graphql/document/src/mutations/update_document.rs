@@ -65,7 +65,7 @@ pub fn update_document(
     validate_auth(
         ctx,
         &ResourceAccessRequest {
-            resource: Resource::Document,
+            resource: Resource::MutateDocument,
             store_id: Some(store_id.to_string()),
         },
     )?;

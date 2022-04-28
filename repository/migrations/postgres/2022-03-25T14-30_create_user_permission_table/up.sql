@@ -1,4 +1,5 @@
 CREATE TYPE permission_type AS ENUM (
+    'SERVER_ADMIN',
     'STORE_ACCESS',
     'LOCATION_MUTATE',
     'STOCK_LINE_QUERY',
@@ -11,7 +12,7 @@ CREATE TYPE permission_type AS ENUM (
     'INBOUND_SHIPMENT_QUERY',
     'INBOUND_SHIPMENT_MUTATE',
     'REPORT',
-    'SERVER_ADMIN'
+    'DOCUMENT'
 );
 
 CREATE TABLE user_permission (

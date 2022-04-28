@@ -31,7 +31,7 @@ pub fn insert_json_schema(
     validate_auth(
         ctx,
         &ResourceAccessRequest {
-            resource: Resource::JsonSchema,
+            resource: Resource::MutateJsonSchema,
             store_id: None,
         },
     )?;

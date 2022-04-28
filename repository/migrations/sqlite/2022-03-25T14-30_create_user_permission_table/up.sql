@@ -3,6 +3,7 @@ CREATE TABLE user_permission (
     user_id TEXT NOT NULL REFERENCES user_account(id),
     store_id TEXT NOT NULL REFERENCES store(id),
     permission TEXT CHECK (permission IN (
+        'SERVER_ADMIN',
         'STORE_ACCESS',
         'LOCATION_MUTATE',
         'STOCK_LINE_QUERY',
@@ -14,7 +15,7 @@ CREATE TABLE user_permission (
         'OUTBOUND_SHIPMENT_MUTATE',
         'INBOUND_SHIPMENT_QUERY',
         'INBOUND_SHIPMENT_MUTATE',
-        'REPORT',
-        'SERVER_ADMIN'
+        'REPORT',        
+        'DOCUMENT'
     )) NOT NULL
 )

@@ -18,7 +18,7 @@ pub fn json_schema(ctx: &Context<'_>, id: String) -> Result<JSONSchemaResponse> 
     validate_auth(
         ctx,
         &ResourceAccessRequest {
-            resource: Resource::JsonSchema,
+            resource: Resource::QueryJsonSchema,
             store_id: None,
         },
     )?;
