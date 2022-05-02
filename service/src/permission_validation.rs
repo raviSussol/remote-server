@@ -464,7 +464,7 @@ mod permission_validation_test {
         let auth_data = AuthData {
             auth_token_secret: "some secret".to_string(),
             token_bucket: Arc::new(RwLock::new(TokenBucket::new())),
-            debug_no_ssl: true,
+            danger_no_ssl: true,
             debug_no_access_control: false,
         };
         let user_id = "test_user_id";
@@ -632,7 +632,7 @@ mod permission_validation_test {
         let auth_data = AuthData {
             auth_token_secret: "some secret".to_string(),
             token_bucket: Arc::new(RwLock::new(TokenBucket::new())),
-            debug_no_ssl: true,
+            danger_no_ssl: true,
             debug_no_access_control: false,
         };
 

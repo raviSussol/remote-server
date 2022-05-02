@@ -37,8 +37,22 @@ pub mod static_files;
 pub mod sync;
 pub mod test_utils;
 
+fn auth_date(
+    settings: &Settings,
+    token_bucket: Arc<RwLock<TokenBucket>>,
+    cert_type: &ServerCertType,
+) -> Data<AuthData> {
+    Data::new(AuthData {
+        auth_token_secret: settings.auth.token_secret.to_owned(),
+        token_bucket,
+        danger_no_ssl: (settings.server.develop || settings.server.danger_allow_http)
+            && matches!(cert_type, ServerCertType::None),
+        debug_no_access_control: settings.server.develop && settings.server.debug_no_access_control,
+    })
+}
+
 async fn run_stage0(
-    settings: Settings,
+    config_settings: Settings,
     off_switch: Arc<Mutex<oneshot::Receiver<()>>>,
     token_bucket: Arc<RwLock<TokenBucket>>,
     connection_manager: StorageConnectionManager,
@@ -46,12 +60,7 @@ async fn run_stage0(
     warn!("Starting server in bootstrap mode. Please use API to configure the server.");
 
     let cert_type = find_certs();
-    let auth_data = Data::new(AuthData {
-        auth_token_secret: settings.auth.token_secret.to_owned(),
-        token_bucket,
-        debug_no_ssl: settings.server.develop && matches!(cert_type, ServerCertType::None),
-        debug_no_access_control: settings.server.develop && settings.server.debug_no_access_control,
-    });
+    let auth_data = auth_date(&config_settings, token_bucket, &cert_type);
 
     let (restart_switch, mut restart_switch_receiver) = tokio::sync::mpsc::channel::<bool>(1);
     let connection_manager_data_app = Data::new(connection_manager.clone());
@@ -83,21 +92,24 @@ async fn run_stage0(
         ServerCertType::SelfSigned(cert_path) => {
             let ssl_builder = load_certs(cert_path).expect("Invalid self signed certificates");
             http_server = http_server.bind_openssl(
-                format!("{}:{}", settings.server.host, settings.server.port),
+                format!(
+                    "{}:{}",
+                    config_settings.server.host, config_settings.server.port
+                ),
                 ssl_builder,
             )?;
         }
         ServerCertType::None => {
-            if !settings.server.develop {
+            if !config_settings.server.develop && !config_settings.server.danger_allow_http {
                 error!("No certificates found");
                 return Err(std::io::Error::new(
                     ErrorKind::Other,
-                    "Certificate required in production",
+                    "Certificate required",
                 ));
             }
 
             warn!("No certificates found: Running in HTTP development mode");
-            let listener = TcpListener::bind(settings.server.address())
+            let listener = TcpListener::bind(config_settings.server.address())
                 .expect("Failed to bind server to address");
             http_server = http_server.listen(listener)?;
         }
@@ -153,13 +165,7 @@ async fn run_server(
     };
 
     let cert_type = find_certs();
-    let auth_data = Data::new(AuthData {
-        auth_token_secret: config_settings.auth.token_secret.to_owned(),
-        token_bucket: token_bucket.clone(),
-        debug_no_ssl: config_settings.server.develop && matches!(cert_type, ServerCertType::None),
-        debug_no_access_control: config_settings.server.develop
-            && config_settings.server.debug_no_access_control,
-    });
+    let auth_data = auth_date(&config_settings, token_bucket.clone(), &cert_type);
 
     let (restart_switch, mut restart_switch_receiver) = tokio::sync::mpsc::channel::<bool>(1);
     let connection_manager_data_app = Data::new(connection_manager.clone());
@@ -221,11 +227,11 @@ async fn run_server(
             )?;
         }
         ServerCertType::None => {
-            if !config_settings.server.develop {
+            if !config_settings.server.develop && !config_settings.server.danger_allow_http {
                 error!("No certificates found");
                 return Err(std::io::Error::new(
                     ErrorKind::Other,
-                    "Certificate required in production",
+                    "Certificate required",
                 ));
             }
 
