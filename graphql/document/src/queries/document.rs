@@ -15,10 +15,12 @@ pub enum DocumentResponse {
 
 #[derive(InputObject, Clone)]
 pub struct DocumentFilterInput {
+    pub store_id: Option<EqualFilterStringInput>,
     pub name: Option<EqualFilterStringInput>,
 }
 fn to_domain_filter(f: DocumentFilterInput) -> DocumentFilter {
     DocumentFilter {
+        store_id: f.store_id.map(EqualFilter::from),
         name: f.name.map(EqualFilter::from),
     }
 }

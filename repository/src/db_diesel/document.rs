@@ -96,11 +96,13 @@ pub struct AncestorDetail {
 
 #[derive(Clone)]
 pub struct DocumentFilter {
+    pub store_id: Option<EqualFilter<String>>,
     pub name: Option<EqualFilter<String>>,
 }
 
 #[derive(Clone)]
 pub struct DocumentHeadFilter {
+    pub store_id: Option<EqualFilter<String>>,
     pub name: Option<EqualFilter<String>>,
 }
 
@@ -182,13 +184,12 @@ impl<'a> DocumentRepository<'a> {
         self.find_one_by_id(&head.head)
     }
 
-    pub fn query(
-        &self,
-        store_id: &str,
-        filter: Option<DocumentFilter>,
-    ) -> Result<Vec<Document>, RepositoryError> {
-        let heads_filter = filter.map(|f| DocumentHeadFilter { name: f.name });
-        let heads = self.query_heads(store_id, heads_filter)?;
+    pub fn query(&self, filter: Option<DocumentFilter>) -> Result<Vec<Document>, RepositoryError> {
+        let heads_filter = filter.map(|f| DocumentHeadFilter {
+            name: f.name,
+            store_id: f.store_id,
+        });
+        let heads = self.query_heads(heads_filter)?;
         let document_ids: Vec<String> = heads.into_iter().map(|head| head.head).collect();
         let rows: Vec<DocumentRow> = document::dsl::document
             .filter(document::dsl::id.eq_any(&document_ids))
@@ -227,31 +228,12 @@ impl<'a> DocumentRepository<'a> {
 
     pub fn query_heads(
         &self,
-        store_id: &str,
         filter: Option<DocumentHeadFilter>,
     ) -> Result<Vec<DocumentHeadRow>, RepositoryError> {
-        let filter = filter.map(|f| DocumentHeadFilter {
-            name: f.name.map(|n| EqualFilter {
-                equal_to: n.equal_to.map(|value| make_head_id(store_id, &value)),
-                not_equal_to: n.not_equal_to.map(|value| make_head_id(store_id, &value)),
-                equal_any: n.equal_any.map(|values| {
-                    values
-                        .iter()
-                        .map(|value| make_head_id(store_id, value))
-                        .collect()
-                }),
-                not_equal_all: n.not_equal_all.map(|values| {
-                    values
-                        .iter()
-                        .map(|value| make_head_id(store_id, value))
-                        .collect()
-                }),
-            }),
-        });
-
         let mut query = document_head::dsl::document_head.into_boxed();
         if let Some(f) = filter {
             apply_equal_filter!(query, f.name, document_head::dsl::name);
+            apply_equal_filter!(query, f.store_id, document_head::dsl::store);
         }
         let result = query.load(&self.connection.connection)?;
         Ok(result)

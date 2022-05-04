@@ -2,8 +2,8 @@ use chrono::Utc;
 
 use jsonschema::JSONSchema;
 use repository::{
-    AncestorDetail, Document, DocumentFilter, DocumentRepository, JsonSchemaRepository,
-    RepositoryError, StorageConnection,
+    AncestorDetail, Document, DocumentFilter, DocumentRepository, EqualFilter,
+    JsonSchemaRepository, RepositoryError, StorageConnection,
 };
 
 use crate::service_provider::ServiceContext;
@@ -47,29 +47,33 @@ pub trait DocumentServiceTrait: Sync + Send {
     fn get_document(
         &self,
         ctx: &ServiceContext,
-        store: &str,
+        store_id: &str,
         name: &str,
     ) -> Result<Option<Document>, RepositoryError> {
-        DocumentRepository::new(&ctx.connection).find_one_by_name(store, name)
+        DocumentRepository::new(&ctx.connection).find_one_by_name(store_id, name)
     }
 
     fn get_documents(
         &self,
         ctx: &ServiceContext,
-        store: &str,
+        store_id: &str,
         filter: Option<DocumentFilter>,
     ) -> Result<Vec<Document>, RepositoryError> {
-        DocumentRepository::new(&ctx.connection).query(store, filter)
+        let filter = filter.map(|mut f| {
+            f.store_id = Some(EqualFilter::equal_to(store_id));
+            f
+        });
+        DocumentRepository::new(&ctx.connection).query(filter)
     }
 
     fn get_document_history(
         &self,
         ctx: &ServiceContext,
-        store: &str,
+        store_id: &str,
         name: &str,
     ) -> Result<Vec<Document>, DocumentHistoryError> {
         let repo = DocumentRepository::new(&ctx.connection);
-        let head = match repo.head(store, name)? {
+        let head = match repo.head(store_id, name)? {
             Some(head) => head,
             None => return Ok(vec![]),
         };
