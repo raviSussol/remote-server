@@ -47,7 +47,7 @@ pub struct DocumentRow {
 table! {
     document_head (id) {
         id -> Text,
-        store -> Text,
+        store_id -> Text,
         name -> Text,
         head -> Text,
     }
@@ -61,7 +61,7 @@ pub struct DocumentHeadRow {
     pub id: String,
     /// The store this head refers too. This mean we can keep track of heads from multiple stores
     /// and merge them when needed.
-    pub store: String,
+    pub store_id: String,
     /// The document name
     pub name: String,
     /// The current document version (hash)
@@ -150,7 +150,7 @@ impl<'a> DocumentRepository<'a> {
         diesel::replace_into(document_head::dsl::document_head)
             .values(DocumentHeadRow {
                 id: make_head_id(store_id, &doc.name),
-                store: store_id.to_owned(),
+                store_id: store_id.to_owned(),
                 name: doc.name.to_owned(),
                 head: doc.id.to_owned(),
             })
@@ -233,7 +233,7 @@ impl<'a> DocumentRepository<'a> {
         let mut query = document_head::dsl::document_head.into_boxed();
         if let Some(f) = filter {
             apply_equal_filter!(query, f.name, document_head::dsl::name);
-            apply_equal_filter!(query, f.store_id, document_head::dsl::store);
+            apply_equal_filter!(query, f.store_id, document_head::dsl::store_id);
         }
         let result = query.load(&self.connection.connection)?;
         Ok(result)
