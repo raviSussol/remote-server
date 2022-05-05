@@ -1,4 +1,8 @@
-use super::{user_row::user_account::dsl as user_account_dsl, StorageConnection, User};
+use super::{
+    user_row::user_account::dsl as user_account_dsl,
+    user_store_join_row::user_store_join::dsl as user_store_join_dsl,
+    StorageConnection, User
+};
 
 use crate::repository_error::RepositoryError;
 
@@ -11,6 +15,15 @@ table! {
         hashed_password -> Text,
         email -> Nullable<Text>,
     }
+}
+
+table! {
+  user_store_join (id) {
+      id -> Text,
+      user_id -> Text,
+      store_id -> Text,
+      is_default -> Bool,
+  }
 }
 
 #[derive(Clone, Queryable, Insertable, Debug, PartialEq, Eq, Default)]
@@ -60,6 +73,29 @@ impl<'a> UserAccountRowRepository<'a> {
     ) -> Result<Option<UserAccountRow>, RepositoryError> {
         let result: Result<UserAccountRow, diesel::result::Error> = user_account_dsl::user_account
             .filter(user_account_dsl::username.eq(username))
+            .first(&self.connection.connection);
+        match result {
+            Ok(row) => Ok(Some(row)),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Ok(None),
+                _ => Err(RepositoryError::from(err)),
+            },
+        }
+    }
+
+    pub fn find_one_user_login_by_username(
+        &self,
+        username: &str,
+    ) -> Result<Option<UserAccountRow>, RepositoryError> {
+        let result: Result<UserAccountRow, diesel::result::Error> = user_store_join_dsl::user_store_join
+            .inner_join(user_account_dsl::user_account)
+            .filter(user_account_dsl::username.eq(username))
+            .select((
+                user_account_dsl::id,
+                user_account_dsl::username,
+                user_account_dsl::hashed_password,
+                user_account_dsl::email
+            ))
             .first(&self.connection.connection);
         match result {
             Ok(row) => Ok(Some(row)),

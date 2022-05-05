@@ -161,7 +161,7 @@ impl<'a> UserAccountService<'a> {
     ) -> Result<UserAccount, VerifyPasswordError> {
         let repo = UserAccountRowRepository::new(self.connection);
         let user = match repo
-            .find_one_by_user_name(username)
+            .find_one_user_login_by_username(username)
             .map_err(|e| VerifyPasswordError::DatabaseError(e))?
         {
             Some(user) => user,
